@@ -1,0 +1,14 @@
+external requirements:
+
+- R
+
+- python_graph_core library for Python
+- python_graph_dot library for Python
+to install these two libraries, refer to superscaffolder README
+
+make sure that:
+- the ./kmergenie symlink points to kmergenie
+- the ./minia symlink points to minia
+- the ./superscaffolder symlink points to superscaffolder
+
+then type `make`
