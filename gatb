@@ -52,7 +52,7 @@ def execute(program, cmdline="", interpreter=""):
 list_reads = prefix + ".list_reads"
 with open(list_reads,"w") as f:
     for read in paired_reads + unpaired_reads:
-            f.write( "\n".join(read.strip().split("\n")) +"\n")
+        f.write( "\n".join(read.strip().split()) +"\n")
 
 # ------------------------------
 # kmergenie
