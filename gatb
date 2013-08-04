@@ -84,7 +84,7 @@ def kmergenie():
             k, genome_size = map(int, line.strip().split())
             hist[k] = genome_size
 
-    genome_size, best_k = max([(hist[k],k) for k in hist]
+    genome_size, best_k = max([(hist[k],k) for k in hist])
 
     if genome_size == None:
         print "could not retrieve best k / genome size from kmergenie (examine histograms.dat); aborting"
