@@ -11,15 +11,21 @@ doc = """GATB Pipeline
 Usage:
     %s [arguments]
 
-Arguments:
+Reads (mandatory, specify at least one of these parameters):
     -p interleaved_paired_reads     interleaved FASTA or FASTQ paired reads
     -p left_mates right_mates       two FASTA or FASTQ paired reads (non-interleaved)
     -u unpaired_reads               unpaired FASTA or FASTQ reads
 
+Optional parameters:
+    -c contigs_file                 only perform scaffolding+gapfilling from these contigs
+    -k kmer_size                    skip kmergenie and use this k-mer size
 """ % (sys.argv[0])
 
 paired_reads = []
 unpaired_reads = []
+contigs = None
+genome_size = 0
+k = 0
 
 try:
     for i,arg in enumerate(sys.argv):
@@ -33,6 +39,8 @@ try:
                paired_reads.append( sys.argv[i+1] + " " + sys.argv[i+2])
         elif arg == "-u":
            unpaired_reads.append(sys.argv[i+1])
+        elif arg == "-c":
+           contigs = sys.argv[i+1]
     if len(paired_reads) + len(unpaired_reads) == 0:
         raise Exception 
 except:
@@ -56,47 +64,59 @@ with open(list_reads,"w") as f:
 
 # ------------------------------
 # kmergenie
+def kmergenie():
+    global genome_size, k
 
-print "running kmergenie"
+    print "running kmergenie"
 
-k = execute('kmergenie/kmergenie', "%s" % list_reads)
+    k = execute('kmergenie/kmergenie', "%s" % list_reads)
 
-print "best k:", k
+    print "best k:", k
 
-if k == 0:
-    print "kmergenie could not detect a best k; aborting"
-    sys.exit(1)
+    if k == 0:
+        print "kmergenie could not detect a best k; aborting"
+        sys.exit(1)
 
-# getting genome size with histograms
-genome_size = 0
-with open('histograms.dat') as f:
-    f.next() # skip header
-    for line in f:
-        k2, genome_size = map(int, line.strip().split())
-        if k2 == k:
-            print "found approximate genome size",genome_size
-            break
-if genome_size == None:
-    print "could not retrieve genome size from kmergenie; aborting"
-    sys.exit(1)
+    # getting genome size with histograms
+    with open('histograms.dat') as f:
+        f.next() # skip header
+        for line in f:
+            k2, genome_size = map(int, line.strip().split())
+            if k2 == k:
+                print "found approximate genome size",genome_size
+                break
+    if genome_size == None:
+        print "could not retrieve genome size from kmergenie; aborting"
+        sys.exit(1)
 
 # ------------------------------
 # minia
 
-print "compiling minia to support k=%d" % k
+def minia():
+    global contigs
+    print "compiling minia to support k=%d" % k
 
-call("make k=%d -C %s/minia/" % (k, DIR), shell=True)
+    call("make k=%d -C %s/minia/" % (k, DIR), shell=True)
 
-print "running minia"
+    print "running minia"
 
-k = execute('minia/minia', "%s %d %d %d %s" % (list_reads, k, min_abundance, genome_size, prefix))
-contigs = prefix + ".contigs.fa"
+    execute('minia/minia', "%s %d %d %d %s" % (list_reads, k, min_abundance, genome_size, prefix))
+    contigs = prefix + ".contigs.fa"
 
 # ------------------------------
 # superscaffolder
 
 def superscaffolder(contigs,library,output_filename=""):
     execute("superscaffolder/superscaffolding.py", "%s %s -o %s" % (contigs, library, output_filename), "python")
+
+
+# ------------------------------
+# main pipeline
+
+if not contigs:
+    if not k:
+        kmergenie()
+    minia()
 
 # scaffolding all libraries
 for i, paired_read in enumerate(paired_reads):
