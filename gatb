@@ -7,6 +7,8 @@ sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0) #unbuffered print, solves ba
 min_abundance=3 # should be computed by kmergenie (not trivial)
 prefix="assembly"
 
+# TODO: don't ask for paired reads, create a tool that, once minia is done, detects which libraries have similar filename and inserts and group them together (Ray has this)
+
 doc = """GATB Pipeline
 
 Usage:
@@ -29,6 +31,10 @@ genome_size = 0
 k = 0
 
 try:
+    if len(sys.argv) == 2:
+        # only one argument: it's a file of unpaired reads; experimental feature for now
+        sys.argv = open(sys.argv[1]).read().splitlines()
+        unpaired_reads = sys.argv
     for i,arg in enumerate(sys.argv):
         if arg == "-p":
            print "a",arg,sys.argv[i+1]
@@ -90,8 +96,8 @@ def kmergenie():
         print "could not retrieve best k / genome size from kmergenie (examine histograms.dat); aborting"
         sys.exit(1)
 
-print "best k from kmergenie:", k
-print "approximate genome size",genome_size
+    print "best k from kmergenie:", k
+    print "approximate genome size",genome_size
 
 
 # ------------------------------
