@@ -20,8 +20,9 @@ Reads (mandatory, specify at least one of these parameters):
 
 Optional parameters:
     -c contigs_file                 only perform scaffolding+gapfilling from these contigs
-    -k kmer_size                    use this k-mer size (skips kmergenie if both -k and -t are specified)
+    -k kmer_size                    use this k-mer size (skips kmergenie if -k, -t and -g are specified)
     -m min_abundance                use this minimum abundance value
+    -g genome_size                  adjust memory usage with respect to this genome size
 """ % (sys.argv[0])
 
 paired_reads = []
@@ -52,6 +53,8 @@ try:
            k = int(sys.argv[i+1])
         elif arg == "-m":
            min_abundance = int(sys.argv[i+1])
+        elif arg == "-g":
+           genome_size = int(sys.argv[i+1])
     if len(paired_reads) + len(unpaired_reads) == 0:
         raise Exception 
 except:
