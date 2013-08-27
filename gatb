@@ -32,10 +32,9 @@ k = 0
 min_abundance = 0
 
 try:
-    if len(sys.argv) == 2:
-        # only one argument: it's a file of unpaired reads; experimental feature for now
-        sys.argv = open(sys.argv[1]).read().splitlines()
-        unpaired_reads = sys.argv
+    if not sys.argv[1].startswith('-'):
+        # first argument isn't a parameter: it's a file of unpaired reads; experimental feature for now
+        unpaired_reads = open(sys.argv[1]).read().splitlines()
     for i,arg in enumerate(sys.argv):
         if arg == "-p":
            print "a",arg,sys.argv[i+1]
