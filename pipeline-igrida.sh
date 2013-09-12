@@ -3,19 +3,13 @@
 # Job parameters
 #------------------------------------------------------------------------------
 #OAR -n gatb-pipeline
-#OAR -l {cluster='soda'}/nodes=1,walltime=24:00:00
-#OAR -l {cluster='ioda'}/nodes=1,walltime=24:00:00
+#OAR -l {cluster='bermuda'}/nodes=1,walltime=24:00:00
 #OAR -O /temp_dd/igrida-fs1/cdeltel/bioinfo/gatb-pipeline-runs/outjobs/run.%jobid%.out
 #OAR -E /temp_dd/igrida-fs1/cdeltel/bioinfo/gatb-pipeline-runs/outjobs/run.%jobid%.out
 
-# IGRIDA clusters (see http://igrida.gforge.inria.fr/practices.html)
-#	gouda  : 2 x 4 cores Clovertown	Intel(R) Xeon(R) CPU E5345 0 @ 2.33GHz			8GB
-#	soda   : 2 x 4 cores Gulftown		Intel(R) Xeon(R) CPU E5640 @ 2.67GHz			48GB
-#	ioda   : idem soda
-#	lambda : 2 x 6 cores Westmere-EP	Intel(R) Xeon(R) CPU E5645 @ 2.40GHz			48GB 
-#	calda  : 2 x 8 cores Sandy Bridge	Intel(R) Xeon(R) CPU E5-2450 0 @ 2.10GHz		48GB
-#	mida   : 2 x 8 cores Sandy Bridge-EP	Intel(R) Xeon(R) CPU E5-2660 0 @ 2.20GHz	64GB
-#	manda  : 2 x 8 cores Sandy Bridge-EP	Intel(R) Xeon(R) CPU E5-2660 0 @ 2.20GHz	128GB
+# we use IGRIDA the following IGRIDA clusters (see http://igrida.gforge.inria.fr/practices.html)
+#	bermuda : 2 x 4 cores Gulftown		Intel(R) Xeon(R) CPU E5640 @ 2.67GHz		48GB
+
 
 # TODOs
 #	make this script more generic (currently only for cdeltel)
@@ -33,6 +27,11 @@ echo "OAR_JOB_NAME    : $OAR_JOB_NAME"
 echo "OAR_JOB_ID      : $OAR_JOB_ID"
 echo "OAR_ARRAY_ID    : $OAR_ARRAY_ID"
 echo "OAR_ARRAY_INDEX : $OAR_ARRAY_INDEX"
+
+#------------------------------------------------------------------------------
+# Host infos
+#------------------------------------------------------------------------------
+lstopo
 
 #------------------------------------------------------------------------------
 # Data paths
@@ -117,11 +116,18 @@ echo "Check compatibility with the command below:"
 mkdir $WORKDIR/run
 cd $WORKDIR/run
 
+date
+START_TIME=`date +"%s"`
 time $GATB_SCRIPT \
-	-p $DATA_IGRIDA/speciesA_200i_40x.1.fastq       $DATA_IGRIDA/speciesA_200i_40x.2.fastq \
+    -p $DATA_IGRIDA/speciesA_200i_40x.1.fastq       $DATA_IGRIDA/speciesA_200i_40x.2.fastq \
     -p $DATA_IGRIDA/speciesA_300i_40x.1.fastq       $DATA_IGRIDA/speciesA_300i_40x.2.fastq \
     -p $DATA_IGRIDA/speciesA_3000i_20x_r3.1.fastq   $DATA_IGRIDA/speciesA_3000i_20x_r3.2.fastq \
     -p $DATA_IGRIDA/speciesA_10000i_20x_r3.1.fastq  $DATA_IGRIDA/speciesA_10000i_20x_r3.2.fastq
+END_TIME=`date +"%s"`
+date
+
+echo "Assemblathon-1 benchmark:"
+echo "OAR_JOB_ID: $OAR_JOB_ID - hostname: `hostname` - START_TIME: $START_TIME - END_TIME: $END_TIME - DURATION: `echo "($DATE2-$DATE1)/3600."|bc -l` h"
 
 #------------------------------------------------------------------------------
 # Synthetize results
