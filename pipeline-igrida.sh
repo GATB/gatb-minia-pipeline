@@ -14,6 +14,7 @@
 
 
 # TODOs
+#       use *local* disk for the run (instead of the NFS dir. /temp_dd/...)
 #	make this script more generic (currently only for cdeltel)
 #	check the compilation options (O3, openmp, sse, etc.)
 #	add md5sum check after transfering the data
@@ -57,6 +58,7 @@ WORKDIR=/temp_dd/igrida-fs1/cdeltel/bioinfo/gatb-pipeline-runs/$NOW
 #WORKDIR=/temp_dd/igrida-fs1/cdeltel/bioinfo/gatb-pipeline-runs/2013-07-29-17:50:29
 PIPELINE=$WORKDIR/gatb-pipeline
 GATB_SCRIPT=$PIPELINE/git-gatb-pipeline/gatb
+MEMUSED=$PIPELINE/git-gatb-pipeline/tools/memused
 mkdir -p $PIPELINE
 
 #------------------------------------------------------------------------------
@@ -131,6 +133,7 @@ cd $WORKDIR/run
 
 date
 START_TIME=`date +"%s"`
+$MEMUSED \
 time $GATB_SCRIPT \
     -p $DATA_IGRIDA/speciesA_200i_40x.1.fastq       $DATA_IGRIDA/speciesA_200i_40x.2.fastq \
     -p $DATA_IGRIDA/speciesA_300i_40x.1.fastq       $DATA_IGRIDA/speciesA_300i_40x.2.fastq \
