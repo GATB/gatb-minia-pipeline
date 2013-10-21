@@ -3,9 +3,11 @@
 # Job parameters
 #------------------------------------------------------------------------------
 #OAR -n gatb-pipeline
-#OAR -l {cluster='bermuda'}/nodes=1,walltime=24:00:00
+##OAR -l {cluster='bermuda'}/nodes=1,walltime=00:10:00
+#OAR -l {cluster='bermuda'}/nodes=1,walltime=15:00:00
 #OAR -O /temp_dd/igrida-fs1/cdeltel/bioinfo/gatb-pipeline-runs/outjobs/run.%jobid%.out
 #OAR -E /temp_dd/igrida-fs1/cdeltel/bioinfo/gatb-pipeline-runs/outjobs/run.%jobid%.out
+##OAR --notify "mail: charles.deltel@inria.fr"
 
 # we use IGRIDA the following IGRIDA clusters (see http://igrida.gforge.inria.fr/practices.html)
 #	bermuda : 2 x 4 cores Gulftown		Intel(R) Xeon(R) CPU E5640 @ 2.67GHz		48GB
@@ -19,6 +21,8 @@
 
 set -xv
 
+MAIL_REPORT=charles.deltel@inria.fr
+
 #------------------------------------------------------------------------------
 # Job infos
 #------------------------------------------------------------------------------
@@ -28,10 +32,15 @@ echo "OAR_JOB_ID      : $OAR_JOB_ID"
 echo "OAR_ARRAY_ID    : $OAR_ARRAY_ID"
 echo "OAR_ARRAY_INDEX : $OAR_ARRAY_INDEX"
 
+SUBJECT="[gatb-benchmark]-job$OAR_JOB_ID-starts"
+ssh igrida-oar-frontend mail $MAIL_REPORT -s "$SUBJECT" << EOF
+echo "OAR_JOB_ID: $OAR_JOB_ID - hostname: `hostname`"
+EOF
+
 #------------------------------------------------------------------------------
 # Host infos
 #------------------------------------------------------------------------------
-lstopo
+lstopo --of txt
 
 #------------------------------------------------------------------------------
 # Data paths
@@ -99,6 +108,10 @@ cat $INFOS_DEBLOOM
 # Compile the codes
 #------------------------------------------------------------------------------
 cd $PIPELINE/git-gatb-pipeline/
+#ln -sf ../specialk        kmergenie
+#ln -sf ../superscaffolder superscaffolder
+ln -sf ../debloom         minia
+
 make
 
 #------------------------------------------------------------------------------
@@ -124,10 +137,31 @@ time $GATB_SCRIPT \
     -p $DATA_IGRIDA/speciesA_3000i_20x_r3.1.fastq   $DATA_IGRIDA/speciesA_3000i_20x_r3.2.fastq \
     -p $DATA_IGRIDA/speciesA_10000i_20x_r3.1.fastq  $DATA_IGRIDA/speciesA_10000i_20x_r3.2.fastq
 END_TIME=`date +"%s"`
+
+(( DURATION_TIME = END_TIME - START_TIME ))
+
 date
 
+#------------------------------------------------------------------------------
+# Job summary
+#------------------------------------------------------------------------------
+
+duration()
+{
+ local dt=${1}
+ ((h=dt/3600))
+ ((m=dt%3600/60))
+ ((s=dt%60))
+ printf "%03dh:%02dm:%0ds\n" $h $m $s
+}
+
 echo "Assemblathon-1 benchmark:"
-echo "OAR_JOB_ID: $OAR_JOB_ID - hostname: `hostname` - START_TIME: $START_TIME - END_TIME: $END_TIME - DURATION: `echo "($DATE2-$DATE1)/3600."|bc -l` h"
+echo "OAR_JOB_ID: $OAR_JOB_ID - hostname: `hostname` - START_TIME: $START_TIME - END_TIME: $END_TIME - DURATION: `duration $DURATION_TIME`"
+
+SUBJECT="[gatb-benchmark]-job$OAR_JOB_ID-ends-`duration $DURATION_TIME`"
+ssh igrida-oar-frontend mail $MAIL_REPORT -s "$SUBJECT" << EOF
+echo "OAR_JOB_ID: $OAR_JOB_ID - hostname: `hostname` - START_TIME: $START_TIME - END_TIME: $END_TIME - DURATION: `duration $DURATION_TIME`"
+EOF
 
 #------------------------------------------------------------------------------
 # Synthetize results
