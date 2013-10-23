@@ -60,6 +60,7 @@ PIPELINE=$WORKDIR/gatb-pipeline
 GATB_SCRIPT=$PIPELINE/git-gatb-pipeline/gatb
 MEMUSED=$PIPELINE/git-gatb-pipeline/tools/memused
 mkdir -p $PIPELINE
+a
 
 #------------------------------------------------------------------------------
 # Prepare the data
@@ -161,9 +162,9 @@ duration()
 echo "Assemblathon-1 benchmark:"
 echo "OAR_JOB_ID: $OAR_JOB_ID - hostname: `hostname` - START_TIME: $START_TIME - END_TIME: $END_TIME - DURATION: `duration $DURATION_TIME`"
 
-SUBJECT="[gatb-benchmark]-job$OAR_JOB_ID-ends-`duration $DURATION_TIME`"
+SUBJECT="[gatb-p1]-job$OAR_JOB_ID-ends-`duration $DURATION_TIME`"
 ssh igrida-oar-frontend mail $MAIL_REPORT -s "$SUBJECT" << EOF
-echo "OAR_JOB_ID: $OAR_JOB_ID - hostname: `hostname` - START_TIME: $START_TIME - END_TIME: $END_TIME - DURATION: `duration $DURATION_TIME`"
+OAR_JOB_ID: $OAR_JOB_ID - hostname: `hostname` - START_TIME: $START_TIME - END_TIME: $END_TIME - DURATION: `duration $DURATION_TIME`
 EOF
 
 #------------------------------------------------------------------------------
