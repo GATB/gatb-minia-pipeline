@@ -33,9 +33,9 @@ echo "OAR_JOB_ID      : $OAR_JOB_ID"
 echo "OAR_ARRAY_ID    : $OAR_ARRAY_ID"
 echo "OAR_ARRAY_INDEX : $OAR_ARRAY_INDEX"
 
-SUBJECT="[gatb-benchmark]-job$OAR_JOB_ID-starts"
+SUBJECT="[gatb-p1]-job$OAR_JOB_ID-starts"
 ssh igrida-oar-frontend mail $MAIL_REPORT -s "$SUBJECT" << EOF
-echo "OAR_JOB_ID: $OAR_JOB_ID - hostname: `hostname`"
+OAR_JOB_ID: $OAR_JOB_ID - hostname: `hostname`
 EOF
 
 #------------------------------------------------------------------------------
@@ -130,11 +130,11 @@ echo "Check compatibility with the command below:"
 
 mkdir $WORKDIR/run
 cd $WORKDIR/run
+chmod a+x $MEMUSED
 
 date
 START_TIME=`date +"%s"`
-$MEMUSED \
-time $GATB_SCRIPT \
+time $MEMUSED $GATB_SCRIPT \
     -p $DATA_IGRIDA/speciesA_200i_40x.1.fastq       $DATA_IGRIDA/speciesA_200i_40x.2.fastq \
     -p $DATA_IGRIDA/speciesA_300i_40x.1.fastq       $DATA_IGRIDA/speciesA_300i_40x.2.fastq \
     -p $DATA_IGRIDA/speciesA_3000i_20x_r3.1.fastq   $DATA_IGRIDA/speciesA_3000i_20x_r3.2.fastq \
