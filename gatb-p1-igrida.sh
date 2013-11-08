@@ -48,24 +48,29 @@ lstopo --of txt
 #------------------------------------------------------------------------------
 DATA_GENOUEST=/omaha-beach/Assemblathon1/data/
 DATA_IGRIDA=/temp_dd/igrida-fs1/cdeltel/bioinfo/Assemblathon1/data/
+REPORTS_GENOUEST=/home/symbiose/cdeltel/anr-gatb/reports/igrida/gatb-p1/
 
 #------------------------------------------------------------------------------
 # Define where the run will take place
 #------------------------------------------------------------------------------
 NOW=$(date +"%Y-%m-%d-%H:%M:%S")
 
-WORKDIR=/temp_dd/igrida-fs1/cdeltel/bioinfo/gatb-pipeline-runs/$NOW
+TEMPDIR=/temp_dd/igrida-fs1/cdeltel/
+WORKDIR=$TEMPDIR/bioinfo/gatb-pipeline-runs/$NOW
 #WORKDIR=/temp_dd/igrida-fs1/cdeltel/bioinfo/gatb-pipeline-runs/2013-07-29-17:50:29
 PIPELINE=$WORKDIR/gatb-pipeline
 GATB_SCRIPT=$PIPELINE/git-gatb-pipeline/gatb
 MEMUSED=$PIPELINE/git-gatb-pipeline/tools/memused
+QUAST_PATH=/udd/cdeltel/bioinfo/quast-2.2/
 mkdir -p $PIPELINE
-a
 
 #------------------------------------------------------------------------------
 # Prepare the data
 #------------------------------------------------------------------------------
 rsync -uv genocluster2:$DATA_GENOUEST/*fastq $DATA_IGRIDA/
+
+#for Quast validation
+rsync -uv genocluster2:/omaha-beach/Assemblathon1/speciesA.diploid.fa $DATA_IGRIDA/
 
 #------------------------------------------------------------------------------
 # Download the code
@@ -120,7 +125,7 @@ make
 #------------------------------------------------------------------------------
 # Default simple test
 #------------------------------------------------------------------------------
-make test
+#make test
 
 #------------------------------------------------------------------------------
 # Assemblathon-1 benchmark
@@ -172,10 +177,16 @@ EOF
 #------------------------------------------------------------------------------
 
 # Validation of the results
+
+python $QUAST_PATH/quast.py assembly.contigs.fa -R $DATA_IGRIDA/speciesA.diploid.fa
+
 # Non regression test (performances)
 
 
+#------------------------------------------------------------------------------
+# Upload run reports to Genouest
+#------------------------------------------------------------------------------
 
-
-
+rsync -uv $TEMPDIR/bioinfo/gatb-pipeline-runs/outjobs/*    genocluster2:$REPORTS_GENOUEST/outjobs/
+rsync -uv $WORKDIR/run/quast_results/results_*/report.txt  genocluster2:$REPORTS_GENOUEST/quast/report.$OAR_JOB_ID.txt
 
