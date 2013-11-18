@@ -1,10 +1,19 @@
 #!/bin/bash
+#==============================================================================
+#                    G A T B    P I P E L I N E   (P1)
+#==============================================================================
+#
+# History
+#   2013-11-18: Change the quast command (contigs were evaluated, instead of scaffolds)
+#
+#==============================================================================
+#
 #------------------------------------------------------------------------------
 # Job parameters
 #------------------------------------------------------------------------------
 #OAR -n gatb-pipeline
 ##OAR -l {cluster='bermuda'}/nodes=1,walltime=00:10:00
-#OAR -l {cluster='bermuda'}/nodes=1,walltime=15:00:00
+#OAR -l {cluster='bermuda'}/nodes=1,walltime=20:00:00
 #OAR -O /temp_dd/igrida-fs1/cdeltel/bioinfo/gatb-pipeline-runs/outjobs/run.%jobid%.out
 #OAR -E /temp_dd/igrida-fs1/cdeltel/bioinfo/gatb-pipeline-runs/outjobs/run.%jobid%.out
 ##OAR --notify "mail: charles.deltel@inria.fr"
@@ -178,7 +187,8 @@ EOF
 
 # Validation of the results
 
-python $QUAST_PATH/quast.py assembly.contigs.fa -R $DATA_IGRIDA/speciesA.diploid.fa
+python $QUAST_PATH/quast.py assembly.scaffolds4.fa -R $DATA_IGRIDA/speciesA.diploid.fa --scaffolds --min-contig 100
+
 
 # Non regression test (performances)
 
