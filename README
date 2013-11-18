@@ -1,3 +1,6 @@
 
 
 type `make test` to launch a small test
+
+IGRIDA Crontab (on the frontend):
+0 18 * * 0,2,4 oarsub -S /udd/cdeltel/bioinfo/anr-gatb/gatb-pipeline/git-gatb-pipeline/gatb-p1-igrida.sh
