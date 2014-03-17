@@ -24,7 +24,7 @@ case "$PIP" in
         p2) DATA_NAME=chr14-gage ;; 
         p3) DATA_NAME=Staphylococcus_aureus/Data/original ;; 
         p4) DATA_NAME=Rhodobacter_sphaeroides/Data/original ;; 
-        p5) DATA_NAME=Bombus_impatiens ;;   # données à vérifier ???
+        p5) DATA_NAME=Bombus_impatiens/Data/original ;;   # données à vérifier ???
         p6) DATA_NAME=Assemblathon2/fish/fastq ;; 
 		*)  echo Error; exit 1; ;;
 esac

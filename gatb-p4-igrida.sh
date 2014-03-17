@@ -123,7 +123,7 @@ EXT_send_ending_mail
 
 # Validation of the results
 
-# ??? $QUAST_CMD assembly.scaffolds3.fa -R $DATA_IGRIDA/genome.fasta
+$QUAST_CMD assembly.scaffolds2.fa -R $DATA_IGRIDA/genome.fasta
 
 
 # Non regression tests

@@ -11,10 +11,10 @@
 #------------------------------------------------------------------------------
 # Job parameters
 #------------------------------------------------------------------------------
-#OAR -n gatb-p6
+#OAR -n gatb-p5
 #OAR -l {cluster='bermuda'}/nodes=1,walltime=160:00:00
-#OAR -O /temp_dd/igrida-fs1/cdeltel/bioinfo/gatb-pipeline-runs/p6/outjobs/run.%jobid%.out
-#OAR -E /temp_dd/igrida-fs1/cdeltel/bioinfo/gatb-pipeline-runs/p6/outjobs/run.%jobid%.out
+#OAR -O /temp_dd/igrida-fs1/cdeltel/bioinfo/gatb-pipeline-runs/p5/outjobs/run.%jobid%.out
+#OAR -E /temp_dd/igrida-fs1/cdeltel/bioinfo/gatb-pipeline-runs/p5/outjobs/run.%jobid%.out
 
 # we use IGRIDA the following IGRIDA clusters (see http://igrida.gforge.inria.fr/practices.html)
 #	bermuda : 2 x 4 cores Gulftown		Intel(R) Xeon(R) CPU E5640 @ 2.67GHz		48GB
@@ -31,7 +31,7 @@
 set -xv
 
 
-PIP=p6   # pipeline name
+PIP=p5   # pipeline name
 
 source gatb-pipeline-common.sh
 
@@ -96,14 +96,10 @@ START_TIME=`date +"%s"`
 #time ls xxx
 
 time $MEMUSED $GATB_SCRIPT \
-	-p $DATA_IGRIDA/625E1AAXX.1_trim1.fastq.gz   		$DATA_IGRIDA/625E1AAXX.1_trim2.fastq.gz  \
-	-p $DATA_IGRIDA/625E1AAXX.2_trim1.fastq.gz   		$DATA_IGRIDA/625E1AAXX.2_trim2.fastq.gz  \
-	-p $DATA_IGRIDA/625E1AAXX.3_trim1.fastq.gz   		$DATA_IGRIDA/625E1AAXX.3_trim2.fastq.gz  \
-	-p $DATA_IGRIDA/625E1AAXX.4_trim1.fastq.gz   		$DATA_IGRIDA/625E1AAXX.4_trim2.fastq.gz  \
-	-p $DATA_IGRIDA/625E1AAXX.5_trim1.fastq.gz   		$DATA_IGRIDA/625E1AAXX.5_trim2.fastq.gz  \
-	-p $DATA_IGRIDA/625E1AAXX.6_trim1.fastq.gz   		$DATA_IGRIDA/625E1AAXX.6_trim2.fastq.gz  \
-	-p $DATA_IGRIDA/625E1AAXX.7_trim1.fastq.gz   		$DATA_IGRIDA/625E1AAXX.7_trim2.fastq.gz  \
-	-p $DATA_IGRIDA/625E1AAXX.8_trim1.fastq.gz   		$DATA_IGRIDA/625E1AAXX.8_trim2.fastq.gz
+	-p $DATA_IGRIDA/frag_1.fastq.gz 			$DATA_IGRIDA/frag_2.fastq.gz  \
+	-p $DATA_IGRIDA/mediumjump_1.fastq.gz 		$DATA_IGRIDA/mediumjump_2.fastq.gz \
+	-p $DATA_IGRIDA/shortjump_1.fastq.gz  		$DATA_IGRIDA/shortjump_2.fastq.gz
+
 
 CMD_EXIT_CODE=$?
 
