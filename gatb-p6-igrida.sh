@@ -33,7 +33,7 @@ set -xv
 
 PIP=p6   # pipeline name
 
-source gatb-pipeline-common.sh
+source /udd/cdeltel/bioinfo/anr-gatb/gatb-pipeline/git-gatb-pipeline/gatb-pipeline-common.sh
 
 EXT_print_job_informations
 

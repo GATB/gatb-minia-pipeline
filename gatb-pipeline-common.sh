@@ -88,9 +88,13 @@ EOF
 #------------------------------------------------------------------------------
 EXT_download_source_code() {
 	git clone git+ssh://cdeltel@scm.gforge.inria.fr//gitroot/gatb-pipeline/gatb-pipeline.git git-gatb-pipeline
+	[ $? -ne 0 ] && { echo "git clone error"; exit 1;}
 	svn co svn+ssh://scm.gforge.inria.fr/svnroot/projetssymbiose/superscaffolder             superscaffolder
+	[ $? -ne 0 ] && { echo "svn co error"; exit 1;}
 	svn co svn+ssh://scm.gforge.inria.fr/svnroot/projetssymbiose/minia/trunk                 debloom
+	[ $? -ne 0 ] && { echo "svn co error"; exit 1;}
 	svn co svn+ssh://scm.gforge.inria.fr/svnroot/projetssymbiose/specialk                    specialk
+	[ $? -ne 0 ] && { echo "svn co error"; exit 1;}
 }
 
 #------------------------------------------------------------------------------
