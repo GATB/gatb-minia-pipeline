@@ -11,10 +11,10 @@
 #------------------------------------------------------------------------------
 # Job parameters
 #------------------------------------------------------------------------------
-#OAR -n gatb-p1
-#OAR -l {cluster='bermuda'}/nodes=1,walltime=20:00:00
-#OAR -O /temp_dd/igrida-fs1/cdeltel/bioinfo/gatb-pipeline-runs/p1/outjobs/run.%jobid%.out
-#OAR -E /temp_dd/igrida-fs1/cdeltel/bioinfo/gatb-pipeline-runs/p1/outjobs/run.%jobid%.out
+#OAR -n gatb-p6
+#OAR -l {cluster='bermuda'}/nodes=1,walltime=160:00:00
+#OAR -O /temp_dd/igrida-fs1/cdeltel/bioinfo/gatb-pipeline-runs/p6/outjobs/run.%jobid%.out
+#OAR -E /temp_dd/igrida-fs1/cdeltel/bioinfo/gatb-pipeline-runs/p6/outjobs/run.%jobid%.out
 
 # we use IGRIDA the following IGRIDA clusters (see http://igrida.gforge.inria.fr/practices.html)
 #	bermuda : 2 x 4 cores Gulftown		Intel(R) Xeon(R) CPU E5640 @ 2.67GHz		48GB
@@ -31,7 +31,7 @@
 set -xv
 
 
-PIP=p1   # pipeline name
+PIP=p6   # pipeline name
 
 source /udd/cdeltel/bioinfo/anr-gatb/gatb-pipeline/git-gatb-pipeline/gatb-pipeline-common.sh
 
@@ -95,12 +95,15 @@ START_TIME=`date +"%s"`
 
 #time ls xxx
 
-# P1
 time $MEMUSED $GATB_SCRIPT \
-    -p $DATA_IGRIDA/speciesA_200i_40x.1.fastq       $DATA_IGRIDA/speciesA_200i_40x.2.fastq \
-    -p $DATA_IGRIDA/speciesA_300i_40x.1.fastq       $DATA_IGRIDA/speciesA_300i_40x.2.fastq \
-    -p $DATA_IGRIDA/speciesA_3000i_20x_r3.1.fastq   $DATA_IGRIDA/speciesA_3000i_20x_r3.2.fastq \
-    -p $DATA_IGRIDA/speciesA_10000i_20x_r3.1.fastq  $DATA_IGRIDA/speciesA_10000i_20x_r3.2.fastq
+	-p $DATA_IGRIDA/625E1AAXX.1_trim1.fastq.gz   		$DATA_IGRIDA/625E1AAXX.1_trim2.fastq.gz  \
+	-p $DATA_IGRIDA/625E1AAXX.2_trim1.fastq.gz   		$DATA_IGRIDA/625E1AAXX.2_trim2.fastq.gz  \
+	-p $DATA_IGRIDA/625E1AAXX.3_trim1.fastq.gz   		$DATA_IGRIDA/625E1AAXX.3_trim2.fastq.gz  \
+	-p $DATA_IGRIDA/625E1AAXX.4_trim1.fastq.gz   		$DATA_IGRIDA/625E1AAXX.4_trim2.fastq.gz  \
+	-p $DATA_IGRIDA/625E1AAXX.5_trim1.fastq.gz   		$DATA_IGRIDA/625E1AAXX.5_trim2.fastq.gz  \
+	-p $DATA_IGRIDA/625E1AAXX.6_trim1.fastq.gz   		$DATA_IGRIDA/625E1AAXX.6_trim2.fastq.gz  \
+	-p $DATA_IGRIDA/625E1AAXX.7_trim1.fastq.gz   		$DATA_IGRIDA/625E1AAXX.7_trim2.fastq.gz  \
+	-p $DATA_IGRIDA/625E1AAXX.8_trim1.fastq.gz   		$DATA_IGRIDA/625E1AAXX.8_trim2.fastq.gz
 
 CMD_EXIT_CODE=$?
 
@@ -126,7 +129,7 @@ EXT_send_ending_mail
 
 # Validation of the results
 
-$QUAST_CMD assembly.scaffolds4.fa -R $DATA_IGRIDA/speciesA.diploid.fa --scaffolds --min-contig 100
+# ??? $QUAST_CMD assembly.scaffolds3.fa -R $DATA_IGRIDA/genome.fasta
 
 
 # Non regression tests
@@ -139,6 +142,7 @@ EXT_non_regression_quast
 #------------------------------------------------------------------------------
 # Upload run reports to Genouest
 #------------------------------------------------------------------------------
+
 
 ssh genocluster2 mkdir -p $REPORTS_GENOUEST/outjobs
 ssh genocluster2 mkdir -p $REPORTS_GENOUEST/quast
