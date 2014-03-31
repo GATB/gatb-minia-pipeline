@@ -21,8 +21,9 @@ Reads (mandatory, specify at least one of these parameters):
 Optional parameters:
     -c contigs_file                 only perform scaffolding+gapfilling from these contigs
     -k kmer_size                    use this k-mer size (skips kmergenie if -k, -t and -g are specified)
-    -m min_abundance                use this minimum abundance value
+    -t min_abundance                use this minimum abundance value
     -g genome_size                  adjust memory usage with respect to this genome size
+    -m                              multi-k mode (default is single-k for faster execution)
 """ % (sys.argv[0])
 
 paired_reads = []
@@ -31,20 +32,27 @@ contigs = None
 genome_size = 0
 k = 0
 min_abundance = 0
+multi_k_mode = False 
 
 try:
+    skip = 1 
     if not sys.argv[1].startswith('-'):
         # first argument isn't a parameter: it's a file of unpaired reads; experimental feature for now
         unpaired_reads = open(sys.argv[1]).read().splitlines()
+        skip = 100
     for i,arg in enumerate(sys.argv):
+        if skip > 0:
+            skip -= 1
+            continue
+        skip = 1
         if arg == "-p":
-           print "a",arg,sys.argv[i+1]
            if i+2 >= len(sys.argv) or sys.argv[i+2][0] == "-":
                # interleaved case
                paired_reads.append(sys.argv[i+1])
            else:
                # non-interleaved case
                paired_reads.append( sys.argv[i+1] + " " + sys.argv[i+2])
+               skip = 2
         elif arg == "-u":
            unpaired_reads.append(sys.argv[i+1])
         elif arg == "-c":
@@ -55,6 +63,11 @@ try:
            min_abundance = int(sys.argv[i+1])
         elif arg == "-g":
            genome_size = int(sys.argv[i+1])
+        elif arg == "-s":
+           multi_k_mode = True
+        else:
+            print("Unknown argument: %s\n" % arg)
+            exit(1)
     if len(paired_reads) + len(unpaired_reads) == 0:
         raise Exception 
 except:
@@ -70,21 +83,25 @@ def execute(program, cmdline="", interpreter=""):
     except OSError as e:
         print >>sys.stderr, "Execution of '%s' with command-line '%s' failed:" % (program, cmdline), e
 
-# create of flat text file with all reads
 list_reads = prefix + ".list_reads"
-with open(list_reads,"w") as f:
-    for read in paired_reads + unpaired_reads:
-        f.write( "\n".join(read.strip().split()) +"\n")
+
+def create_list_reads(extra_reads = []):
+    # create of flat text file with all reads
+    with open(list_reads,"w") as f:
+        for read in paired_reads + unpaired_reads + extra_reads:
+            f.write( "\n".join(read.strip().split()) +"\n")
 
 # ------------------------------
 # kmergenie
 
 from kmergenie.wrapper import kmergenie
+from kmergenie.wrapper import parse_kmergenie_results 
+from kmergenie.wrapper import all_k_values_fitted_or_not
 
 # ------------------------------
 # minia
 
-def minia():
+def minia(k=k, min_abundance=min_abundance, prefix=prefix):
     global contigs
     print "compiling minia to support k=%d" % k
 
@@ -94,6 +111,7 @@ def minia():
 
     execute('minia/minia', "%s %d %d %d %s" % (list_reads, k, min_abundance, genome_size, prefix))
     contigs = prefix + ".contigs.fa"
+    return contigs
 
 # ------------------------------
 # superscaffolder
@@ -105,10 +123,42 @@ def superscaffolder(contigs,library,output_filename=""):
 # ------------------------------
 # main pipeline
 
-if not contigs:
-    if not k or not min_abundance:
-        genome_size, k, min_abundance = kmergenie(list_reads)
-    minia()
+def assemble_single_k():
+    if not contigs:
+        if not k or not min_abundance:
+            genome_size, k, min_abundance = kmergenie(list_reads)
+            genome_size = max(1000000000, genome_size) #hack to make it use at least 1GB of memory to go faster on bacterial genomes
+        minia()
+
+create_list_reads()
+
+if not multi_k_mode:
+    assemble_single_k()
+else:
+    # multi-k assembly algorithms following the idea of idba/spades to reconstruct graph with larger k and reinject previous contigs
+    kmergenie(list_reads)
+    results = parse_kmergenie_results()
+    cutoffs = dict([(k,min_abundance) for (genome_size, k, min_abundance) in results] )
+    genome_size = max(1000000000,max(results)[0]) #hack to make it use at least 1GB of memory to go faster on bacterial genomes
+    # add cutoff=2 for larger k values for which there was no fit
+    # disabled for my tests now
+    for k in all_k_values_fitted_or_not():
+        if k not in cutoffs:
+            cutoffs[k] = 2
+    step = 10 # maybe set that as parameter
+    last_k_value = 0
+    previous_contigs = None
+    for k in sorted(cutoffs.keys()):
+        if k < last_k_value + step:
+            continue
+        min_abundance = cutoffs[k]
+        print "Multi-k GATB-Pipeline, Minia assembling at k=%d min_abundance=%d genome_size=%d" % (k, min_abundance, genome_size)
+        extra_reads = [previous_contigs]*(min_abundance+1) if previous_contigs is not None else []
+        create_list_reads(extra_reads)
+        multi_k_prefix = prefix + "_k%d" % k
+        previous_contigs = minia(k, min_abundance, prefix=multi_k_prefix)
+        last_k_value = k 
+    print "Finished Multi-k GATB-Pipeline with k=%d" % last_k_value
 
 # scaffolding all libraries
 for i, paired_read in enumerate(paired_reads):
