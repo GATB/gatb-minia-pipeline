@@ -6,8 +6,7 @@ echo
 
 
 MAIL_DST_ALL_MESG=charles.deltel@inria.fr
-MAIL_DST_ERR_ONLY=cdeltel@laposte.net
-				 #rchikhi@gmail.com
+MAIL_DST_ERR_ONLY="cdeltel@laposte.net rchikhi@gmail.com"
 
 MAIL_CMD="ssh igrida-oar-frontend mail "
 
