@@ -1,12 +1,10 @@
 #!/usr/bin/env python
 
 import sys, os
-from subprocess import call
+from subprocess import call, Popen, PIPE
 sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0) #unbuffered print, solves badly ordered stdout on clusters
 
 prefix="assembly"
-
-# TODO: don't ask for paired reads, create a tool that, once minia is done, detects which libraries have similar filename and inserts and group them together (Ray has this)
 
 doc = """GATB Pipeline
 
@@ -17,6 +15,7 @@ Reads (mandatory, specify at least one of these parameters):
     -p interleaved_paired_reads     interleaved FASTA or FASTQ paired reads
     -p left_mates right_mates       two FASTA or FASTQ paired reads (non-interleaved)
     -u unpaired_reads               unpaired FASTA or FASTQ reads
+    -l list_of_unpaired_reads       one file name per line
 
 Optional parameters:
     -c contigs_file                 only perform scaffolding+gapfilling from these contigs
@@ -35,11 +34,7 @@ min_abundance = 0
 multi_k_mode = False 
 
 try:
-    skip = 1 
-    if not sys.argv[1].startswith('-'):
-        # first argument isn't a parameter: it's a file of unpaired reads; experimental feature for now
-        unpaired_reads = open(sys.argv[1]).read().splitlines()
-        skip = 100
+    skip = 1 # to handle paired-end case (-p XX XX)
     for i,arg in enumerate(sys.argv):
         if skip > 0:
             skip -= 1
@@ -59,12 +54,14 @@ try:
            contigs = sys.argv[i+1]
         elif arg == "-k":
            k = int(sys.argv[i+1])
-        elif arg == "-m":
+        elif arg == "-t":
            min_abundance = int(sys.argv[i+1])
         elif arg == "-g":
            genome_size = int(sys.argv[i+1])
-        elif arg == "-s":
+        elif arg == "-k":
            multi_k_mode = True
+        elif arg == "-l":
+            unpaired_reads = open(sys.argv[1]).read().splitlines()
         else:
             print("Unknown argument: %s\n" % arg)
             exit(1)
@@ -77,9 +74,9 @@ except:
 
 DIR = os.path.dirname(os.path.realpath(__file__))
 
-def execute(program, cmdline="", interpreter=""):
+def execute(program, cmdline=[], interpreter=None):
     try:
-        return call("%s %s/%s %s" % (interpreter, DIR, program, cmdline), shell=True)
+        return call(([interpreter] if interpreter else []) + [ "%s/%s" % (DIR, program) ] + map(str, cmdline) )
     except OSError as e:
         print >>sys.stderr, "Execution of '%s' with command-line '%s' failed:" % (program, cmdline), e
 
@@ -101,15 +98,18 @@ from kmergenie.wrapper import all_k_values_fitted_or_not
 # ------------------------------
 # minia
 
-def minia(k=k, min_abundance=min_abundance, prefix=prefix):
+def minia(k, min_abundance, prefix):
+    global genome_size
     global contigs
+    if k == 0:
+        exit('cannot run minia with k=0 (did kmergenie fail to detect best k?)')
     print "compiling minia to support k=%d" % k
 
-    call("make k=%d -C %s/minia/" % (k, DIR), shell=True)
+    call("make -j8 k=%d -C %s/minia/" % (k, DIR), shell=True)
 
     print "running minia"
 
-    execute('minia/minia', "%s %d %d %d %s" % (list_reads, k, min_abundance, genome_size, prefix))
+    execute('minia/minia', [list_reads, k, min_abundance, genome_size, prefix])
     contigs = prefix + ".contigs.fa"
     return contigs
 
@@ -117,18 +117,78 @@ def minia(k=k, min_abundance=min_abundance, prefix=prefix):
 # superscaffolder
 
 def superscaffolder(contigs,library,output_filename=""):
-    execute("superscaffolder/superscaffolding.py", "%s %s -o %s" % (contigs, library, output_filename), "python")
+    execute("superscaffolder/superscaffolding.py", [contigs, library, "-o", output_filename], "python")
+
+#-------------------------------
+# sspace wrapper
+
+def get_paired_end_parameters(contigs, library):
+    paired_reads = library.split(' ')
+    cmd = ["%s/tools/estimate-insert-sizes" % DIR, contigs] + paired_reads
+    output = Popen(cmd, stdout=PIPE).communicate()[0]
+    orientation, mean, stdev = None, None, None
+    for line in output.split('\n'):
+        if line.startswith('Orientation'):
+            l = line.split()
+            orientation, mean, stdev = l[1], int(l[3]), int(l[5])
+    return orientation, mean, stdev
+        
+def sspace(contigs, paired_reads, output_filename=""):
+    # create a sspace config file
+    lib_file = prefix + '.sspace.config'
+    with open(lib_file, 'w') as f:
+        for i, library in enumerate(paired_reads):
+            # sspace needs de-interleaved input
+            if ' ' not in library:
+                print "Splitting interleaved file:", library
+                ext = library.split(".")[-1]
+                p1, p2 = [prefix + ".lib%d_%d." % (i,j) + ext for j in [1,2] ]
+                #de-interleave reads using SGA's script (was too lazy to write my own)
+                execute('tools/sga-deinterleave.pl', [library, p1, p2], interpreter="perl")
+                library = p1 + " " + p2
+
+            # estimate insert size
+            orientation, mean, stdev = get_paired_end_parameters(contigs, library)
+            if orientation is None:
+                exit("Error running estimate-insert-sizes for library: %s" % library)
+
+            # sspace error isn't exactly the stdev; subjectively, I'm converting using 3 sigmas
+            error = min(max(0.1, stdev * 3.0 / mean),1.0)
+            f.write('lib%d %s %d %0.1f %s' % (i, library, mean, error, orientation))
+
+    # run sspace
+    cmd = ['-l', lib_file, '-s', contigs, '-b', prefix + '.sspace']
+    execute('sspace/SSPACE_Basic_v2.0.pl', cmd, interpreter="perl")
+
+    # clean up intermediate sspace files
+    
+
+# ------------------------------
+# wrapper for scaffolding
+
+#method="superscaffolder"
+method="sspace"
+def scaffold(contigs, paired_reads):
+    if method == "superscaffolder":
+        # superscaf takes one library at a time
+        for i, paired_read in enumerate(paired_reads):
+            input_file = prefix + ".scaffolds%d.fa" % i if i > 0 else contigs
+            output_file = prefix + ".scaffolds%d.fa" % (i+1)
+            superscaffolder(input_file,paired_read,output_file)
+    elif method == "sspace":
+        sspace(contigs,paired_reads)
 
 
 # ------------------------------
 # main pipeline
 
 def assemble_single_k():
+    global k, min_abundance, genome_size, list_reads, contigs, prefix
     if not contigs:
         if not k or not min_abundance:
-            genome_size, k, min_abundance = kmergenie(list_reads)
+            genome_size, k, min_abundance = kmergenie(list_reads, one_pass=True)
             genome_size = max(1000000000, genome_size) #hack to make it use at least 1GB of memory to go faster on bacterial genomes
-        minia()
+        contigs = minia(k, min_abundance, prefix=prefix)
 
 create_list_reads()
 
@@ -161,9 +221,6 @@ else:
     print "Finished Multi-k GATB-Pipeline with k=%d" % last_k_value
 
 # scaffolding all libraries
-for i, paired_read in enumerate(paired_reads):
-    input_file = prefix + ".scaffolds%d.fa" % i if i > 0 else contigs
-    output_file = prefix + ".scaffolds%d.fa" % (i+1)
-    superscaffolder(input_file,paired_read,output_file)
+scaffold(contigs, paired_reads)
 
 print "pipeline finished!!"
