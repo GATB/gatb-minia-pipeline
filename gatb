@@ -71,6 +71,9 @@ except:
     print doc
     sys.exit(1)
 
+if k != 0 and (min_abundance == 0 or genome_size == 0):
+    sys.exit("If you specify k, please specify min_abundance and genome_size as well")
+
 
 DIR = os.path.dirname(os.path.realpath(__file__))
 
