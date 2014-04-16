@@ -1,0 +1,1 @@
+../../gatb-tools/gatb-tools/thirdparty/gatb-core/gatb-core/scripts/delivery.sh
