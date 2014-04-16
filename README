@@ -1,6 +1,24 @@
+GATB-Pipeline
+-------------
+
+installation:
+
+    1) Prerequisite: Python >= 2.5 and R.
+    2) Type `make`
+
+usage:
+
+    ./gatb -p read_1.fastq read_2.fastq [..]
 
 
-type `make test` to launch a small test
+Many more input options are available. Type `./gatb` for extended usage.
+Type `make test` to launch a small test.
 
-IGRIDA Crontab (on the frontend):
-0 18 * * 0,2,4 oarsub -S /udd/cdeltel/bioinfo/anr-gatb/gatb-pipeline/git-gatb-pipeline/gatb-p1-igrida.sh
+Support
+-------
+
+To contact an author directly: rayan.chikhi@ens-cachan.org
+Main dynamic FAQ (ask a question about Gatb-pipeline on any of these two websites): 
+http://biostar.genouest.org 
+www.biostars.org
+
