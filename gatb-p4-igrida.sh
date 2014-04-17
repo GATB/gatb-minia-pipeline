@@ -12,7 +12,7 @@
 # Job parameters
 #------------------------------------------------------------------------------
 #OAR -n gatb-p4
-#OAR -l {cluster='bermuda'}/nodes=1,walltime=20:00:00
+#OAR -l {cluster='bermuda'}/nodes=1,walltime=00:30:00
 #OAR -O /temp_dd/igrida-fs1/cdeltel/bioinfo/gatb-pipeline-runs/p4/outjobs/run.%jobid%.out
 #OAR -E /temp_dd/igrida-fs1/cdeltel/bioinfo/gatb-pipeline-runs/p4/outjobs/run.%jobid%.out
 
@@ -72,6 +72,7 @@ cd $PIPELINE/git-gatb-pipeline/
 ln -sf ../debloom         minia
 
 make
+MAKE_EXIT_CODE=$?
 
 #------------------------------------------------------------------------------
 # Default simple test
@@ -141,6 +142,6 @@ EXT_non_regression_quast
 ssh genocluster2 mkdir -p $REPORTS_GENOUEST/outjobs
 ssh genocluster2 mkdir -p $REPORTS_GENOUEST/quast
 
-rsync -uv $TEMPDIR/bioinfo/gatb-pipeline-runs/outjobs-${PIP}/*	genocluster2:$REPORTS_GENOUEST/outjobs/
+rsync -uv $WORKDIR/../outjobs/*									genocluster2:$REPORTS_GENOUEST/outjobs/
 rsync -uv $WORKDIR/run/quast_results/results_*/report.txt		genocluster2:$REPORTS_GENOUEST/quast/report.$OAR_JOB_ID.txt
 

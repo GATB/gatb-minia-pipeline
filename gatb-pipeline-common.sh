@@ -74,10 +74,12 @@ EXT_send_ending_mail() {
 	$MAIL_CMD $MAIL_DST_ALL_MESG -s "$SUBJECT" << EOF
 $JOB_SUMMARY
 EOF
-	if [ $CMD_EXIT_CODE -ne 0 ]; then
-		SUBJECT="[gatb-${PIP}]-job$OAR_JOB_ID-ends-Error$CMD_EXIT_CODE"
+	if [ $CMD_EXIT_CODE -ne 0 ] || [ $MAKE_EXIT_CODE -ne 0 ]; then
+		SUBJECT="[gatb-${PIP}]-job$OAR_JOB_ID-ends-Error"
 		$MAIL_CMD $MAIL_DST_ALL_MESG $MAIL_DST_ERR_ONLY -s "$SUBJECT" << EOF
-This is to inform you that the "gatb" pipeline script exited with error ($CMD_EXIT_CODE).
+This is to inform you that the GATB ${PIP} pipeline exited with error: 
+	MAKE_EXIT_CODE: $MAKE_EXIT_CODE
+	CMD_EXIT_CODE:  $CMD_EXIT_CODE
 EOF
 	fi
 }
