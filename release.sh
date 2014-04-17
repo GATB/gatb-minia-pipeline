@@ -40,7 +40,7 @@ then
     exit 0
 fi
 
-# todo: upload that to gatb website
+# uploading to gatb website
 
 #ripped from Delivery.cmake, I know, sorry for duplicating code; this needs to
 # be converted to cmake someday
@@ -79,4 +79,6 @@ echo "calling delivery.sh"
 #dependencies/delivery.sh "BIN_OTHER" ${PROJECT_NAME} ${CPACK_PACKAGE_VERSION} ${CPACK_UPLOAD_VERSIONS} ${CPACK_VERSIONS_FILENAME}  "${CPACK_INFO_BIN}"  ${CPACK_URI_BIN}   ${CPACK_UPLOAD_URI_BIN}
 dependencies/delivery.sh "SRC_OTHER" ${PROJECT_NAME} ${CPACK_PACKAGE_VERSION} ${CPACK_UPLOAD_VERSIONS} ${CPACK_VERSIONS_FILENAME}  "${CPACK_INFO_SRC}"  ${CPACK_URI_SRC}   ${CPACK_UPLOAD_URI_SRC}
 
+# some cleanup
 rm -f versions.txt
+mv  $soft-$version.tar.gz  archive/

@@ -22,7 +22,7 @@ Optional parameters:
     -k kmer_size                    use this k-mer size (skips kmergenie if -k, -t and -g are specified)
     -t min_abundance                use this minimum abundance value
     -g genome_size                  adjust memory usage with respect to this genome size
-    -m                              multi-k mode (default is single-k for faster execution)
+    -m                              multi-k mode (experimental, not currently supported)
 """ % (sys.argv[0])
 
 paired_reads = []
