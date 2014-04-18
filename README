@@ -1,6 +1,12 @@
 GATB-Pipeline
 -------------
 
+Only compatible with Linux64 for now.
+
+Reasons:
+- SSPACE shipping with bowtie pre-compiled
+- estimate-insert-size needs bwa, so I'm shipping a linux64 version
+
 installation:
 
     1) Prerequisite: Python >= 2.5 and R.

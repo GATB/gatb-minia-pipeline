@@ -134,6 +134,7 @@ def get_paired_end_parameters(contigs, library):
         if line.startswith('Orientation'):
             l = line.split()
             orientation, mean, stdev = l[1], int(l[3]), int(l[5])
+    print "GATB-Pipeline estimated insert size of library", paired_reads, ":", mean, stdev, orientation
     return orientation, mean, stdev
         
 def sspace(contigs, paired_reads, output_filename=""):
