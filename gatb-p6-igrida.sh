@@ -67,7 +67,7 @@ EXT_print_versioning_informations
 # Compile the codes
 #------------------------------------------------------------------------------
 cd $PIPELINE/git-gatb-pipeline/
-#ln -sf ../specialk        kmergenie
+ln -sf ../specialk        kmergenie
 #ln -sf ../superscaffolder superscaffolder
 ln -sf ../debloom         minia
 
