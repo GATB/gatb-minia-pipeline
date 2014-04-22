@@ -12,6 +12,7 @@ MAIL_CMD="ssh igrida-oar-frontend mail "
 
 #LOGBOOK=/udd/cdeltel/bioinfo/anr-gatb/logbook-${PIP}.txt   => Currently read-only file system!
 LOGBOOK=/temp_dd/igrida-fs1/cdeltel/bioinfo/logbook-${PIP}.txt
+TODAY=`date +'%Y/%m/%d'`
 
 #------------------------------------------------------------------------------
 # Data paths
@@ -52,6 +53,7 @@ duration() {
 #------------------------------------------------------------------------------
 EXT_print_job_informations() {
 	echo "hostname        : " `hostname`
+	echo "TODAY           : $TODAY"
 	echo "OAR_JOB_NAME    : $OAR_JOB_NAME"
 	echo "OAR_JOB_ID      : $OAR_JOB_ID"
 	echo "OAR_ARRAY_ID    : $OAR_ARRAY_ID"
@@ -160,7 +162,7 @@ EXT_non_regression_update_logbook(){
 	(( DURATION_TIME_PREVIOUS = END_TIME_PREVIOUS - START_TIME_PREVIOUS ))
 	(( DT_WITH_PREVIOUS = DURATION_TIME - DURATION_TIME_PREVIOUS ))
 
-	JOB_SUMMARY="OAR_JOB_ID: $OAR_JOB_ID - hostname: `hostname` - START_TIME: $START_TIME - END_TIME: $END_TIME - DURATION: `duration $DURATION_TIME` - CMD_EXIT_CODE: $CMD_EXIT_CODE - DT_WITH_PREVIOUS: $DT_WITH_PREVIOUS"
+	JOB_SUMMARY="TODAY: $TODAY - OAR_JOB_ID: $OAR_JOB_ID - hostname: `hostname` - START_TIME: $START_TIME - END_TIME: $END_TIME - DURATION: `duration $DURATION_TIME` - CMD_EXIT_CODE: $CMD_EXIT_CODE - DT_WITH_PREVIOUS: $DT_WITH_PREVIOUS"
 	echo "$JOB_SUMMARY" >> $LOGBOOK
 }
 
@@ -189,4 +191,19 @@ EXT_non_regression_execution_time() {
 	echo "EXT_non_regression_execution_time: TODO"
 }
 
+#------------------------------------------------------------------------------
+# Upload run reports to Genouest
+#------------------------------------------------------------------------------
+
+EXT_transfer_reports_to_genouest() {
+
+	ssh genocluster2 mkdir -p $REPORTS_GENOUEST/outjobs
+	ssh genocluster2 mkdir -p $REPORTS_GENOUEST/quast
+
+	rsync -uv $WORKDIR/../outjobs/*									genocluster2:$REPORTS_GENOUEST/outjobs/
+	rsync -uv $WORKDIR/run/quast_results/results_*/report.txt		genocluster2:$REPORTS_GENOUEST/quast/report.$OAR_JOB_ID.txt
+	
+	rsync -uv $LOGBOOK												genocluster2:$REPORTS_GENOUEST/outjobs/logbook-${PIP}.txt
+	
+}
 
