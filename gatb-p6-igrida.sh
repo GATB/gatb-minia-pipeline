@@ -139,15 +139,11 @@ EXT_non_regression_execution_time  # todo
 
 EXT_non_regression_quast
 
+EXT_non_regression_plot
 
 #------------------------------------------------------------------------------
 # Upload run reports to Genouest
 #------------------------------------------------------------------------------
 
-
-ssh genocluster2 mkdir -p $REPORTS_GENOUEST/outjobs
-ssh genocluster2 mkdir -p $REPORTS_GENOUEST/quast
-
-rsync -uv $WORKDIR/../outjobs/*									genocluster2:$REPORTS_GENOUEST/outjobs/
-rsync -uv $WORKDIR/run/quast_results/results_*/report.txt		genocluster2:$REPORTS_GENOUEST/quast/report.$OAR_JOB_ID.txt
+EXT_transfer_reports_to_genouest
 

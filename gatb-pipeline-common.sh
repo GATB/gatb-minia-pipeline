@@ -11,7 +11,11 @@ MAIL_DST_ERR_ONLY="cdeltel@laposte.net rchikhi@gmail.com"
 MAIL_CMD="ssh igrida-oar-frontend mail "
 
 #LOGBOOK=/udd/cdeltel/bioinfo/anr-gatb/logbook-${PIP}.txt   => Currently read-only file system!
-LOGBOOK=/temp_dd/igrida-fs1/cdeltel/bioinfo/logbook-${PIP}.txt
+LOGBOOK_ROOT=logbook-${PIP}
+LOGBOOK_TXT=/temp_dd/igrida-fs1/cdeltel/bioinfo/${LOGBOOK_ROOT}.txt
+LOGBOOK_POS=/temp_dd/igrida-fs1/cdeltel/bioinfo/${LOGBOOK_ROOT}.ps
+
+TODAY=`date +'%Y/%m/%d'`
 
 #------------------------------------------------------------------------------
 # Data paths
@@ -52,6 +56,7 @@ duration() {
 #------------------------------------------------------------------------------
 EXT_print_job_informations() {
 	echo "hostname        : " `hostname`
+	echo "TODAY           : $TODAY"
 	echo "OAR_JOB_NAME    : $OAR_JOB_NAME"
 	echo "OAR_JOB_ID      : $OAR_JOB_ID"
 	echo "OAR_ARRAY_ID    : $OAR_ARRAY_ID"
@@ -160,8 +165,8 @@ EXT_non_regression_update_logbook(){
 	(( DURATION_TIME_PREVIOUS = END_TIME_PREVIOUS - START_TIME_PREVIOUS ))
 	(( DT_WITH_PREVIOUS = DURATION_TIME - DURATION_TIME_PREVIOUS ))
 
-	JOB_SUMMARY="OAR_JOB_ID: $OAR_JOB_ID - hostname: `hostname` - START_TIME: $START_TIME - END_TIME: $END_TIME - DURATION: `duration $DURATION_TIME` - CMD_EXIT_CODE: $CMD_EXIT_CODE - DT_WITH_PREVIOUS: $DT_WITH_PREVIOUS"
-	echo "$JOB_SUMMARY" >> $LOGBOOK
+	JOB_SUMMARY="TODAY: $TODAY - OAR_JOB_ID: $OAR_JOB_ID - hostname: `hostname` - START_TIME: $START_TIME - END_TIME: $END_TIME - DURATION: `duration $DURATION_TIME` - CMD_EXIT_CODE: $CMD_EXIT_CODE - DT_WITH_PREVIOUS: $DT_WITH_PREVIOUS"
+	echo "$JOB_SUMMARY" >> $LOGBOOK_TXT
 }
 
 EXT_non_regression_quast() {
@@ -189,4 +194,59 @@ EXT_non_regression_execution_time() {
 	echo "EXT_non_regression_execution_time: TODO"
 }
 
+EXT_non_regression_plot() {
+	echo "EXT_non_regression_plot: "
+	pwd
+	
+	awk '{ print $2  }' $LOGBOOK_TXT > c0
+	awk '{ print $17 }' $LOGBOOK_TXT |cut -c1-3 > c1
+	awk '{ print $17 }' $LOGBOOK_TXT |cut -c6-7 > c2
+	awk '{ print $17 }' $LOGBOOK_TXT |cut -c10-|cut -ds -f1 > c3
+	paste c0 c1 c2 c3 > tmp
+	
+	awk '{ printf("%10.2f\n",  $2+$3/60.+$4/60./60.)      }' tmp > in_hours
+	awk '{ printf("%10.2f\n", ($2+$3/60.+$4/60./60.)*60.) }' tmp > in_minutes
+
+	paste tmp in_hours in_minutes > ${LOGBOOK_ROOT}_processed.txt
+
+	rm -f c0 c1 c2 c3 tmp in_hours in_minutes
+	
+	COLUMN_HOURS=5
+	COLUMN_MINUT=6
+	
+	case "$PIP" in
+        p1) COL=$COLUMN_HOURS ; UNITS="hours";;
+        p2) COL=$COLUMN_HOURS ; UNITS="hours";;
+        p3) COL=$COLUMN_MINUT ; UNITS="minutes";;
+        p4) COL=$COLUMN_MINUT ; UNITS="minutes";;
+        p5) COL=$COLUMN_HOURS ; UNITS="hours";;
+        p6) COL=$COLUMN_HOURS ; UNITS="hours";;
+		*)  echo Error; exit 1; ;;
+	esac
+							
+	gnuplot << EOF
+set terminal postscript
+set output "$LOGBOOK_POS"
+set grid
+plot "${LOGBOOK_ROOT}_processed.txt" u $COL w boxes title "${LOGBOOK_ROOT} (in $UNITS)"
+EOF
+
+}
+
+#------------------------------------------------------------------------------
+# Upload run reports to Genouest
+#------------------------------------------------------------------------------
+
+EXT_transfer_reports_to_genouest() {
+
+	ssh genocluster2 mkdir -p $REPORTS_GENOUEST/outjobs
+	ssh genocluster2 mkdir -p $REPORTS_GENOUEST/quast
+
+	rsync -uv $WORKDIR/../outjobs/*									genocluster2:$REPORTS_GENOUEST/outjobs/
+	rsync -uv $WORKDIR/run/quast_results/results_*/report.txt		genocluster2:$REPORTS_GENOUEST/quast/report.$OAR_JOB_ID.txt
+	
+	rsync -uv $LOGBOOK_TXT											genocluster2:$REPORTS_GENOUEST/outjobs/${LOGBOOK_ROOT}.txt
+	rsync -uv $LOGBOOK_POS											genocluster2:$REPORTS_GENOUEST/outjobs/${LOGBOOK_ROOT}.ps
+	
+}
 

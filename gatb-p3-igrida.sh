@@ -12,7 +12,7 @@
 # Job parameters
 #------------------------------------------------------------------------------
 #OAR -n gatb-p3
-#OAR -l {cluster='bermuda'}/nodes=1,walltime=20:00:00
+#OAR -l {cluster='bermuda'}/nodes=1,walltime=00:30:00
 #OAR -O /temp_dd/igrida-fs1/cdeltel/bioinfo/gatb-pipeline-runs/p3/outjobs/run.%jobid%.out
 #OAR -E /temp_dd/igrida-fs1/cdeltel/bioinfo/gatb-pipeline-runs/p3/outjobs/run.%jobid%.out
 
@@ -41,6 +41,7 @@ EXT_send_starting_mail
 
 EXT_define_paths
 
+###if [ 1 -eq 0 ]; then
 
 #------------------------------------------------------------------------------
 # Prepare the data
@@ -133,15 +134,13 @@ EXT_non_regression_execution_time  # todo
 
 EXT_non_regression_quast
 
+###fi
+
+EXT_non_regression_plot
 
 #------------------------------------------------------------------------------
 # Upload run reports to Genouest
 #------------------------------------------------------------------------------
 
-
-ssh genocluster2 mkdir -p $REPORTS_GENOUEST/outjobs
-ssh genocluster2 mkdir -p $REPORTS_GENOUEST/quast
-
-rsync -uv $WORKDIR/../outjobs/*									genocluster2:$REPORTS_GENOUEST/outjobs/
-rsync -uv $WORKDIR/run/quast_results/results_*/report.txt		genocluster2:$REPORTS_GENOUEST/quast/report.$OAR_JOB_ID.txt
+EXT_transfer_reports_to_genouest
 
