@@ -139,6 +139,7 @@ EXT_non_regression_execution_time  # todo
 
 EXT_non_regression_quast
 
+EXT_non_regression_plot
 
 #------------------------------------------------------------------------------
 # Upload run reports to Genouest

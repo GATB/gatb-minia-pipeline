@@ -41,6 +41,7 @@ EXT_send_starting_mail
 
 EXT_define_paths
 
+###if [ 1 -eq 0 ]; then
 
 #------------------------------------------------------------------------------
 # Prepare the data
@@ -133,6 +134,9 @@ EXT_non_regression_execution_time  # todo
 
 EXT_non_regression_quast
 
+###fi
+
+EXT_non_regression_plot
 
 #------------------------------------------------------------------------------
 # Upload run reports to Genouest
