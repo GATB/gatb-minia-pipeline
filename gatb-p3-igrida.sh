@@ -12,7 +12,7 @@
 # Job parameters
 #------------------------------------------------------------------------------
 #OAR -n gatb-p3
-#OAR -l {cluster='bermuda'}/nodes=1,walltime=20:00:00
+#OAR -l {cluster='bermuda'}/nodes=1,walltime=00:30:00
 #OAR -O /temp_dd/igrida-fs1/cdeltel/bioinfo/gatb-pipeline-runs/p3/outjobs/run.%jobid%.out
 #OAR -E /temp_dd/igrida-fs1/cdeltel/bioinfo/gatb-pipeline-runs/p3/outjobs/run.%jobid%.out
 
@@ -67,7 +67,7 @@ EXT_print_versioning_informations
 # Compile the codes
 #------------------------------------------------------------------------------
 cd $PIPELINE/git-gatb-pipeline/
-#ln -sf ../specialk        kmergenie
+ln -sf ../specialk        kmergenie
 #ln -sf ../superscaffolder superscaffolder
 ln -sf ../debloom         minia
 
