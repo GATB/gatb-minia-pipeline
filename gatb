@@ -62,7 +62,7 @@ try:
            min_abundance = int(sys.argv[i+1])
         elif arg == "-g":
            genome_size = int(sys.argv[i+1])
-        elif arg == "-k":
+        elif arg == "-m":
            multi_k_mode = True
         elif arg == "-l":
             unpaired_reads = open(sys.argv[i+1]).read().splitlines()
