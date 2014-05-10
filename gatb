@@ -187,7 +187,7 @@ def sspace(contigs, paired_reads, output_filename=""):
 
             # sspace error isn't exactly the stdev; subjectively, I'm converting using 3 sigmas
             error = min(max(0.1, stdev * 3.0 / mean),1.0)
-            f.write('lib%d %s %d %0.1f %s' % (i, library, mean, error, orientation))
+            f.write('lib%d %s %d %0.1f %s\n' % (i, library, mean, error, orientation))
 
     # run sspace
     cmd = ['-l', lib_file, '-s', contigs, '-b', prefix + '.sspace']
