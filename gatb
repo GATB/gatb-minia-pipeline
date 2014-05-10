@@ -44,10 +44,14 @@ try:
            if i+2 >= len(sys.argv) or sys.argv[i+2][0] == "-":
                # interleaved case
                paired_reads.append(sys.argv[i+1])
+               has_space = ' ' in sys.argv[i+1]
            else:
                # non-interleaved case
                paired_reads.append( sys.argv[i+1] + " " + sys.argv[i+2])
                skip = 2
+               has_space = ' ' in sys.argv[i+1] or ' ' in sys.argv[i+2]
+           if has_space:
+               print("Space character isn't allowed in file names")
         elif arg == "-u":
            unpaired_reads.append(sys.argv[i+1])
         elif arg == "-c":
@@ -63,11 +67,12 @@ try:
         elif arg == "-l":
             unpaired_reads = open(sys.argv[i+1]).read().splitlines()
         else:
-            print("Unknown argument: %s\n" % arg)
-            exit(1)
+            print("Unknown parameters", arg)
     if len(paired_reads) + len(unpaired_reads) == 0:
-        raise Exception 
+        raise Exception("Please input at least one read dataset") 
 except:
+    import traceback
+    traceback.print_exc()
     print doc
     sys.exit(1)
 
@@ -77,9 +82,13 @@ if k != 0 and (min_abundance == 0 or genome_size == 0):
 
 DIR = os.path.dirname(os.path.realpath(__file__))
 
-def execute(program, cmdline=[], interpreter=None):
+def execute(program, cmdline=[], interpreter=None, stdout=None):
     try:
-        return call(([interpreter] if interpreter else []) + [ "%s/%s" % (DIR, program) ] + map(str, cmdline) )
+        cmd = [interpreter] if interpreter else []
+        if program is not None:
+            cmd += [ "%s/%s" % (DIR, program) ] 
+        cmd += map(str, cmdline)
+        return call(cmd, stdout=stdout)
     except OSError as e:
         print >>sys.stderr, "Execution of '%s' with command-line '%s' failed:" % (program, cmdline), e
 
@@ -136,7 +145,22 @@ def get_paired_end_parameters(contigs, library):
             orientation, mean, stdev = l[1], int(l[3]), int(l[5])
     print "GATB-Pipeline estimated insert size of library", paired_reads, ":", mean, stdev, orientation
     return orientation, mean, stdev
-        
+    
+def possibly_gunzip(filename, lib_index, paired_index=None):
+    if filename.endswith('.gz'):
+        unzipped_filename = '.'.join(filename.split(".")[:-1])
+        ext = unzipped_filename.split(".")[-1]
+        output = prefix + '.lib%d' % lib_index 
+        if paired_index:
+            output += "_%d" % paired_index
+        output += "." + ext
+        print "Gunzipping", filename, "to", output
+        outfile = open(output, 'wb')
+        execute(None, ['-c', filename], interpreter='gunzip', stdout=outfile)
+        outfile.close
+        return output 
+    return filename
+
 def sspace(contigs, paired_reads, output_filename=""):
     # create a sspace config file
     lib_file = prefix + '.sspace.config'
@@ -144,12 +168,17 @@ def sspace(contigs, paired_reads, output_filename=""):
         for i, library in enumerate(paired_reads):
             # sspace needs de-interleaved input
             if ' ' not in library:
+                library = possibly_gunzip(library, i)
                 print "Splitting interleaved file:", library
                 ext = library.split(".")[-1]
                 p1, p2 = [prefix + ".lib%d_%d." % (i,j) + ext for j in [1,2] ]
                 #de-interleave reads using SGA's script (was too lazy to write my own)
                 execute('tools/sga-deinterleave.pl', [library, p1, p2], interpreter="perl")
                 library = p1 + " " + p2
+            else:
+                # sspace basic cannot work with gzipped files
+                p1, p2 = library.split(' ')
+                library = possibly_gunzip(p1, i, 1) + ' ' + possibly_gunzip(p2, i, 2)
 
             # estimate insert size
             orientation, mean, stdev = get_paired_end_parameters(contigs, library)

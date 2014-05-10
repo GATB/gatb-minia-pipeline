@@ -6,4 +6,4 @@ all:
 .FORCE:
 
 test: all .FORCE 
-	cd test ; ../gatb -p small_test_reads.fa
+	cd test ; ../gatb -p small_test_reads.fa.gz
