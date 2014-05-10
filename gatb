@@ -61,7 +61,7 @@ try:
         elif arg == "-k":
            multi_k_mode = True
         elif arg == "-l":
-            unpaired_reads = open(sys.argv[1]).read().splitlines()
+            unpaired_reads = open(sys.argv[i+1]).read().splitlines()
         else:
             print("Unknown argument: %s\n" % arg)
             exit(1)
