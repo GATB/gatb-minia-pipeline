@@ -127,7 +127,8 @@ EXT_send_ending_mail
 
 # Validation of the results
 
-$QUAST_CMD assembly.scaffolds4.fa -R $DATA_IGRIDA/speciesA.diploid.fa --scaffolds --min-contig 100
+outfile=assembly.sspace.final.scaffolds.fasta
+$QUAST_CMD $outfile -R $DATA_IGRIDA/speciesA.diploid.fa --scaffolds --min-contig 100
 
 
 # Non regression tests

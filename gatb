@@ -229,7 +229,7 @@ if not multi_k_mode:
     assemble_single_k()
 else:
     # multi-k assembly algorithms following the idea of idba/spades to reconstruct graph with larger k and reinject previous contigs
-    kmergenie(list_reads)
+    kmergenie(list_reads, one_pass=True)
     results = parse_kmergenie_results()
     cutoffs = dict([(k,min_abundance) for (genome_size, k, min_abundance) in results] )
     genome_size = max(1000000000,max(results)[0]) #hack to make it use at least 1GB of memory to go faster on bacterial genomes
