@@ -186,7 +186,7 @@ def sspace(contigs, paired_reads, output_filename=""):
                 exit("Error running estimate-insert-sizes for library: %s" % library)
 
             # sspace error isn't exactly the stdev; subjectively, I'm converting using 3 sigmas
-            error = min(max(0.1, stdev * 3.0 / mean),1.0)
+            error = min(max(0.1, stdev * 3.0 / mean),0.9)
             f.write('lib%d %s %d %0.1f %s\n' % (i, library, mean, error, orientation))
 
     # run sspace

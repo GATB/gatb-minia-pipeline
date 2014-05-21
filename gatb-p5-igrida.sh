@@ -98,8 +98,8 @@ START_TIME=`date +"%s"`
 
 time $MEMUSED $GATB_SCRIPT \
 	-p $DATA_IGRIDA/frag_1.fastq.gz 			$DATA_IGRIDA/frag_2.fastq.gz  \
-	-p $DATA_IGRIDA/mediumjump_1.fastq.gz 		$DATA_IGRIDA/mediumjump_2.fastq.gz \
-	-p $DATA_IGRIDA/shortjump_1.fastq.gz  		$DATA_IGRIDA/shortjump_2.fastq.gz
+	-p $DATA_IGRIDA/shortjump_1.fastq.gz  		$DATA_IGRIDA/shortjump_2.fastq.gz \
+	-p $DATA_IGRIDA/mediumjump_1.fastq.gz 		$DATA_IGRIDA/mediumjump_2.fastq.gz
 
 
 CMD_EXIT_CODE=$?
