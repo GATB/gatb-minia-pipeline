@@ -16,16 +16,19 @@ Reads (mandatory, specify at least one of these parameters):
     -p left_mates right_mates       two FASTA or FASTQ paired reads (non-interleaved)
     -u unpaired_reads               unpaired FASTA or FASTQ reads
     -l list_of_unpaired_reads       one file name per line
+    -m interleaved_mate_pairs       same input as paired reads (-p) but for mate pairs
+    -m left_mates right_mates       same input as paired reads (-p) but for mate pairs
 
 Optional parameters:
     -c contigs_file                 only perform scaffolding+gapfilling from these contigs
     -k kmer_size                    use this k-mer size (skips kmergenie if -k, -t and -g are specified)
     -t min_abundance                use this minimum abundance value
     -g genome_size                  adjust memory usage with respect to this genome size
-    -m                              multi-k mode (experimental, not currently supported)
+    --multik                        multi-k mode (experimental, not currently supported)
 """ % (sys.argv[0])
 
 paired_reads = []
+mate_pairs = []
 unpaired_reads = []
 contigs = None
 genome_size = 0
@@ -40,18 +43,22 @@ try:
             skip -= 1
             continue
         skip = 1
-        if arg == "-p":
+        if arg == "-p" or arg == "-m":
            if i+2 >= len(sys.argv) or sys.argv[i+2][0] == "-":
                # interleaved case
-               paired_reads.append(sys.argv[i+1])
+               library = sys.argv[i+1]
                has_space = ' ' in sys.argv[i+1]
            else:
                # non-interleaved case
-               paired_reads.append( sys.argv[i+1] + " " + sys.argv[i+2])
+               library = sys.argv[i+1] + " " + sys.argv[i+2]
                skip = 2
                has_space = ' ' in sys.argv[i+1] or ' ' in sys.argv[i+2]
            if has_space:
                print("Space character isn't allowed in file names")
+               exit(0)
+           paired_reads.append(library)
+           if arg == "-m":
+               mate_pairs.append(library)
         elif arg == "-u":
            unpaired_reads.append(sys.argv[i+1])
         elif arg == "-c":
@@ -62,7 +69,7 @@ try:
            min_abundance = int(sys.argv[i+1])
         elif arg == "-g":
            genome_size = int(sys.argv[i+1])
-        elif arg == "-m":
+        elif arg == "--multik":
            multi_k_mode = True
         elif arg == "-l":
             unpaired_reads = open(sys.argv[i+1]).read().splitlines()
@@ -134,9 +141,11 @@ def superscaffolder(contigs,library,output_filename=""):
 #-------------------------------
 # sspace wrapper
 
-def get_paired_end_parameters(contigs, library):
+def get_paired_end_parameters(contigs, library, is_mate_pairs = False):
     paired_reads = library.split(' ')
     cmd = ["%s/tools/estimate-insert-sizes" % DIR, contigs] + paired_reads
+    if is_mate_pairs:
+        cmd += ["--RF"] # force mate pairs
     output = Popen(cmd, stdout=PIPE).communicate()[0]
     orientation, mean, stdev = None, None, None
     for line in output.split('\n'):
@@ -166,6 +175,7 @@ def sspace(contigs, paired_reads, output_filename=""):
     lib_file = prefix + '.sspace.config'
     with open(lib_file, 'w') as f:
         for i, library in enumerate(paired_reads):
+            is_mate_pairs = library in mate_pairs
             # sspace needs de-interleaved input
             if ' ' not in library:
                 library = possibly_gunzip(library, i)
@@ -181,7 +191,7 @@ def sspace(contigs, paired_reads, output_filename=""):
                 library = possibly_gunzip(p1, i, 1) + ' ' + possibly_gunzip(p2, i, 2)
 
             # estimate insert size
-            orientation, mean, stdev = get_paired_end_parameters(contigs, library)
+            orientation, mean, stdev = get_paired_end_parameters(contigs, library, is_mate_pairs)
             if orientation is None:
                 exit("Error running estimate-insert-sizes for library: %s" % library)
 

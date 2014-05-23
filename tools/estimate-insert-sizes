@@ -36,6 +36,11 @@ if len(sys.argv) < 3:
     exit(doc)
 
 reference = os.path.abspath(sys.argv[1])
+if "--RF" in sys.argv:
+    is_mate_pairs = True
+    sys.argv.remove("--RF")
+else:
+    is_mate_pairs = False
 reads = sorted(sys.argv[2:])
 
 # add script's folder to path, to find BWA
@@ -97,8 +102,11 @@ for read1, read2 in zip(reads[::2],reads[1::2]):
         sys.stdout.flush()
     if process.poll() is None:
         process.terminate()
-   
-    results = sorted(stats.items(), key = lambda x: x[1]['nb_pairs'], reverse=True)
+
+    if not is_mate_pairs:
+        results = sorted(stats.items(), key = lambda x: x[1]['nb_pairs'], reverse=True)
+    else:
+        results = [("RF", stats["RF"])]
     most_likely = results[0]
     mean = most_likely[1]['mean']
     stdev = most_likely[1]['stdev']
