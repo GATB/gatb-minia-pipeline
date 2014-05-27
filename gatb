@@ -89,9 +89,13 @@ if k != 0 and (min_abundance == 0 or genome_size == 0):
 
 DIR = os.path.dirname(os.path.realpath(__file__))
 
-def execute(program, cmdline=[], interpreter=None, stdout=None):
+def execute(program, cmdline=[], interpreter=None, stdout=None, memused=False):
     try:
-        cmd = [interpreter] if interpreter else []
+        cmd = []
+        if memused:
+            cmd += [ "%s/tools/memused" % DIR ]
+        if interpreter:
+            cmd += [interpreter]
         if program is not None:
             cmd += [ "%s/%s" % (DIR, program) ] 
         cmd += map(str, cmdline)
@@ -128,7 +132,7 @@ def minia(k, min_abundance, prefix):
 
     print "running minia"
 
-    execute('minia/minia', [list_reads, k, min_abundance, genome_size, prefix])
+    execute('minia/minia', [list_reads, k, min_abundance, genome_size, prefix], memused=True)
     contigs = prefix + ".contigs.fa"
     return contigs
 
@@ -136,7 +140,7 @@ def minia(k, min_abundance, prefix):
 # superscaffolder
 
 def superscaffolder(contigs,library,output_filename=""):
-    execute("superscaffolder/superscaffolding.py", [contigs, library, "-o", output_filename], "python")
+    execute("superscaffolder/superscaffolding.py", [contigs, library, "-o", output_filename], interpreter="python", memused=True)
 
 #-------------------------------
 # sspace wrapper
@@ -201,7 +205,8 @@ def sspace(contigs, paired_reads, output_filename=""):
 
     # run sspace
     cmd = ['-l', lib_file, '-s', contigs, '-b', prefix + '.sspace']
-    execute('sspace/SSPACE_Basic_v2.0.pl', cmd, interpreter="perl")
+    execute('sspace/SSPACE_Basic_v2.0.pl', cmd, interpreter="perl", memused=True)
+    print "SSPACE is done! the maximal memory used above was for SSPACE only"
 
     # clean up intermediate sspace files
     

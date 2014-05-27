@@ -1,10 +1,11 @@
 #!/bin/bash
 # Author: Rayan Chikhi
-#  usage: memused program [arguments]
+#  usage: memused [program arg1 arg2 ...]
 
 "$@" &
+pid=$!
 
-cd /proc/$!
+cd /proc/$pid
 
 max=0
 while [ -f status ]
@@ -13,11 +14,13 @@ sleep 0.1
 if [ -f status ]
 then
     mem=`cat status | grep VmHWM | tr -s [:blank:] | cut -d ' ' -f 2`
-    if [ "$mem" -gt "$max" ]
+    if [ "0$mem" -gt "0$max" ]
     then
     max=$mem
     fi
 fi;
 done
+wait $pid
 
-echo "maximal memory used ( kilobyte(s) (K / Kb))" $max
+echo "maximal memory used: $max KB"
+
