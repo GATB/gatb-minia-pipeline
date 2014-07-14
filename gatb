@@ -2,6 +2,7 @@
 
 import sys, os
 from subprocess import call, Popen, PIPE
+import glob
 sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0) #unbuffered print, solves badly ordered stdout on clusters
 import multiprocessing
 nb_cpus = multiprocessing.cpu_count()
@@ -253,8 +254,9 @@ def besst(contigs, bam_files, output_filename=""):
     interpreter = check_for_python_27()
     cmd = ['-c', contigs, '-f'] + bam_files + ['--no_score', '--iter',100000, '-filter_contigs', 1000, '-o', prefix + '_besst']
     execute('BESST/runBESST', cmd, interpreter=interpreter, memused=True)
+    besst_scaffolds = sorted(glob.glob(prefix + "_besst/BESST_output/pass*/*.fa"))[-1]
+    os.symlink(besst_scaffolds, prefix + ".besst.scaffolds.fasta")
     print "BESST is done! the maximal memory used above was for BESST only"
-    # clean up intermediate besst files
     
 
 # ------------------------------

@@ -130,7 +130,7 @@ EXT_send_ending_mail
 
 # Validation of the results
 
-outfile=assembly.sspace.final.scaffolds.fasta
+outfile=assembly.besst.scaffolds.fasta
 $QUAST_CMD $outfile --scaffolds --min-contig 100
 
 # Non regression tests
