@@ -4,23 +4,21 @@
 
 "$@" &
 pid=$!
-
 cd /proc/$pid
 
 max=0
 while [ -f status ]
 do
-sleep 0.1
-if [ -f status ]
-then
-    mem=`cat status | grep VmHWM | tr -s [:blank:] | cut -d ' ' -f 2`
+    sleep 0.1
+    mem=`if [ -f status ]; then cat status | grep VmHWM | tr -s [:blank:] | cut -d ' ' -f 2; fi`
     if [ "0$mem" -gt "0$max" ]
     then
     max=$mem
     fi
-fi;
 done
 wait $pid
+ret=$?
 
 echo "maximal memory used: $max KB"
 
+exit $ret

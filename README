@@ -1,15 +1,18 @@
 GATB-Pipeline
 -------------
 
-Only compatible with Linux64 for now.
+Installation:
+-------------
 
-Reasons:
-- SSPACE shipping with bowtie pre-compiled
-- estimate-insert-size needs bwa, so I'm shipping a linux64 version
+    1) Prerequisites: 
 
-installation:
+        Python >= 2.7 with the following modules (can be installed by pip): 
+            mathstats (for BESST)
+            scipy (for BESST)
+            pulp (for BESST) 
+        bwa (for BESST)
+        R (for KmerGenie)
 
-    1) Prerequisite: Python >= 2.5 and R.
     2) Type `make`
 
 usage:
@@ -20,9 +23,15 @@ usage:
 Many more input options are available. Type `./gatb` for extended usage.
 Type `make test` to launch a small test.
 
+FAQ
+---
+
+If you get the following error during the pipeline (BESST): "'NoneType' object has no attribute 'actualSolve'", then you need to type "sudo pulptest" (root required).
+
+
 Support
 -------
-
+        
 To contact an author directly: rayan.chikhi@ens-cachan.org
 Main dynamic FAQ (ask a question about Gatb-pipeline on any of these two websites): 
 http://biostar.genouest.org 

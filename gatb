@@ -3,6 +3,8 @@
 import sys, os
 from subprocess import call, Popen, PIPE
 sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0) #unbuffered print, solves badly ordered stdout on clusters
+import multiprocessing
+nb_cpus = multiprocessing.cpu_count()
 
 prefix="assembly"
 
@@ -73,6 +75,8 @@ try:
            multi_k_mode = True
         elif arg == "-l":
             unpaired_reads = open(sys.argv[i+1]).read().splitlines()
+        elif arg in ["-h", "-help", "--help"]:
+            raise Exception("Displaying help") 
         else:
             print("Unknown parameters", arg)
     if len(paired_reads) + len(unpaired_reads) == 0:
@@ -90,7 +94,9 @@ if k != 0 and (min_abundance == 0 or genome_size == 0):
 DIR = os.path.dirname(os.path.realpath(__file__))
 
 def execute(program, cmdline=[], interpreter=None, stdout=None, memused=False):
+    ret = 0
     try:
+        print "Running",program
         cmd = []
         if memused:
             cmd += [ "%s/tools/memused" % DIR ]
@@ -99,9 +105,14 @@ def execute(program, cmdline=[], interpreter=None, stdout=None, memused=False):
         if program is not None:
             cmd += [ "%s/%s" % (DIR, program) ] 
         cmd += map(str, cmdline)
-        return call(cmd, stdout=stdout)
+        print >>sys.stderr, "Execution of '%s'. Command line: \n     %s" % (program, ' '.join(cmd))
+        ret = call(cmd, stdout=stdout)
     except OSError as e:
-        print >>sys.stderr, "Execution of '%s' with command-line '%s' failed:" % (program, cmdline), e
+        print >>sys.stderr, "Exception:",e
+        ret = 1
+    if ret:
+        print >>sys.stderr, "Execution of '%s' failed. Command line: \n     %s" % (program, ' '.join(cmd))
+        exit(1)
 
 list_reads = prefix + ".list_reads"
 
@@ -109,7 +120,10 @@ def create_list_reads(extra_reads = []):
     # create of flat text file with all reads
     with open(list_reads,"w") as f:
         for read in paired_reads + unpaired_reads + extra_reads:
-            f.write( "\n".join(read.strip().split()) +"\n")
+            for filename in read.strip().split():
+                if not os.path.exists(filename):
+                    exit("Read file %s does not exist" % filename)
+                f.write(filename + "\n")
 
 # ------------------------------
 # kmergenie
@@ -212,10 +226,43 @@ def sspace(contigs, paired_reads, output_filename=""):
     
 
 # ------------------------------
+# besst wrapper
+
+def run_besst_mapping(i, contigs, library):
+    paired_reads = library.split(' ')
+    output_bam = prefix + '.lib_%d' % i
+    os.environ["TEMP"] = os.getcwd() # besst uses tempfile which uses $TEMP to store mapping data
+    execute('BESST/scripts/reads_to_ctg_map.py', ["--threads",nb_cpus] + paired_reads + [contigs, output_bam], interpreter="python")
+    return output_bam + ".bam"
+
+# besst needs python >= 2.7
+def check_for_python_27():
+    for i, python27 in enumerate(['python', 'python2.7', 'python-2.7']):
+        try:
+            ret = call([python27, "-c", "from collections import Counter"])#,stdout=PIPE,stderr=PIPE)
+        except:
+            ret = 1
+        if ret == 0:
+            if i > 0:
+                print "found Python 2.7 via command:", python27
+            return python27
+    exit("BESST needs Python >= 2.7, make sure it is aliased to either the 'python' or the 'python2.7' command on your shell")
+
+
+def besst(contigs, bam_files, output_filename=""):
+    interpreter = check_for_python_27()
+    cmd = ['-c', contigs, '-f'] + bam_files + ['--no_score', '--iter',100000, '-filter_contigs', 1000, '-o', prefix + '_besst']
+    execute('BESST/runBESST', cmd, interpreter=interpreter, memused=True)
+    print "BESST is done! the maximal memory used above was for BESST only"
+    # clean up intermediate besst files
+    
+
+# ------------------------------
 # wrapper for scaffolding
 
 #method="superscaffolder"
-method="sspace"
+#method="sspace"
+method="besst"
 def scaffold(contigs, paired_reads):
     if method == "superscaffolder":
         # superscaf takes one library at a time
@@ -225,6 +272,12 @@ def scaffold(contigs, paired_reads):
             superscaffolder(input_file,paired_read,output_file)
     elif method == "sspace":
         sspace(contigs,paired_reads)
+    elif method == "besst":
+        # besst needs pre-mapping one library at a time
+        bam_files = []
+        for i, paired_read in enumerate(paired_reads):
+            bam_files += [run_besst_mapping(i,contigs,paired_read)]
+        besst(contigs,bam_files)
 
 
 # ------------------------------

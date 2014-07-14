@@ -1,5 +1,5 @@
 all:
-	#make -C superscaffolder # using sspace now
+	#make -C superscaffolder # using a better scaffolder now
 	make -C kmergenie
 	#make -C minia # will be dynamically compiled
 

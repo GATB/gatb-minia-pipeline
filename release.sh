@@ -29,7 +29,7 @@ mv $soft-$version/minia*/ $soft-$version/minia
 cp gatb README CHANGELOG Makefile $soft-$version/
 mkdir -p $soft-$version/test/
 cp -R test/small_test_reads.fa.gz $soft-$version/test/
-cp -R sspace $soft-$version/
+cp -R BESST $soft-$version/
 cp -R tools $soft-$version/
 
 tar -chzf $soft-$version.tar.gz $soft-$version/

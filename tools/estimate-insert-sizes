@@ -44,7 +44,8 @@ else:
 reads = sorted(sys.argv[2:])
 
 # add script's folder to path, to find BWA
-os.environ["PATH"] += os.pathsep + os.path.dirname(os.path.realpath(__file__))
+# no longer needed as i'm putting bwa as a prerequisite and not packaging it
+#os.environ["PATH"] += os.pathsep + os.path.dirname(os.path.realpath(__file__))
 
 try:
     subprocess.call(["bwa"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
