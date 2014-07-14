@@ -230,6 +230,15 @@ def sspace(contigs, paired_reads, output_filename=""):
 # besst wrapper
 
 def run_besst_mapping(i, contigs, library):
+    # besst needs de-interleaved input
+    if ' ' not in library:
+        library = possibly_gunzip(library, i)
+        print "Splitting interleaved file:", library
+        ext = library.split(".")[-1]
+        p1, p2 = [prefix + ".lib%d_%d." % (i,j) + ext for j in [1,2] ]
+        #de-interleave reads using SGA's script (was too lazy to write my own)
+        execute('tools/sga-deinterleave.pl', [library, p1, p2], interpreter="perl")
+        library = p1 + " " + p2
     paired_reads = library.split(' ')
     output_bam = prefix + '.lib_%d' % i
     os.environ["TEMP"] = os.getcwd() # besst uses tempfile which uses $TEMP to store mapping data
@@ -254,8 +263,11 @@ def besst(contigs, bam_files, output_filename=""):
     interpreter = check_for_python_27()
     cmd = ['-c', contigs, '-f'] + bam_files + ['--no_score', '--iter',100000, '-filter_contigs', 1000, '-o', prefix + '_besst']
     execute('BESST/runBESST', cmd, interpreter=interpreter, memused=True)
-    besst_scaffolds = sorted(glob.glob(prefix + "_besst/BESST_output/pass*/*.fa"))[-1]
-    os.symlink(besst_scaffolds, prefix + ".besst.scaffolds.fasta")
+    besst_scaffolds = sorted(glob.glob(prefix + "_besst/BESST_output/pass*/*.fa"))
+    if len(besst_scaffolds) == 0:
+        exit("Error: BESST returned no results in %s" % (prefix + "_besst/"))
+    last_pass = besst_scaffolds[-1]
+    os.symlink(last_pass, prefix + ".besst.scaffolds.fasta")
     print "BESST is done! the maximal memory used above was for BESST only"
     
 
