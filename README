@@ -6,11 +6,17 @@ Installation:
 
     1) Prerequisites: 
 
-        Python >= 2.7 with the following modules (can be installed by pip): 
+        Python >= 2.7 with the following modules: 
             mathstats (for BESST)
             scipy (for BESST)
             pulp (for BESST) 
+            networkx (for BESST)
+            
+            to install them at once, run:
+            pip install mathstats pulp networkx scipy
+
         bwa (for BESST)
+
         R (for KmerGenie)
 
     2) Type `make`
