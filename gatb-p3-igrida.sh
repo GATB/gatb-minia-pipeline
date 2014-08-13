@@ -127,7 +127,7 @@ EXT_send_ending_mail
 # Validation of the results
 
 outfile=assembly.besst.scaffolds.fasta
-$QUAST_CMD outfile -R $DATA_IGRIDA/genome.fasta --scaffolds --min-contig 100
+$QUAST_CMD $outfile -R $DATA_IGRIDA/genome.fasta --scaffolds --min-contig 100
 
 
 # Non regression tests
