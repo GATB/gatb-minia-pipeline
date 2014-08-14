@@ -12,6 +12,7 @@
 # Job parameters
 #------------------------------------------------------------------------------
 #OAR -n gatb-p6
+#OAR -p dedicated='none'
 #OAR -l {cluster='bermuda'}/nodes=1,walltime=160:00:00
 #OAR -O /temp_dd/igrida-fs1/cdeltel/bioinfo/gatb-pipeline-runs/p6/outjobs/run.%jobid%.out
 #OAR -E /temp_dd/igrida-fs1/cdeltel/bioinfo/gatb-pipeline-runs/p6/outjobs/run.%jobid%.out
