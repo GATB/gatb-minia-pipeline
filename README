@@ -12,10 +12,13 @@ Installation:
             pulp (for BESST) 
             networkx (for BESST)
             
-            to install them at once, run:
-            pip install mathstats pulp networkx scipy
+            To install all of them at once, run:
+               pip install mathstats pulp networkx scipy
+            Can't install scipy? get activestate python: http://www.activestate.com/activepython/downloads and type 'pypm install scipy'
 
         bwa (for BESST)
+
+        seqtk (for BESST)
 
         R (for KmerGenie)
 
@@ -24,7 +27,6 @@ Installation:
 usage:
 
     ./gatb -p read_1.fastq read_2.fastq [..]
-
 
 Many more input options are available. Type `./gatb` for extended usage.
 Type `make test` to launch a small test.
