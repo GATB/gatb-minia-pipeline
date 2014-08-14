@@ -12,7 +12,8 @@
 # Job parameters
 #------------------------------------------------------------------------------
 #OAR -n gatb-p3
-#OAR -l {cluster='bermuda'}/nodes=1,walltime=00:30:00
+#OAR -p dedicated='none'
+#OAR -l {cluster='bermuda'}/nodes=1,walltime=20:00:00
 #OAR -O /temp_dd/igrida-fs1/cdeltel/bioinfo/gatb-pipeline-runs/p3/outjobs/run.%jobid%.out
 #OAR -E /temp_dd/igrida-fs1/cdeltel/bioinfo/gatb-pipeline-runs/p3/outjobs/run.%jobid%.out
 
@@ -126,7 +127,7 @@ EXT_send_ending_mail
 # Validation of the results
 
 outfile=assembly.besst.scaffolds.fasta
-$QUAST_CMD outfile -R $DATA_IGRIDA/genome.fasta --scaffolds --min-contig 100
+$QUAST_CMD $outfile -R $DATA_IGRIDA/genome.fasta --scaffolds --min-contig 100
 
 
 # Non regression tests

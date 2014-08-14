@@ -4,6 +4,7 @@ echo
 echo "Sourcing gatb-pipeline-common.sh ..."
 echo
 
+PATH="/udd/cdeltel/bioinfo/bwa-0.7.10/:.:$PATH"
 
 MAIL_DST_ALL_MESG=charles.deltel@inria.fr
 MAIL_DST_ERR_ONLY="cdeltel@laposte.net rchikhi@gmail.com"
@@ -95,6 +96,12 @@ EOF
 EXT_download_source_code() {
 	git clone git+ssh://cdeltel@scm.gforge.inria.fr//gitroot/gatb-pipeline/gatb-pipeline.git git-gatb-pipeline
 	[ $? -ne 0 ] && { echo "git clone error"; exit 1;}
+	cd git-gatb-pipeline
+	git submodule init
+	git submodule update
+	[ $? -ne 0 ] && { echo "git submodule error"; exit 1;}
+	git submodule status
+	cd ..
 	svn co svn+ssh://scm.gforge.inria.fr/svnroot/projetssymbiose/superscaffolder             superscaffolder
 	[ $? -ne 0 ] && { echo "svn co error"; exit 1;}
 	svn co svn+ssh://scm.gforge.inria.fr/svnroot/projetssymbiose/minia/trunk                 debloom
