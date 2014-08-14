@@ -230,10 +230,10 @@ def sspace(contigs, paired_reads, output_filename=""):
 
 def revcomp_matepairs(library, i):
     new_mate_pairs = []
-    for mates in library:
+    for j, mates in enumerate(library):
         print "Reverse-complementing mate-pairs for BESST:", library
         ext = mates.split(".")[-1]
-        p = prefix + (".lib%d_MPrc." % i) + ext
+        p = prefix + (".lib%d_%d_MPrc." % (i, j+1)) + ext
         #RC using seqtk (was too lazy to write my own), wrapped to handle stdout redirection
         execute('tools/rc.sh', [mates, p])
         new_mate_pairs.append(p)
