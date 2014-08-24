@@ -97,7 +97,6 @@ DIR = os.path.dirname(os.path.realpath(__file__))
 def execute(program, cmdline=[], interpreter=None, stdout=None, memused=False):
     ret = 0
     try:
-        print "Running",program
         cmd = []
         if memused:
             cmd += [ "%s/tools/memused" % DIR ]
@@ -106,13 +105,14 @@ def execute(program, cmdline=[], interpreter=None, stdout=None, memused=False):
         if program is not None:
             cmd += [ "%s/%s" % (DIR, program) ] 
         cmd += map(str, cmdline)
-        print >>sys.stderr, "Execution of '%s'. Command line: \n     %s" % (program, ' '.join(cmd))
+        program_string = ((interpreter + " ") if interpreter is not None else "") + (program if program is not None else "")
+        print >>sys.stderr, "Execution of '%s'. Command line: \n     %s" % (program_string, ' '.join(cmd))
         ret = call(cmd, stdout=stdout)
     except OSError as e:
         print >>sys.stderr, "Exception:",e
         ret = 1
     if ret:
-        print >>sys.stderr, "Execution of '%s' failed. Command line: \n     %s" % (program, ' '.join(cmd))
+        print >>sys.stderr, "Execution of '%s' failed. Command line: \n     %s" % (program_string, ' '.join(cmd))
         exit(1)
 
 list_reads = prefix + ".list_reads"
@@ -230,8 +230,8 @@ def sspace(contigs, paired_reads, output_filename=""):
 
 def revcomp_matepairs(library, i):
     new_mate_pairs = []
+    print "Reverse-complementing mate-pairs for BESST:", " ".join(library)
     for j, mates in enumerate(library):
-        print "Reverse-complementing mate-pairs for BESST:", library
         ext = mates.split(".")[-1]
         p = prefix + (".lib%d_%d_MPrc." % (i, j+1)) + ext
         #RC using seqtk (was too lazy to write my own), wrapped to handle stdout redirection
