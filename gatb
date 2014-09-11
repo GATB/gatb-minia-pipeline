@@ -39,6 +39,10 @@ k = 0
 min_abundance = 0
 multi_k_mode = False 
 
+#scaffolding_method="superscaffolder"
+#scaffolding_method="sspace"
+scaffolding_method="besst"
+
 try:
     skip = 1 # to handle paired-end case (-p XX XX)
     for i,arg in enumerate(sys.argv):
@@ -76,6 +80,8 @@ try:
            multi_k_mode = True
         elif arg == "-l":
             unpaired_reads = open(sys.argv[i+1]).read().splitlines()
+        elif arg == "--sspace":  #hidden parameter, for now
+            scaffolding_method = "sspace" 
         elif arg in ["-h", "-help", "--help"]:
             raise Exception("Displaying help") 
         else:
@@ -295,19 +301,16 @@ def besst(contigs, bam_files, output_filename=""):
 # ------------------------------
 # wrapper for scaffolding
 
-#method="superscaffolder"
-#method="sspace"
-method="besst"
 def scaffold(contigs, paired_reads):
-    if method == "superscaffolder":
+    if scaffolding_method == "superscaffolder":
         # superscaf takes one library at a time
         for i, paired_read in enumerate(paired_reads):
             input_file = prefix + ".scaffolds%d.fa" % i if i > 0 else contigs
             output_file = prefix + ".scaffolds%d.fa" % (i+1)
             superscaffolder(input_file,paired_read,output_file)
-    elif method == "sspace":
+    elif scaffolding_method == "sspace":
         sspace(contigs,paired_reads)
-    elif method == "besst":
+    elif scaffolding_method == "besst":
         # besst needs pre-mapping one library at a time
         bam_files = []
         for i, paired_read in enumerate(paired_reads):
