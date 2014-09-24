@@ -5,6 +5,7 @@ echo "Sourcing gatb-pipeline-common.sh ..."
 echo
 
 PATH="/udd/cdeltel/bioinfo/bwa-0.7.10/:.:$PATH"
+PATH="/udd/cdeltel/bioinfo/seqtk/:.:$PATH"
 
 MAIL_DST_ALL_MESG=charles.deltel@inria.fr
 MAIL_DST_ERR_ONLY="cdeltel@laposte.net rchikhi@gmail.com"
