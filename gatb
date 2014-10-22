@@ -288,7 +288,8 @@ def check_for_python_27():
 
 def besst(contigs, bam_files, output_filename=""):
     interpreter = check_for_python_27()
-    cmd = ['-c', contigs, '-f'] + bam_files + ['--no_score', '--iter',100000, '-filter_contigs', 1000, '-o', prefix + '_besst']
+    filter_contigs = (100 if len(mate_pairs) == 0 else 1000)
+    cmd = ['-c', contigs, '-f'] + bam_files + ['--no_score', '--iter',100000, '-filter_contigs', filter_contigs, '-o', prefix + '_besst']
     execute('BESST/runBESST', cmd, interpreter=interpreter, memused=True)
     besst_scaffolds = sorted(glob.glob(prefix + "_besst/BESST_output/pass*/*.fa"))
     if len(besst_scaffolds) == 0:
