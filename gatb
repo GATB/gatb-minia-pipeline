@@ -23,6 +23,7 @@ Reads (mandatory, specify at least one of these parameters):
     -m left_mates right_mates       same input as paired reads (-p) but for mate pairs
 
 Advanced parameters (optional):
+    -o prefix                       prefix of the output files (default: assembly)
     -c contigs_file                 only perform scaffolding+gapfilling from these contigs
     -k kmer_size                    use this k-mer size (skips kmergenie if -k, -t and -g are specified)
     -t min_abundance                use this minimum abundance value
@@ -78,6 +79,8 @@ try:
            genome_size = int(sys.argv[i+1])
         elif arg == "-l":
             unpaired_reads = open(sys.argv[i+1]).read().splitlines()
+        elif arg == "-o":
+            prefix = sys.argv[i+1]
 
         # special cases: 0-parameters arguments, need for "skip=0", well one day i'll use getopt
         elif arg == "--multik":
