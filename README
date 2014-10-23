@@ -13,7 +13,7 @@ Installation:
             networkx (for BESST)
             
             To install all of them at once, run:
-               pip install mathstats pulp networkx scipy
+               pip install --user mathstats pulp networkx scipy
             Can't install scipy? get activestate python: http://www.activestate.com/activepython/downloads and type 'pypm install scipy'
 
         bwa (for BESST)

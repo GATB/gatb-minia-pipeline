@@ -23,6 +23,7 @@ Reads (mandatory, specify at least one of these parameters):
     -m left_mates right_mates       same input as paired reads (-p) but for mate pairs
 
 Advanced parameters (optional):
+    -o prefix                       prefix of the output files (default: assembly)
     -c contigs_file                 only perform scaffolding+gapfilling from these contigs
     -k kmer_size                    use this k-mer size (skips kmergenie if -k, -t and -g are specified)
     -t min_abundance                use this minimum abundance value
@@ -38,6 +39,10 @@ genome_size = 0
 k = 0
 min_abundance = 0
 multi_k_mode = False 
+
+#scaffolding_method="superscaffolder"
+#scaffolding_method="sspace"
+scaffolding_method="besst"
 
 try:
     skip = 1 # to handle paired-end case (-p XX XX)
@@ -72,10 +77,18 @@ try:
            min_abundance = int(sys.argv[i+1])
         elif arg == "-g":
            genome_size = int(sys.argv[i+1])
-        elif arg == "--multik":
-           multi_k_mode = True
         elif arg == "-l":
             unpaired_reads = open(sys.argv[i+1]).read().splitlines()
+        elif arg == "-o":
+            prefix = sys.argv[i+1]
+
+        # special cases: 0-parameters arguments, need for "skip=0", well one day i'll use getopt
+        elif arg == "--multik":
+           multi_k_mode = True
+           skip = 0
+        elif arg == "--sspace":  #hidden parameter, for now
+            scaffolding_method = "sspace" 
+            skip = 0
         elif arg in ["-h", "-help", "--help"]:
             raise Exception("Displaying help") 
         else:
@@ -278,7 +291,8 @@ def check_for_python_27():
 
 def besst(contigs, bam_files, output_filename=""):
     interpreter = check_for_python_27()
-    cmd = ['-c', contigs, '-f'] + bam_files + ['--no_score', '--iter',100000, '-filter_contigs', 1000, '-o', prefix + '_besst']
+    filter_contigs = (100 if len(mate_pairs) == 0 else 1000)
+    cmd = ['-c', contigs, '-f'] + bam_files + ['--no_score', '--iter',100000, '-filter_contigs', filter_contigs, '-o', prefix + '_besst']
     execute('BESST/runBESST', cmd, interpreter=interpreter, memused=True)
     besst_scaffolds = sorted(glob.glob(prefix + "_besst/BESST_output/pass*/*.fa"))
     if len(besst_scaffolds) == 0:
@@ -295,19 +309,16 @@ def besst(contigs, bam_files, output_filename=""):
 # ------------------------------
 # wrapper for scaffolding
 
-#method="superscaffolder"
-#method="sspace"
-method="besst"
 def scaffold(contigs, paired_reads):
-    if method == "superscaffolder":
+    if scaffolding_method == "superscaffolder":
         # superscaf takes one library at a time
         for i, paired_read in enumerate(paired_reads):
             input_file = prefix + ".scaffolds%d.fa" % i if i > 0 else contigs
             output_file = prefix + ".scaffolds%d.fa" % (i+1)
             superscaffolder(input_file,paired_read,output_file)
-    elif method == "sspace":
+    elif scaffolding_method == "sspace":
         sspace(contigs,paired_reads)
-    elif method == "besst":
+    elif scaffolding_method == "besst":
         # besst needs pre-mapping one library at a time
         bam_files = []
         for i, paired_read in enumerate(paired_reads):
