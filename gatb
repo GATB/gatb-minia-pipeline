@@ -251,7 +251,7 @@ def run_besst_mapping(i, contigs, library):
         library = p1 + " " + p2
     paired_reads = library.split(' ')
 
-    # BESST needs to reversecomplement all mate pairs
+    # BESST needs to reversecomplement all mate pairs (TODO not anymore, orientation parameter)
     is_mate_pairs = library in mate_pairs
     if is_mate_pairs:
         paired_reads = revcomp_matepairs(paired_reads, i)
