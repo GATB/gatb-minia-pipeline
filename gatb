@@ -27,7 +27,6 @@ Advanced parameters (optional):
     -c contigs_file                 only perform scaffolding+gapfilling from these contigs
     -k kmer_size                    use this k-mer size (skips kmergenie if -k, -t and -g are specified)
     -t min_abundance                use this minimum abundance value
-    -g genome_size                  adjust memory usage with respect to this genome size
     --multik                        multi-k mode (experimental, not currently supported)
 """ % (sys.argv[0])
 
@@ -35,7 +34,6 @@ paired_reads = []
 mate_pairs = []
 unpaired_reads = []
 contigs = None
-genome_size = 0
 k = 0
 min_abundance = 0
 multi_k_mode = False 
@@ -75,8 +73,6 @@ try:
            k = int(sys.argv[i+1])
         elif arg == "-t":
            min_abundance = int(sys.argv[i+1])
-        elif arg == "-g":
-           genome_size = int(sys.argv[i+1])
         elif arg == "-l":
             unpaired_reads = open(sys.argv[i+1]).read().splitlines()
         elif arg == "-o":
@@ -101,8 +97,8 @@ except:
     print doc
     sys.exit(1)
 
-if k != 0 and (min_abundance == 0 or genome_size == 0):
-    sys.exit("If you specify k, please specify min_abundance and genome_size as well")
+if k != 0 and (min_abundance == 0):
+    sys.exit("If you specify k, please specify min_abundance")
 
 
 DIR = os.path.dirname(os.path.realpath(__file__))
@@ -150,16 +146,11 @@ from kmergenie.wrapper import all_k_values_fitted_or_not
 # minia
 
 def minia(k, min_abundance, prefix):
-    global genome_size
     global contigs
     if k == 0:
         exit('cannot run minia with k=0 (did kmergenie fail to detect best k?)')
-    print "compiling minia to support k=%d" % k
 
-    call("make -j8 k=%d -C %s/minia/" % (k, DIR), shell=True)
-
-    genome_size = max(1000000000, genome_size) #hack to make it use at least 1GB of memory to go faster on bacterial genomes
-    execute('minia/minia', [list_reads, k, min_abundance, genome_size, prefix], memused=True)
+    execute('minia/minia', ['-in', list_reads, '-kmer-size', k, '-abundance', min_abundance, '-out', prefix], memused=True)
     contigs = prefix + ".contigs.fa"
     return contigs
 
@@ -241,17 +232,6 @@ def sspace(contigs, paired_reads, output_filename=""):
 # ------------------------------
 # besst wrapper
 
-def revcomp_matepairs(library, i):
-    new_mate_pairs = []
-    print "Reverse-complementing mate-pairs for BESST:", " ".join(library)
-    for j, mates in enumerate(library):
-        ext = mates.split(".")[-1]
-        p = prefix + (".lib%d_%d_MPrc." % (i, j+1)) + ext
-        #RC using seqtk (was too lazy to write my own), wrapped to handle stdout redirection
-        execute('tools/rc.sh', [mates, p])
-        new_mate_pairs.append(p)
-    return new_mate_pairs
-
 def run_besst_mapping(i, contigs, library):
     # besst needs de-interleaved input
     if ' ' not in library:
@@ -264,15 +244,10 @@ def run_besst_mapping(i, contigs, library):
         library = p1 + " " + p2
     paired_reads = library.split(' ')
 
-    # BESST needs to reversecomplement all mate pairs
-    is_mate_pairs = library in mate_pairs
-    if is_mate_pairs:
-        paired_reads = revcomp_matepairs(paired_reads, i)
-        
     output_bam = prefix + '.lib_%d' % i
     os.environ["TEMP"] = os.getcwd() # besst uses tempfile which uses $TEMP to store mapping data
     # bwa mem produces wrong contamination estimates (see assemblathon dataset)
-    execute('BESST/scripts/reads_to_ctg_map.py', ["--nomem","--threads",nb_cpus] + paired_reads + [contigs, output_bam], interpreter="python")
+    execute('BESST/scripts/reads_to_ctg_map.py', ["--nomem", "--threads", nb_cpus] + paired_reads + [contigs, output_bam], interpreter="python")
     return output_bam + ".bam"
 
 # besst needs python >= 2.7
@@ -289,10 +264,11 @@ def check_for_python_27():
     exit("BESST needs Python >= 2.7, make sure it is aliased to either the 'python' or the 'python2.7' command on your shell")
 
 
-def besst(contigs, bam_files, output_filename=""):
+def besst(contigs, bam_files, orientations, output_filename=""):
+    global k
     interpreter = check_for_python_27()
-    filter_contigs = (100 if len(mate_pairs) == 0 else 1000)
-    cmd = ['-c', contigs, '-f'] + bam_files + ['--no_score', '--iter',100000, '-filter_contigs', filter_contigs, '-o', prefix + '_besst']
+    filter_contigs = (200 if len(mate_pairs) == 0 else 1000) #hacky
+    cmd = ['-c', contigs, '-f'] + bam_files + ['--orientation'] + orientations + ['--no_score', '-filter_contigs', filter_contigs, '-o', prefix + '_besst', '-K', k]
     execute('BESST/runBESST', cmd, interpreter=interpreter, memused=True)
     besst_scaffolds = sorted(glob.glob(prefix + "_besst/BESST_output/pass*/*.fa"))
     if len(besst_scaffolds) == 0:
@@ -320,10 +296,11 @@ def scaffold(contigs, paired_reads):
         sspace(contigs,paired_reads)
     elif scaffolding_method == "besst":
         # besst needs pre-mapping one library at a time
-        bam_files = []
+        bam_files, orientations = [], []
         for i, paired_read in enumerate(paired_reads):
             bam_files += [run_besst_mapping(i,contigs,paired_read)]
-        besst(contigs,bam_files)
+            orientations += [ 'rf' if paired_read in mate_pairs else 'fr' ]
+        besst(contigs,bam_files, orientations)
 
 
 # ------------------------------
@@ -363,7 +340,8 @@ else:
         create_list_reads(extra_reads)
         multi_k_prefix = prefix + "_k%d" % k
         previous_contigs = minia(k, min_abundance, prefix=multi_k_prefix)
-        last_k_value = k 
+        last_k_value = k
+    k = last_k_value # hint for besst
     print "Finished Multi-k GATB-Pipeline with k=%d" % last_k_value
 
 # scaffolding all libraries
