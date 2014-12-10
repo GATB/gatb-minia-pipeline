@@ -21,9 +21,11 @@ echo "" >> CHANGELOG # it was missing a \n
 tar xf dependencies/kmergenie* -C $soft-$version/
 mv $soft-$version/kmergenie*/ $soft-$version/kmergenie
 
+# minia binary is provided for now
+cp -R minia $soft-$version/
 # extract minia release to minia/
-tar xf dependencies/minia* -C $soft-$version/
-mv $soft-$version/minia*/ $soft-$version/minia
+#tar xf dependencies/minia* -C $soft-$version/
+#mv $soft-$version/minia*/ $soft-$version/minia
 
 # package the rest
 cp gatb README CHANGELOG Makefile $soft-$version/
