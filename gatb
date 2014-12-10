@@ -150,6 +150,8 @@ def minia(k, min_abundance, prefix):
     if k == 0:
         exit('cannot run minia with k=0 (did kmergenie fail to detect best k?)')
 
+    min_abundance = max(min_abundance, 2) # fix for when kmergenie thinks min_abundance of 1 is a good idea
+
     execute('minia/minia', ['-in', list_reads, '-kmer-size', k, '-abundance', min_abundance, '-out', prefix], memused=True)
     contigs = prefix + ".contigs.fa"
     return contigs
