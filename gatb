@@ -330,7 +330,7 @@ else:
     for k in all_k_values_fitted_or_not():
         if k not in cutoffs:
             cutoffs[k] = 2
-    step = 10 # maybe set that as parameter
+    step = 20 # maybe set that as parameter
     last_k_value = 0
     previous_contigs = None
     for k in sorted(cutoffs.keys()):
