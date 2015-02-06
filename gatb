@@ -152,7 +152,7 @@ def minia(k, min_abundance, prefix):
 
     min_abundance = max(min_abundance, 2) # fix for when kmergenie thinks min_abundance of 1 is a good idea
 
-    execute('minia/minia', ['-in', list_reads, '-kmer-size', k, '-abundance', min_abundance, '-out', prefix], memused=True)
+    execute('minia/minia', ['-in', list_reads, '-kmer-size', k, '-abundance-min', min_abundance, '-out', prefix], memused=True)
     contigs = prefix + ".contigs.fa"
     return contigs
 
