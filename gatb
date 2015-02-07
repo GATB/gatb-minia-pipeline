@@ -347,6 +347,7 @@ else:
     print "Finished Multi-k GATB-Pipeline with k=%d" % last_k_value
 
 # scaffolding all libraries
-scaffold(contigs, paired_reads)
+if len(paired_reads) > 0:
+    scaffold(contigs, paired_reads)
 
 print "pipeline finished!!"
