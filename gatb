@@ -125,6 +125,7 @@ def execute(program, cmdline=[], interpreter=None, stdout=None, memused=False):
         exit(1)
 
 list_reads = prefix + ".list_reads"
+final_assembly = prefix + ".fasta"
 
 def create_list_reads(extra_reads = []):
     # create of flat text file with all reads
@@ -267,7 +268,7 @@ def check_for_python_27():
 
 
 def besst(contigs, bam_files, orientations, output_filename=""):
-    global k
+    global k, final_assembly
     interpreter = check_for_python_27()
     filter_contigs = (200 if len(mate_pairs) == 0 else 1000) #hacky
     cmd = ['-c', contigs, '-f'] + bam_files + ['--orientation'] + orientations + ['--no_score', '-filter_contigs', filter_contigs, '-o', prefix + '_besst', '-K', k]
@@ -276,12 +277,10 @@ def besst(contigs, bam_files, orientations, output_filename=""):
     if len(besst_scaffolds) == 0:
         exit("Error: BESST returned no results in %s" % (prefix + "_besst/"))
     last_pass = besst_scaffolds[-1]
-    final_assembly = prefix + ".besst.scaffolds.fasta"
     if os.path.exists(final_assembly):
         os.remove(final_assembly)
     os.symlink(last_pass, final_assembly)
     print "BESST is done! the maximal memory used above was for BESST only"
-    print "final assembly:",final_assembly
     
 
 # ------------------------------
@@ -349,5 +348,9 @@ else:
 # scaffolding all libraries
 if len(paired_reads) > 0:
     scaffold(contigs, paired_reads)
-
-print "pipeline finished!!"
+else:
+    if os.path.exists(final_assembly):
+        os.remove(final_assembly)
+    os.symlink(contigs, final_assembly)
+ 
+print "pipeline finished!! assembly is in: %s" % final_assembly
