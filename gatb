@@ -28,6 +28,7 @@ Advanced parameters (optional):
     -k kmer_size                    use this k-mer size (skips kmergenie if -k, -t and -g are specified)
     -t min_abundance                use this minimum abundance value
     --multik                        multi-k mode (experimental, not currently supported)
+    --multik-meta                   multi-k mode for metagenomics (experimental, not currently supported)
 """ % (sys.argv[0])
 
 paired_reads = []
@@ -37,6 +38,7 @@ contigs = None
 k = 0
 min_abundance = 0
 multi_k_mode = False 
+metagenomics = False 
 
 #scaffolding_method="superscaffolder"
 #scaffolding_method="sspace"
@@ -82,6 +84,10 @@ try:
         elif arg == "--multik":
            multi_k_mode = True
            skip = 0
+        elif arg == "--multik-meta":
+           multi_k_mode = True
+           metagenomics = True
+           skip = 0
         elif arg == "--sspace":  #hidden parameter, for now
             scaffolding_method = "sspace" 
             skip = 0
@@ -89,6 +95,7 @@ try:
             raise Exception("Displaying help") 
         else:
             print("Unknown parameters", arg)
+            raise Exception("Displaying help") 
     if len(paired_reads) + len(unpaired_reads) == 0:
         raise Exception("Please input at least one read dataset") 
 except:
@@ -320,15 +327,23 @@ if not multi_k_mode:
     assemble_single_k()
 else:
     # multi-k assembly algorithms following the idea of idba/spades to reconstruct graph with larger k and reinject previous contigs
-    kmergenie(list_reads, one_pass=True)
-    results = parse_kmergenie_results()
-    cutoffs = dict([(k,min_abundance) for (genome_size, k, min_abundance) in results] )
-    genome_size = max(results)[0]
-    # add cutoff=2 for larger k values for which there was no fit
-    # disabled for my tests now
-    for k in all_k_values_fitted_or_not():
-        if k not in cutoffs:
-            cutoffs[k] = 2
+
+    if metagenomics:
+        # set abundance cutoffs to 2, and fixed k values
+        cutoffs = dict([ (21, 2), (41, 2), (61, 2), (91,2)])
+        genome_size=0
+        print "Metagenomics mode: hardcoding multi-k values and cutoffs to",cutoffs
+    else:
+        # get abundance cutoffs from kmergenie
+        kmergenie(list_reads, one_pass=True)
+        results = parse_kmergenie_results()
+        cutoffs = dict([(k,min_abundance) for (genome_size, k, min_abundance) in results] )
+        genome_size = max(results)[0]
+        # add cutoff=2 for larger k values for which there was no fit
+        # disabled for my tests now
+        for k in all_k_values_fitted_or_not():
+            if k not in cutoffs:
+                cutoffs[k] = 2
     step = 20 # maybe set that as parameter
     last_k_value = 0
     previous_contigs = None
