@@ -329,8 +329,8 @@ else:
     # multi-k assembly algorithms following the idea of idba/spades to reconstruct graph with larger k and reinject previous contigs
 
     if metagenomics:
-        # set abundance cutoffs to 2, and fixed k values
-        cutoffs = dict([ (21, 2), (41, 2), (61, 2), (91,2)])
+        # set abundance cutoffs to 2-3, and fixed k values
+        cutoffs = dict([ (21, 3), (41, 3), (61, 2), (91,2)])
         genome_size=0
         print "Metagenomics mode: hardcoding multi-k values and cutoffs to",cutoffs
     else:
