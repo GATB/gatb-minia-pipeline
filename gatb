@@ -348,7 +348,7 @@ else:
     last_k_value = 0
     previous_contigs = None
     for k in sorted(cutoffs.keys()):
-        if k < last_k_value + step:
+        if k < last_k_value + step and not metagenomics:
             continue
         min_abundance = cutoffs[k]
         print "Multi-k GATB-Pipeline, Minia assembling at k=%d min_abundance=%d genome_size=%d" % (k, min_abundance, genome_size)
