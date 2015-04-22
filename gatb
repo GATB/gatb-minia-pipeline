@@ -160,7 +160,12 @@ def minia(k, min_abundance, prefix):
 
     min_abundance = max(min_abundance, 2) # fix for when kmergenie thinks min_abundance of 1 is a good idea
 
-    execute('minia/minia', ['-in', list_reads, '-kmer-size', k, '-abundance-min', min_abundance, '-out', prefix], memused=True)
+    params = ['-in', list_reads, '-kmer-size', k, '-abundance-min', min_abundance, '-out', prefix]
+
+    if k >= 128:
+        params += ['-debloom','original'] # fix for large k values
+
+    execute('minia/minia', , memused=True)
     contigs = prefix + ".contigs.fa"
     return contigs
 
