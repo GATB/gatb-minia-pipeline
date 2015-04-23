@@ -165,7 +165,7 @@ def minia(k, min_abundance, prefix):
     if k >= 128:
         params += ['-debloom','original'] # fix for large k values
 
-    execute('minia/minia', , memused=True)
+    execute('minia/minia', params, memused=True)
     contigs = prefix + ".contigs.fa"
     return contigs
 
