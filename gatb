@@ -29,6 +29,9 @@ Advanced parameters (optional):
     -t min_abundance                use this minimum abundance value
     --multik                        multi-k mode (experimental, not currently supported)
     --multik-meta                   multi-k mode for metagenomics (experimental, not currently supported)
+
+Production parameters:
+    -r                              restart mode: k-value where to restart the iterative loop (useful for interrupted jobs)
 """ % (sys.argv[0])
 
 paired_reads = []
@@ -39,6 +42,7 @@ k = 0
 min_abundance = 0
 multi_k_mode = False 
 metagenomics = False 
+k_restart=-1
 
 #scaffolding_method="superscaffolder"
 #scaffolding_method="sspace"
@@ -79,6 +83,8 @@ try:
             unpaired_reads = open(sys.argv[i+1]).read().splitlines()
         elif arg == "-o":
             prefix = sys.argv[i+1]
+        elif arg == "-r":
+            k_restart = int(sys.argv[i+1])
 
         # special cases: 0-parameters arguments, need for "skip=0", well one day i'll use getopt
         elif arg == "--multik":
@@ -328,6 +334,9 @@ def assemble_single_k():
 
 create_list_reads()
 
+if not metagenomics and not k_restart == -1:
+    sys.exit("Error: restart mode only implemented in metagenomics case...") 
+
 if not multi_k_mode:
     assemble_single_k()
 else:
@@ -338,6 +347,15 @@ else:
         cutoffs = dict([(21, 2), (41, 2), (61, 2), (91,2), (121,2), (151, 2)])
         genome_size=0
         print "Metagenomics mode: hardcoding multi-k values and cutoffs to",cutoffs
+        # restart mode
+        if not k_restart == -1:
+            print "*** restart mode"
+            sorted_keys=sorted(cutoffs.keys())
+            last_k_value_before_restart = sorted_keys[sorted_keys.index(k_restart)-1]
+            print "*** pipeline restart mode: k_restart=%d (last_k_value_before_restart=%d) *** " % (k_restart, last_k_value_before_restart)
+            restart_keys = [x for x in sorted(cutoffs.keys()) if x>=k_restart]
+            cutoffs = dict([(key,cutoffs[key]) for key in restart_keys])
+            print "restart cutoffs : ", cutoffs
     else:
         # get abundance cutoffs from kmergenie
         kmergenie(list_reads, one_pass=True)
@@ -351,7 +369,7 @@ else:
                 cutoffs[k] = 2
     step = 20 # maybe set that as parameter
     last_k_value = 0
-    previous_contigs = None
+    previous_contigs = None if k_restart == -1 else  prefix+"_k%d.contigs.fa"%last_k_value_before_restart
     for k in sorted(cutoffs.keys()):
         if k < last_k_value + step and not metagenomics:
             continue
