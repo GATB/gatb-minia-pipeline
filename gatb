@@ -344,7 +344,7 @@ else:
 
     if metagenomics:
         # set abundance cutoffs to 2, and fixed k values
-        cutoffs = dict([(21, 2), (41, 2), (61, 2), (91,2), (121,2), (151, 2)])
+        cutoffs = dict([(21, 2), (41, 2), (61, 2), (91,2), (121,2), (151, 2), (181, 2)])
         genome_size=0
         print "Metagenomics mode: hardcoding multi-k values and cutoffs to",cutoffs
         # restart mode
