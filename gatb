@@ -152,9 +152,10 @@ def create_list_reads(extra_reads = []):
 # ------------------------------
 # kmergenie
 
-from kmergenie.wrapper import kmergenie
-from kmergenie.wrapper import parse_kmergenie_results 
-from kmergenie.wrapper import all_k_values_fitted_or_not
+if not metagenomics:
+    from kmergenie.wrapper import kmergenie
+    from kmergenie.wrapper import parse_kmergenie_results 
+    from kmergenie.wrapper import all_k_values_fitted_or_not
 
 # ------------------------------
 # minia
