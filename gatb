@@ -348,8 +348,9 @@ if len(list_k_values) == 0:
         sys.exit("Reads are shorter than 21 base pairs? (%d bp at 90 percentile of read lengths over the first 1000 reads of each input file).\nNotify a developer if this estimation was wrong, or if your reads are really that short, please set the list of kmer lengths manually using the --kmer-sizes parameter" % max_k)
     # two implicit assumptions: do not make more than 20 rounds, and start at k=21 
     for i in xrange(20): 
-        if 21 + i*step <= max_k:
-            list_k_values += [21 + i*step]
+        k = 21 + i*step
+        if k <= max_k and k <= 256: #max supported in minia binary is 256
+            list_k_values += [k]
 
 if len(list_min_abundances) == 0:
     list_min_abundances = [2]*len(list_k_values)
