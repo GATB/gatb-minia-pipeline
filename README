@@ -6,29 +6,31 @@ Installation:
 
     1) Prerequisites: 
 
-        Python >= 2.7 with the following modules: 
-            mathstats (for BESST)
-            scipy (for BESST)
-            networkx (for BESST)
-            pysam (for BESST)
-            
-            To install all of them at once, run:
-               pip install --user mathstats pysam networkx scipy
-            Can't install scipy? get activestate python: http://www.activestate.com/activepython/downloads and type 'pypm install scipy'
+        Linux 64 bits (for Minia binary)
 
         bwa (for BESST)
-
-        seqtk (for BESST)
-
-        R (for KmerGenie)
+        Python >= 2.7 with the following modules (for BESST): 
+            mathstats
+            scipy 
+            networkx 
+            pysam
+            pyfasta (for gatb script)
+            
+            To install all of them at once, run:
+               pip install --user mathstats pysam networkx scipy pyfasta
+            Can't install scipy? get activestate python: http://www.activestate.com/activepython/downloads and type 'pypm install scipy'
 
     2) Type `make`
 
 usage:
 
-    ./gatb -p read_1.fastq read_2.fastq [..]
+     ./gatb -1 read_1.fastq -2 read_2.fastq
+ or
+     ./gatb --12 interleaved_reads.fastq
+ or
+     ./gatb -s single_reads.fastq
 
-Many more input options are available. Type `./gatb` for extended usage.
+More input options are available. Type `./gatb` for extended usage.
 Type `make test` to launch a small test.
 
 FAQ

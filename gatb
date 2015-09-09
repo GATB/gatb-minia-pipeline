@@ -12,88 +12,90 @@ prefix="assembly"
 doc = """GATB Pipeline
 
 Usage:
+
     %s [arguments]
 
 Reads (mandatory, specify at least one of these parameters):
-    -p interleaved_paired_reads     interleaved FASTA or FASTQ paired reads
-    -p left_mates right_mates       two FASTA or FASTQ paired reads (non-interleaved)
-    -u unpaired_reads               unpaired FASTA or FASTQ reads
-    -l list_of_unpaired_reads       one file name per line
-    -m interleaved_mate_pairs       same input as paired reads (-p) but for mate pairs
-    -m left_mates right_mates       same input as paired reads (-p) but for mate pairs
+
+    --12 interleaved_paired_reads   interleaved paired reads
+    -1 left_mates                   non-interleaved paired reads
+    -2 right_mates                  
+    -s unpaired_reads               single reads
+    -l list_of_unpaired_reads       list of single reads, one file name per line
+    --mp-12 interleaved_mate_pairs  same input as paired reads (--12) but for mate pairs
+    --mp-1 left_mates 
+    --mp-2 right_mates              same input as paired reads (-1 -2) but for mate pairs
 
 Advanced parameters (optional):
+
     -o prefix                       prefix of the output files (default: assembly)
     -c contigs_file                 only perform scaffolding+gapfilling from these contigs
-    -k kmer_size                    use this k-mer size (skips kmergenie if -k, -t and -g are specified)
-    -t min_abundance                use this minimum abundance value
-    --multik                        multi-k mode (experimental, not currently supported)
-    --multik-meta                   multi-k mode for metagenomics (experimental, not currently supported)
+    --step step                     increments of k values (default: 20)
+    --kmer-sizes list_of_ints       use this comma-separated list of k-mer sizes (default: 21,21+step,21+2*step,..)
+    --abundance-mins list_if_ints   use this list of low abundance thresholds (default: 2,2,2,..)
+    --restart-from integer k        value where to restart the iterative loop (useful for interrupted jobs)
 
-Production parameters:
-    -r                              restart mode: k-value where to restart the iterative loop (useful for interrupted jobs)
 """ % (sys.argv[0])
 
 paired_reads = []
 mate_pairs = []
 unpaired_reads = []
 contigs = None
-k = 0
-min_abundance = 0
-multi_k_mode = False 
-metagenomics = False 
-k_restart=-1
+list_k_values = []
+list_min_abundances = []
+k_restart = -1
+step = 20
 
 #scaffolding_method="superscaffolder"
 #scaffolding_method="sspace"
 scaffolding_method="besst"
 
+# this used to be false, now it's default
+multi_k_mode = True
+metagenomics = True
+
 try:
-    skip = 1 # to handle paired-end case (-p XX XX)
+    #TODO: now that it has a clean cmdline arguments structure, use docopt or something
+    skip = 1 # this was formerly to handle paired-end case (-p XX XX) but it's not needed anymore now
+    library = ""
     for i,arg in enumerate(sys.argv):
         if skip > 0:
             skip -= 1
             continue
         skip = 1
-        if arg == "-p" or arg == "-m":
-           if i+2 >= len(sys.argv) or sys.argv[i+2][0] == "-":
-               # interleaved case
-               library = sys.argv[i+1]
-               has_space = ' ' in sys.argv[i+1]
-           else:
-               # non-interleaved case
-               library = sys.argv[i+1] + " " + sys.argv[i+2]
-               skip = 2
-               has_space = ' ' in sys.argv[i+1] or ' ' in sys.argv[i+2]
-           if has_space:
-               print("Space character isn't allowed in file names")
-               exit(0)
-           paired_reads.append(library)
-           if arg == "-m":
-               mate_pairs.append(library)
-        elif arg == "-u":
+        if arg == "--12" or arg == "--mp-12":
+           library = sys.argv[i+1]
+           paired_reads.append(library) # list of all pairendd/matepairs reads
+           if arg == "--mp-12":
+               mate_pairs.append(library) # remember which are matepairs
+        elif arg == "-1" or arg == "--mp-1":
+           library = sys.argv[i+1]
+        elif arg == "-2" or arg == "--mp-2":
+           if library == "":
+               exit("missing -1 parameter")
+           library += + " " + sys.argv[i+1]
+           paired_reads.append(library) # list of all pairendd/matepairs reads
+           if arg == "--mp-2":
+               mate_pairs.append(library) # remember which are matepairs
+           library = ""
+        elif arg == "-s":
            unpaired_reads.append(sys.argv[i+1])
         elif arg == "-c":
            contigs = sys.argv[i+1]
-        elif arg == "-k":
-           k = int(sys.argv[i+1])
-        elif arg == "-t":
-           min_abundance = int(sys.argv[i+1])
+        elif arg == "--kmer-sizes":
+           list_k_values = int(sys.argv[i+1].split(','))
+        elif arg == "--abundance-mins":
+           list_min_abundances = int(sys.argv[i+1].split(','))
         elif arg == "-l":
             unpaired_reads = open(sys.argv[i+1]).read().splitlines()
         elif arg == "-o":
             prefix = sys.argv[i+1]
-        elif arg == "-r":
+        elif arg == "--restart-from":
             k_restart = int(sys.argv[i+1])
+        elif arg == "--step":
+            step = int(sys.argv[i+1])
 
         # special cases: 0-parameters arguments, need for "skip=0", well one day i'll use getopt
-        elif arg == "--multik":
-           multi_k_mode = True
-           skip = 0
-        elif arg == "--multik-meta":
-           multi_k_mode = True
-           metagenomics = True
-           skip = 0
         elif arg == "--sspace":  #hidden parameter, for now
             scaffolding_method = "sspace" 
             skip = 0
@@ -109,10 +111,6 @@ except:
     traceback.print_exc()
     print doc
     sys.exit(1)
-
-if k != 0 and (min_abundance == 0):
-    sys.exit("If you specify k, please specify min_abundance")
-
 
 DIR = os.path.dirname(os.path.realpath(__file__))
 
@@ -150,22 +148,12 @@ def create_list_reads(extra_reads = []):
                 f.write(filename + "\n")
 
 # ------------------------------
-# kmergenie
-
-if not metagenomics:
-    from kmergenie.wrapper import kmergenie
-    from kmergenie.wrapper import parse_kmergenie_results 
-    from kmergenie.wrapper import all_k_values_fitted_or_not
-
-# ------------------------------
 # minia
 
 def minia(k, min_abundance, prefix):
     global contigs
     if k == 0:
-        exit('cannot run minia with k=0 (did kmergenie fail to detect best k?)')
-
-    min_abundance = max(min_abundance, 2) # fix for when kmergenie thinks min_abundance of 1 is a good idea
+        exit('cannot execute minia with k=0')
 
     params = ['-in', list_reads, '-kmer-size', k, '-abundance-min', min_abundance, '-out', prefix]
 
@@ -255,7 +243,7 @@ def sspace(contigs, paired_reads, output_filename=""):
 # besst wrapper
 
 def run_besst_mapping(i, contigs, library):
-    # besst needs de-interleaved input
+    # besst needs de-interleaved input, for the mapping phase (else it thinks they're single end)
     if ' ' not in library:
         library = possibly_gunzip(library, i) # until sga-deinterleave supports gzipped input, no other choice but to gunzip
         print "Splitting interleaved file:", library
@@ -272,7 +260,7 @@ def run_besst_mapping(i, contigs, library):
     execute('BESST/scripts/reads_to_ctg_map.py', ["--nomem", "--threads", nb_cpus] + paired_reads + [contigs, output_bam], interpreter="python")
     return output_bam + ".bam"
 
-# besst needs python >= 2.7
+# besst needs python >= 2.7, see if we have it installed on the system somewhere
 def check_for_python_27():
     for i, python27 in enumerate(['python', 'python2.7', 'python-2.7']):
         try:
@@ -326,63 +314,72 @@ def scaffold(contigs, paired_reads):
 # ------------------------------
 # main pipeline
 
-def assemble_single_k():
-    global k, min_abundance, genome_size, list_reads, contigs, prefix
-    if not contigs:
-        if not k or not min_abundance:
-            genome_size, k, min_abundance = kmergenie(list_reads, one_pass=True)
-        contigs = minia(k, min_abundance, prefix=prefix)
-
 create_list_reads()
 
-if not metagenomics and not k_restart == -1:
-    sys.exit("Error: restart mode only implemented in metagenomics case...") 
+def get_read_length(list_reads):
+    read_lengths = []
+    for reads_file in list_reads:
+        try:
+            import gzip
+            fp = gzip.open(reads_file)
+        except:
+            fp = open(reads_file)
+        # read a subsample of 1000 reads (if fasta, also reads one every 2 reads)
+        line_count = 0
+        for line in fp:
+            line = line.strip()
+            if line_count > 1000:
+                break
+            if line_count % 4 != 1:
+                line_count += 1
+                continue
+            line_count += 1
+            read_lengths += [len(line)]
+    import numpy 
+    estimated_max_read_length = numpy.percentile(read_lengths,90)
+    print "Setting maximum kmer length to:", estimated_max_read_length, "bp" # based on the 90 percentile of 1000 first reads lengths of each input file
+    return estimated_max_read_length
+            
 
-if not multi_k_mode:
-    assemble_single_k()
+if len(list_k_values) == 0:
+    max_k = get_read_length(paired_reads + unpaired_reads) #TODO: modify bloocoo so that it gives a read length histogram, rather than using this hacky procedure
+    if max_k <= 21:
+        sys.exit("Reads are shorter than 21 base pairs? (%d bp at 90 percentile of read lengths over the first 1000 reads of each input file).\nNotify a developer if this estimation was wrong, or if your reads are really that short, please set the list of kmer lengths manually using the --kmer-sizes parameter" % max_k)
+    # two implicit assumptions: do not make more than 20 rounds, and start at k=21 
+    for i in xrange(20): 
+        if 21 + i*step <= max_k:
+            list_k_values += [21 + i*step]
+
+if len(list_min_abundances) == 0:
+    list_min_abundances = [2]*len(list_k_values)
+
+cutoffs = sorted(zip(list_k_values, list_min_abundances))
+
+if k_restart == -1:
+    print "Multi-k values and cutoffs: ",cutoffs
 else:
-    # multi-k assembly algorithms following the idea of idba/spades to reconstruct graph with larger k and reinject previous contigs
+    print "*** restart mode"
+    last_k_value_before_restart = dict(cutoffs)[cutoffs.index(k_restart)-1]
+    print "*** pipeline restart mode: k_restart=%d (last_k_value_before_restart=%d) *** " % (k_restart, last_k_value_before_restart)
+    restart_keys = [x for x in dict(cutoffs).keys() if x>=k_restart]
+    cutoffs = sorted([(key,dict(cutoffs)[key]) for key in restart_keys])
+    print "Restarting GATB-pipeline with cutoffs ", cutoffs
+    print "This assumes that an assembly with k =", last_k_value_before_restart, "exists."
 
-    if metagenomics:
-        # set abundance cutoffs to 2, and fixed k values
-        cutoffs = dict([(21, 2), (41, 2), (61, 2), (91,2), (121,2), (151, 2), (181, 2)])
-        genome_size=0
-        print "Metagenomics mode: hardcoding multi-k values and cutoffs to",cutoffs
-        # restart mode
-        if not k_restart == -1:
-            print "*** restart mode"
-            sorted_keys=sorted(cutoffs.keys())
-            last_k_value_before_restart = sorted_keys[sorted_keys.index(k_restart)-1]
-            print "*** pipeline restart mode: k_restart=%d (last_k_value_before_restart=%d) *** " % (k_restart, last_k_value_before_restart)
-            restart_keys = [x for x in sorted(cutoffs.keys()) if x>=k_restart]
-            cutoffs = dict([(key,cutoffs[key]) for key in restart_keys])
-            print "restart cutoffs : ", cutoffs
-    else:
-        # get abundance cutoffs from kmergenie
-        kmergenie(list_reads, one_pass=True)
-        results = parse_kmergenie_results()
-        cutoffs = dict([(k,min_abundance) for (genome_size, k, min_abundance) in results] )
-        genome_size = max(results)[0]
-        # add cutoff=2 for larger k values for which there was no fit
-        # disabled for my tests now
-        for k in all_k_values_fitted_or_not():
-            if k not in cutoffs:
-                cutoffs[k] = 2
-    step = 20 # maybe set that as parameter
-    last_k_value = 0
-    previous_contigs = None if k_restart == -1 else  prefix+"_k%d.contigs.fa"%last_k_value_before_restart
-    for k in sorted(cutoffs.keys()):
-        if k < last_k_value + step and not metagenomics:
-            continue
-        min_abundance = cutoffs[k]
-        print "Multi-k GATB-Pipeline, Minia assembling at k=%d min_abundance=%d genome_size=%d" % (k, min_abundance, genome_size)
-        extra_reads = [previous_contigs]*(min_abundance+1) if previous_contigs is not None else []
-        create_list_reads(extra_reads)
-        multi_k_prefix = prefix + "_k%d" % k
-        previous_contigs = minia(k, min_abundance, prefix=multi_k_prefix)
-        last_k_value = k
-    k = last_k_value # hint for besst
-    print "Finished Multi-k GATB-Pipeline with k=%d" % last_k_value
+last_k_value = 0
+previous_contigs = None if k_restart == -1 else  prefix+"_k%d.contigs.fa"%last_k_value_before_restart
+for k in dict(cutoffs).keys():
+    if k < last_k_value + step and not metagenomics:
+        continue
+    min_abundance = dict(cutoffs)[k]
+    print "Multi-k GATB-Pipeline, Minia assembling at k=%d min_abundance=%d" % (k, min_abundance)
+    extra_reads = [previous_contigs]*(min_abundance+1) if previous_contigs is not None else []
+    create_list_reads(extra_reads)
+    multi_k_prefix = prefix + "_k%d" % k
+    previous_contigs = minia(k, min_abundance, prefix=multi_k_prefix)
+    last_k_value = k
+k = last_k_value # hint for besst
+print "Finished Multi-k GATB-Pipeline at k=%d" % last_k_value
 
 # scaffolding all libraries
 if len(paired_reads) > 0:
