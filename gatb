@@ -369,7 +369,7 @@ else:
 
 last_k_value = 0
 previous_contigs = None if k_restart == -1 else  prefix+"_k%d.contigs.fa"%last_k_value_before_restart
-for k in dict(cutoffs).keys():
+for k in sorted(dict(cutoffs).keys()):
     if k < last_k_value + step and not metagenomics:
         continue
     min_abundance = dict(cutoffs)[k]
