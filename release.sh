@@ -2,8 +2,14 @@
 
 soft=gatb-pipeline
 
-#make a version number
-version="1.`git rev-list HEAD | wc -l`"
+if [[ "$1" == "--version" ]] #  version override
+then
+    version=$2
+    version_override="--override"
+else
+    #make a version number
+    version="1.`git rev-list HEAD | wc -l`"
+fi
 echo "version: $version"
 
 rm -Rf $soft-$version/
@@ -70,8 +76,8 @@ CPACK_INFO_SRC="${CMAKE_PROJECT_NAME} src ${PROJECT_NAME} ${CPACK_PACKAGE_VERSIO
 
 # We get the versions.txt file from the server
 echo "calling delivery.sh"
-dependencies/delivery.sh "BIN_OTHER" ${PROJECT_NAME} ${CPACK_PACKAGE_VERSION} ${CPACK_UPLOAD_VERSIONS} ${CPACK_VERSIONS_FILENAME}  "${CPACK_INFO_BIN}"  ${CPACK_URI_BIN}   ${CPACK_UPLOAD_URI_BIN}
-dependencies/delivery.sh "SRC_OTHER" ${PROJECT_NAME} ${CPACK_PACKAGE_VERSION} ${CPACK_UPLOAD_VERSIONS} ${CPACK_VERSIONS_FILENAME}  "${CPACK_INFO_SRC}"  ${CPACK_URI_SRC}   ${CPACK_UPLOAD_URI_SRC}
+dependencies/delivery.sh "BIN_OTHER" ${PROJECT_NAME} ${CPACK_PACKAGE_VERSION} ${CPACK_UPLOAD_VERSIONS} ${CPACK_VERSIONS_FILENAME}  "${CPACK_INFO_BIN}"  ${CPACK_URI_BIN}   ${CPACK_UPLOAD_URI_BIN} $version_override
+dependencies/delivery.sh "SRC_OTHER" ${PROJECT_NAME} ${CPACK_PACKAGE_VERSION} ${CPACK_UPLOAD_VERSIONS} ${CPACK_VERSIONS_FILENAME}  "${CPACK_INFO_SRC}"  ${CPACK_URI_SRC}   ${CPACK_UPLOAD_URI_SRC} $version_override
 
 # some cleanup
 rm -f versions.txt
