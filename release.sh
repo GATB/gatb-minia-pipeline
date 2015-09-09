@@ -13,14 +13,6 @@ mkdir $soft-$version
 git log --pretty=format:'%cd: %s' --date=short > CHANGELOG
 echo "" >> CHANGELOG # it was missing a \n
 
-# so, I did the following system:
-# dependencies/ holds the release packages of kmergenie/minia
-# this script will extract them to the correct dirs
-
-# extract kmergenie release to kmergenie/
-tar xf dependencies/kmergenie* -C $soft-$version/
-mv $soft-$version/kmergenie*/ $soft-$version/kmergenie
-
 # minia binary is provided for now
 cp -R minia $soft-$version/
 # extract minia release to minia/
