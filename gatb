@@ -83,9 +83,9 @@ try:
         elif arg == "-c":
            contigs = sys.argv[i+1]
         elif arg == "--kmer-sizes":
-           list_k_values = int(sys.argv[i+1].split(','))
+           list_k_values = map(int,sys.argv[i+1].split(','))
         elif arg == "--abundance-mins":
-           list_min_abundances = int(sys.argv[i+1].split(','))
+           list_min_abundances = map(int,sys.argv[i+1].split(','))
         elif arg == "-l":
             unpaired_reads = open(sys.argv[i+1]).read().splitlines()
         elif arg == "-o":
