@@ -322,6 +322,7 @@ def get_read_length(list_reads):
         try:
             import gzip
             fp = gzip.open(reads_file)
+            ln = h.read(2) # read arbitrary bytes to check if gzipped 
         except:
             fp = open(reads_file)
         # read a subsample of 1000 reads (if fasta, also reads one every 2 reads)
