@@ -72,7 +72,7 @@ try:
         elif arg == "-2" or arg == "--mp-2":
            if library == "":
                exit("missing -1 parameter")
-           library += + " " + sys.argv[i+1]
+           library += " " + sys.argv[i+1]
            paired_reads.append(library) # list of all pairendd/matepairs reads
            if arg == "--mp-2":
                mate_pairs.append(library) # remember which are matepairs
@@ -317,24 +317,29 @@ create_list_reads()
 
 def get_read_length(list_reads):
     read_lengths = []
-    for reads_file in list_reads:
-        try:
-            import gzip
-            fp = gzip.open(reads_file)
-            ln = h.read(2) # read arbitrary bytes to check if gzipped 
-        except:
-            fp = open(reads_file)
-        # read a subsample of 1000 reads (if fasta, also reads one every 2 reads)
-        line_count = 0
-        for line in fp:
-            line = line.strip()
-            if line_count > 1000:
-                break
-            if line_count % 4 != 1:
+    for library in list_reads:
+        if ' ' in library:
+            reads_list = library.split(' ')
+        else:
+            reads_list = [library]
+        for reads_file in reads_list:
+            try:
+                import gzip
+                fp = gzip.open(reads_file)
+                ln = fp.read(2) # read arbitrary bytes to check if gzipped 
+            except Exception,e:
+                fp = open(reads_file)
+            # read a subsample of 1000 reads (if fasta, also reads one every 2 reads)
+            line_count = 0
+            for line in fp:
+                line = line.strip()
+                if line_count > 1000:
+                    break
+                if line_count % 4 != 1:
+                    line_count += 1
+                    continue
                 line_count += 1
-                continue
-            line_count += 1
-            read_lengths += [len(line)]
+                read_lengths += [len(line)]
     import numpy 
     estimated_max_read_length = numpy.percentile(read_lengths,90)
     print "Setting maximum kmer length to:", estimated_max_read_length, "bp" # based on the 90 percentile of 1000 first reads lengths of each input file
