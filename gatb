@@ -17,23 +17,22 @@ Usage:
 
 Reads (mandatory, specify at least one of these parameters):
 
-    --12 interleaved_paired_reads   interleaved paired reads
-    -1 left_mates                   non-interleaved paired reads
-    -2 right_mates                  
-    -s unpaired_reads               single reads
-    -l list_of_unpaired_reads       list of single reads, one file name per line
-    --mp-12 interleaved_mate_pairs  same input as paired reads (--12) but for mate pairs
-    --mp-1 left_mates 
-    --mp-2 right_mates              same input as paired reads (-1 -2) but for mate pairs
-
+    --12 <filename>                 interleaved paired reads
+    -1   <filename>                 non-interleaved paired reads (forward mates)
+    -2   <filename>                                            (reverse mates)
+    -s   <filename>                 single reads
+    -l   <file_of_filenames>        list of single reads, one file name per line
+    --mp-12  <filename>             same input as paired reads (--12) but for mate pairs
+    --mp-1   <filename>             same input as paired reads (-1 -2) but for mate pairs
+    --mp-2   <filename>              
 Advanced parameters (optional):
 
-    -o prefix                       prefix of the output files (default: assembly)
-    -c contigs_file                 only perform scaffolding+gapfilling from these contigs
-    --step step                     increments of k values (default: 20)
-    --kmer-sizes list_of_ints       use this comma-separated list of k-mer sizes (default: 21,21+step,21+2*step,..)
-    --abundance-mins list_if_ints   use this list of low abundance thresholds (default: 2,2,2,..)
-    --restart-from integer k        value where to restart the iterative loop (useful for interrupted jobs)
+    -o <string>                     prefix of the output files (default: assembly)
+    -c <filename>                   filename of contigs, will only perform scaffolding+gapfilling
+    --step <step>                   step size to control increments of k values (default: 20)
+    --kmer-sizes <k1>,<k2>,..       comma-separated list of k-mer sizes (default: 21,21+step,21+2*step,..)
+    --abundance-mins <t1>,<t2>,..   list of low abundance thresholds (default: 2,2,2,..)
+    --restart-from <k>              k value where to restart the multi-k process (useful for interrupted jobs)
 
 """ % (sys.argv[0])
 
