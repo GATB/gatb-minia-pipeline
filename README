@@ -9,15 +9,16 @@ Installation:
         Linux 64 bits (for Minia binary)
 
         bwa (for BESST)
+
         Python >= 2.7 with the following modules (for BESST): 
             mathstats
             scipy 
             networkx 
             pysam
-            
+
             To install all of them at once, run:
+
                pip install --user mathstats pysam networkx scipy pyfasta
-            Can't install scipy? get activestate python: http://www.activestate.com/activepython/downloads and type 'pypm install scipy'
 
     2) Type `make`
 
@@ -35,8 +36,7 @@ Type `make test` to launch a small test.
 FAQ
 ---
 
-If you get the following error during the pipeline (BESST): "'NoneType' object has no attribute 'actualSolve'", then you need to type "sudo pulptest" (root required).
-
+Can't install scipy? get activestate python: http://www.activestate.com/activepython/downloads and type 'pypm install scipy'
 
 Support
 -------
