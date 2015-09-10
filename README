@@ -14,7 +14,6 @@ Installation:
             scipy 
             networkx 
             pysam
-            pyfasta (for gatb script)
             
             To install all of them at once, run:
                pip install --user mathstats pysam networkx scipy pyfasta
