@@ -329,17 +329,15 @@ def get_read_length(list_reads):
                 ln = fp.read(2) # read arbitrary bytes to check if gzipped 
             except Exception,e:
                 fp = open(reads_file)
-            # read a subsample of 1000 reads (if fasta, also reads one every 2 reads)
-            line_count = 0
-            for line in fp:
-                line = line.strip()
-                if line_count > 1000:
+            # read the 1000 first reads
+            from tools.readfq import readfq
+            read_count = 0
+            for name, seq, qual in readfq(fp):
+                read_count += 1
+                read_lengths += [len(seq)]
+                if read_count > 1000:
                     break
-                if line_count % 4 != 1:
-                    line_count += 1
-                    continue
-                line_count += 1
-                read_lengths += [len(line)]
+
     import numpy 
     estimated_max_read_length = numpy.percentile(read_lengths,90)
     print "Setting maximum kmer length to:", estimated_max_read_length, "bp" # based on the 90 percentile of 1000 first reads lengths of each input file
