@@ -33,7 +33,7 @@ Advanced parameters (optional):
     --kmer-sizes <k1>,<k2>,..       comma-separated list of k-mer sizes (default: 21,21+step,21+2*step,..)
     --abundance-mins <t1>,<t2>,..   list of low abundance thresholds (default: 2,2,2,..)
     --restart-from <k>              k value where to restart the multi-k process (useful for interrupted jobs)
-
+    --max-memory <int>              go faster by using more memory (in MB) (default: as much as Minia needs)
 """ % (sys.argv[0])
 
 paired_reads = []
@@ -44,6 +44,7 @@ list_k_values = []
 list_min_abundances = []
 k_restart = -1
 step = 20
+max_memory = - 1
 
 #scaffolding_method="superscaffolder"
 #scaffolding_method="sspace"
@@ -93,6 +94,8 @@ try:
             k_restart = int(sys.argv[i+1])
         elif arg == "--step":
             step = int(sys.argv[i+1])
+        elif arg == "--max-memory":
+            max_memory = int(sys.argv[i+1])
 
         # special cases: 0-parameters arguments, need for "skip=0", well one day i'll use getopt
         elif arg == "--sspace":  #hidden parameter, for now
@@ -155,6 +158,9 @@ def minia(k, min_abundance, prefix):
         exit('cannot execute minia with k=0')
 
     params = ['-in', list_reads, '-kmer-size', k, '-abundance-min', min_abundance, '-out', prefix]
+    
+    if max_memory != -1:
+        params += ['-max-memory',max_memory]
 
     if k >= 128:
         params += ['-debloom','original'] # fix for large k values
