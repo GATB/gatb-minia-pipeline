@@ -334,7 +334,8 @@ def get_read_length(list_reads):
                 fp = gzip.open(reads_file)
                 ln = fp.read(2) # read arbitrary bytes to check if gzipped 
             except Exception,e:
-                fp = open(reads_file)
+                fp.close()
+                fp = open(reads_file)  
             # read the 1000 first reads
             from tools.readfq import readfq
             read_count = 0
@@ -343,9 +344,15 @@ def get_read_length(list_reads):
                 read_lengths += [len(seq)]
                 if read_count > 1000:
                     break
+            fp.close()
 
-    import numpy 
-    estimated_max_read_length = numpy.percentile(read_lengths,90)
+    # so, on CEA cluster, loading numpy forced minia to run on a single thread. so let's not use numpy here. days of debugging to get that.
+    import math
+    def percentile(data, percentile):
+        size = len(data)
+        return sorted(data)[int(math.ceil((size * percentile) / 100)) - 1]
+
+    estimated_max_read_length = percentile(read_lengths,90)
     print "Setting maximum kmer length to:", estimated_max_read_length, "bp" # based on the 90 percentile of 1000 first reads lengths of each input file
     return estimated_max_read_length
             
