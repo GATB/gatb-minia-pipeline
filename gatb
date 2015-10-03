@@ -369,10 +369,10 @@ if k_restart == -1:
     print "Multi-k values and cutoffs: ",cutoffs
 else:
     print "*** restart mode"
-    last_k_value_before_restart = dict(cutoffs)[cutoffs.index(k_restart)-1]
+    cutoffs_keys = sorted([x for x in dict(cutoffs).keys()])
+    last_k_value_before_restart = cutoffs_keys[cutoffs_keys.index(k_restart)-1]
     print "*** pipeline restart mode: k_restart=%d (last_k_value_before_restart=%d) *** " % (k_restart, last_k_value_before_restart)
-    restart_keys = [x for x in dict(cutoffs).keys() if x>=k_restart]
-    cutoffs = sorted([(key,dict(cutoffs)[key]) for key in restart_keys])
+    cutoffs = sorted([(key,dict(cutoffs)[key]) for key in cutoffs_keys if key >= k_restart])
     print "Restarting GATB-pipeline with cutoffs ", cutoffs
     print "This assumes that an assembly with k =", last_k_value_before_restart, "exists."
 
