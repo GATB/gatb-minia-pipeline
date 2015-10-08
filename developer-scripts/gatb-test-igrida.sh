@@ -14,10 +14,31 @@ echo "OAR_JOB_ID      : $OAR_JOB_ID"
 echo "OAR_ARRAY_ID    : $OAR_ARRAY_ID"
 echo "OAR_ARRAY_INDEX : $OAR_ARRAY_INDEX"
 
-RUNDIR=/temp_dd/igrida-fs1/cdeltel/bioinfo/gatb-pipeline-runs/test/run
+FRONTEND=igrida-oar-frontend
+TO=charles.deltel
+ssh $FRONTEND mail $TO@inria.fr -s start_scm_$OAR_JOB_ID << eom
+OAR_JOB_ID: $OAR_JOB_ID - hostname: `hostname`
+eom
+
+TEMP_DD=/temp_dd/igrida-fs1/cdeltel
+RUNDIR=$TEMP_DD/bioinfo/gatb-pipeline-runs/test/run
+LOCKFILE=$TEMP_DD/bioinfo/.gatb-test-lockfile   # if exists, only 1 line with $OAR_JOB_ID
+
+# if a similar job is already running, we must kill it before
+echo
+if [ -f $LOCKFILE ]; then
+   ssh $FRONTEND oardel `cat $LOCKFILE`
+   while true; do 
+      oarstat -sj `cat $LOCKFILE` |grep -E 'Terminated|Error' >/dev/null
+      [ $? -eq 0 ] && { break; } || { printf "."; sleep 2; }
+   done
+   rm -f $LOCKFILE
+fi
+echo
+
+echo $OAR_JOB_ID > $LOCKFILE
 
 [ -d $RUNDIR ] || { mkdir $RUNDIR; } && { rm -rf $RUNDIR/*; }
-
 
 GITDIR=~/bioinfo/anr-gatb/gatb-pipeline/git-gatb-pipeline/
 
@@ -64,3 +85,9 @@ time $MEMUSED $GATB_SCRIPT \
 	-1 $DATA_IGRIDA/frag_1.fastq 			-2 $DATA_IGRIDA/frag_2.fastq  \
 	-1 $DATA_IGRIDA/shortjump_1.fastq  		-2 $DATA_IGRIDA/shortjump_2.fastq
 
+ssh igrida-oar-frontend mail $TO@inria.fr -s end_scm_$OAR_JOB_ID << eom
+OAR_JOB_ID: $OAR_JOB_ID - hostname: `hostname`
+
+Get more details with:
+oarstat -fj $OAR_JOB_ID
+eom
