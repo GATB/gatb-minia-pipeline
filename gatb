@@ -53,6 +53,7 @@ scaffolding_method="besst"
 # this used to be false, now it's default
 multi_k_mode = True
 metagenomics = True
+use_bloocoo_preprocessing = True
 
 try:
     #TODO: now that it has a clean cmdline arguments structure, use docopt or something
@@ -140,10 +141,17 @@ def execute(program, cmdline=[], interpreter=None, stdout=None, memused=False):
 list_reads = prefix + ".list_reads"
 final_assembly = prefix + ".fasta"
 
-def create_list_reads(extra_reads = []):
+def create_list_reads(extra_reads = [], append = False):
     # create of flat text file with all reads
-    with open(list_reads,"w") as f:
-        for read in paired_reads + unpaired_reads + extra_reads:
+    if append == True:
+        local_list = extra_reads
+        open_mode = "a"
+    else:
+        local_list = paired_reads + unpaired_reads + extra_reads
+        open_mode = "w"
+
+    with open(list_reads, open_mode) as f:
+        for read in local_list:
             for filename in read.strip().split():
                 if not os.path.exists(filename):
                     exit("Read file %s does not exist" % filename)
@@ -168,6 +176,25 @@ def minia(k, min_abundance, prefix):
     execute('minia/minia', params, memused=True)
     contigs = prefix + ".contigs.fa"
     return contigs
+
+# ------------------------------
+# wrapper for bloocoo
+
+def bloocoo(output_file_prefix, threshold=2, kmer_size=31):
+
+    # bloocoo command line arguments
+    corrected_fasta = output_file_prefix + ".corrected_with_bloocoo.fa"
+    params = ['-file', list_reads, '-out', corrected_fasta, '-abundance-min', threshold, 
+              '-kmer-size', kmer_size, '-slow', '-high-precision']
+
+    # call bloocoo
+    execute('bloocoo/Bloocoo', params)
+
+    # return a text file with the name of the bloocoo corrected data file
+    list_reads_with_bloocoo_corrections = output_file_prefix + "_corrected_with_bloocoo.list_reads"
+    with open(list_reads_with_bloocoo_corrections,"w") as f:
+        f.write(corrected_fasta + "\n")
+    return list_reads_with_bloocoo_corrections
 
 # ------------------------------
 # superscaffolder
@@ -315,11 +342,8 @@ def scaffold(contigs, paired_reads):
             orientations += [ 'rf' if paired_read in mate_pairs else 'fr' ]
         besst(contigs,bam_files, orientations)
 
-
 # ------------------------------
-# main pipeline
-
-create_list_reads()
+# auxiliary function
 
 def get_read_length(list_reads):
     read_lengths = []
@@ -355,7 +379,20 @@ def get_read_length(list_reads):
     estimated_max_read_length = percentile(read_lengths,90)
     print "Setting maximum kmer length to:", estimated_max_read_length, "bp" # based on the 90 percentile of 1000 first reads lengths of each input file
     return estimated_max_read_length
-            
+
+# ------------------------------
+# main pipeline
+
+create_list_reads()
+
+if use_bloocoo_preprocessing == True:
+
+    # call bloocoo
+    list_reads_corrected = bloocoo(output_file_prefix=prefix)
+
+    # now list_reads contains only the bloocoo output filename
+    os.rename(list_reads_corrected,list_reads)
+
 
 if len(list_k_values) == 0:
     max_k = get_read_length(paired_reads + unpaired_reads) #TODO: modify bloocoo so that it gives a read length histogram, rather than using this hacky procedure
@@ -391,7 +428,7 @@ for k in sorted(dict(cutoffs).keys()):
     min_abundance = dict(cutoffs)[k]
     print "Multi-k GATB-Pipeline, Minia assembling at k=%d min_abundance=%d" % (k, min_abundance)
     extra_reads = [previous_contigs]*(min_abundance+1) if previous_contigs is not None else []
-    create_list_reads(extra_reads)
+    create_list_reads(extra_reads, append=True)
     multi_k_prefix = prefix + "_k%d" % k
     previous_contigs = minia(k, min_abundance, prefix=multi_k_prefix)
     last_k_value = k
