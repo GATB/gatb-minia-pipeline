@@ -6,6 +6,12 @@
 #OAR -O /temp_dd/igrida-fs1/cdeltel/bioinfo/gatb-pipeline-runs/test/outjobs/run.%jobid%.out
 #OAR -E /temp_dd/igrida-fs1/cdeltel/bioinfo/gatb-pipeline-runs/test/outjobs/run.%jobid%.out
 
+## snippet for manually testing Bloocoo on the dataset used in this script
+## oarsub -I -l /nodes=1,walltime=5 -p "cluster='bermuda'"
+## cd /temp_dd/igrida-fs1/$USER/bioinfo/gatb-pipeline-runs/test/run
+## BLOOCOO=/udd/cdeltel/bioinfo/anr-gatb/gatb-pipeline/git-gatb-pipeline/bloocoo/Bloocoo
+## $BLOOCOO -file assembly.list_reads -out tmp.x -abundance-min 2 -kmer-size 31 -nb-cores 8 -slow -high-precision
+
 # =================== job informations =========================================
 echo "hostname        : " `hostname`
 echo "TODAY           : $TODAY"
@@ -29,7 +35,7 @@ echo
 if [ -f $LOCKFILE ]; then
    ssh $FRONTEND oardel `cat $LOCKFILE`
    while true; do 
-      oarstat -sj `cat $LOCKFILE` |grep -E 'Terminated|Error' >/dev/null
+      ssh $FRONTEND oarstat -sj `cat $LOCKFILE` |grep -E 'Terminated|Error' >/dev/null
       [ $? -eq 0 ] && { break; } || { printf "."; sleep 2; }
    done
    rm -f $LOCKFILE
@@ -85,7 +91,7 @@ time $MEMUSED $GATB_SCRIPT \
 	-1 $DATA_IGRIDA/frag_1.fastq 			-2 $DATA_IGRIDA/frag_2.fastq  \
 	-1 $DATA_IGRIDA/shortjump_1.fastq  		-2 $DATA_IGRIDA/shortjump_2.fastq
 
-ssh igrida-oar-frontend mail $TO@inria.fr -s end_scm_$OAR_JOB_ID << eom
+ssh $FRONTEND mail $TO@inria.fr -s end_scm_$OAR_JOB_ID << eom
 OAR_JOB_ID: $OAR_JOB_ID - hostname: `hostname`
 
 Get more details with:
