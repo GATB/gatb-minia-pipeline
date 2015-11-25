@@ -1,5 +1,14 @@
+---------------------------------------------------------------------------------------
+History
+---------------------------------------------------------------------------------------
+2015/11/25
+Binary Bloocoo build for Linux target (on a IGRIDA 'bermuda' node, cf. OAR snippet below)
+from http://gatb-tools.gforge.inria.fr/versions/src/Bloocoo-1.0.6-Source.tar.gz
+oarsub -I -l /nodes=1,walltime=1 -p "cluster='bermuda'"
+---------------------------------------------------------------------------------------
 2015/10/01
 Binary Bloocoo build for Linux target (on igrida01-12)
 from gatb-tools sources http://gatb-tools.gforge.inria.fr/versions/src/Bloocoo-1.0.5-Source.tar.gz
 
 (cf. /udd/cdeltel/bioinfo/anr-gatb/Bloocoo-1.0.5-Source/build)
+---------------------------------------------------------------------------------------
