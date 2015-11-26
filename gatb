@@ -186,18 +186,36 @@ def minia(k, min_abundance, prefix):
 def bloocoo(output_file_prefix, threshold=2, kmer_size=31):
 
     # bloocoo command line arguments
-    corrected_fasta = output_file_prefix + ".corrected_with_bloocoo.fa"
+    keyword = ".corrected_with_bloocoo"
+    corrected_fasta = output_file_prefix + keyword + ".fa"
     params = ['-file', list_reads, '-out', corrected_fasta, '-abundance-min', threshold, 
               '-kmer-size', kmer_size, '-nb-cores', nb_cores , '-slow', '-high-precision']
     print "Running bloocoo on ", nb_cores, "cores"
     # call bloocoo
     execute('bloocoo/Bloocoo', params)
 
-    # return a text file with the name of the bloocoo corrected data file
     list_reads_with_bloocoo_corrections = output_file_prefix + "_corrected_with_bloocoo.list_reads"
-    with open(list_reads_with_bloocoo_corrections,"w") as f:
-        f.write(corrected_fasta + "\n")
-    return list_reads_with_bloocoo_corrections
+
+    # 2 cases: one or several input banks (cf. Bloocoo.cpp)
+    #          according to the number of lines of the list_reads file
+    with open(list_reads) as f:
+        nInputBanks = sum(1 for _ in f) # nb of lines in list_reads
+    print "nInputBanks=", nInputBanks
+
+    if nInputBanks == 1:    # one input bank
+        # return a text file with the name of the bloocoo corrected data file(s)
+        with open(list_reads_with_bloocoo_corrections,"w") as f:
+            f.write(corrected_fasta + "\n")
+        return list_reads_with_bloocoo_corrections
+    elif nInputBanks > 1:   # several input banks
+        bloocoo_output = sorted(glob.glob(prefix+'*'+keyword+'*.fastq'))
+        with open(list_reads_with_bloocoo_corrections,"w") as f:
+            for ii in range(nInputBanks):
+                f.write(bloocoo_output[ii] + "\n")
+        return list_reads_with_bloocoo_corrections
+    else:
+        print("Error: nInputBanks=", nInputBanks)
+        raise Exception("Displaying help") 
 
 # ------------------------------
 # superscaffolder
@@ -393,7 +411,7 @@ if use_bloocoo_preprocessing == True:
     # call bloocoo
     list_reads_corrected = bloocoo(output_file_prefix=prefix)
 
-    # now list_reads contains only the bloocoo output filename
+    # now list_reads contains only the bloocoo output filename(s)
     os.rename(list_reads_corrected,list_reads)
 
 

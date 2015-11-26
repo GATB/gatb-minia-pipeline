@@ -72,6 +72,7 @@ PATH="/udd/cdeltel/bioinfo/bwa-0.7.10/:.:$PATH"
 # ================= default very short test ====================================
 cd $GITDIR/test
 ../gatb --12 small_test_reads.fa.gz
+echo END_OF_VERY_SHORT_TEST
 
 # ================= short pipeline test (p3) ===================================
 DATA_NAME=Staphylococcus_aureus/Data/original   # this is pipeline p3
@@ -90,6 +91,8 @@ GATB_SCRIPT=$GITDIR/gatb
 time $MEMUSED $GATB_SCRIPT \
 	-1 $DATA_IGRIDA/frag_1.fastq 			-2 $DATA_IGRIDA/frag_2.fastq  \
 	-1 $DATA_IGRIDA/shortjump_1.fastq  		-2 $DATA_IGRIDA/shortjump_2.fastq
+
+echo END_OF_SHORT_TEST
 
 ssh $FRONTEND mail $TO@inria.fr -s end_scm_$OAR_JOB_ID << eom
 OAR_JOB_ID: $OAR_JOB_ID - hostname: `hostname`
