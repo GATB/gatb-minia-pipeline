@@ -44,7 +44,7 @@ list_k_values = []
 list_min_abundances = []
 k_restart = -1
 step = 20
-max_memory = - 1
+max_memory = -1
 nb_cores = int(check_output(["nproc"]))  # for bloocoo
 
 #scaffolding_method="superscaffolder"
