@@ -47,7 +47,7 @@ step = 20
 max_memory = -1
 nb_cores = int(check_output(["nproc"]))  # for bloocoo
 
-#scaffolding_method="superscaffolder"
+# it's a hardcoded switch; only switch to sspace if you have good reasons to dislike besst! because besst rocks.
 #scaffolding_method="sspace"
 scaffolding_method="besst"
 
@@ -57,7 +57,6 @@ metagenomics = True
 use_bloocoo_preprocessing = True
 
 try:
-    #TODO: now that it has a clean cmdline arguments structure, use docopt or something
     skip = 1 # this was formerly to handle paired-end case (-p XX XX) but it's not needed anymore now
     library = ""
     for i,arg in enumerate(sys.argv):
@@ -217,12 +216,6 @@ def bloocoo(output_file_prefix, threshold=2, kmer_size=31):
         print("Error: nInputBanks=", nInputBanks)
         raise Exception("Displaying help") 
 
-# ------------------------------
-# superscaffolder
-
-def superscaffolder(contigs,library,output_filename=""):
-    execute("superscaffolder/superscaffolding.py", [contigs, library, "-o", output_filename], interpreter="python", memused=True)
-
 #-------------------------------
 # sspace wrapper
 
@@ -329,8 +322,10 @@ def check_for_python_27():
 def besst(contigs, bam_files, orientations, output_filename=""):
     global k, final_assembly
     interpreter = check_for_python_27()
-    filter_contigs = (200 if len(mate_pairs) == 0 else 1000) #hacky
-    cmd = ['-c', contigs, '-f'] + bam_files + ['--orientation'] + orientations + ['--no_score', '-filter_contigs', filter_contigs, '-o', prefix + '_besst', '-K', k]
+    #filter_contigs = (200 if len(mate_pairs) == 0 else 1000) #hacky
+    #cmd = ['-c', contigs, '-f'] + bam_files + ['--orientation'] + orientations + ['-filter_contigs', filter_contigs, '-o', prefix + '_besst', '-K', k]
+    # let's try with as few parameters as possible
+    cmd = ['-c', contigs, '-f'] + bam_files + ['-o', prefix + '_besst'] + ['--orientation'] + orientations
     execute('BESST/runBESST', cmd, interpreter=interpreter, memused=True)
     besst_scaffolds = sorted(glob.glob(prefix + "_besst/BESST_output/pass*/*.fa"))
     if len(besst_scaffolds) == 0:
@@ -346,13 +341,7 @@ def besst(contigs, bam_files, orientations, output_filename=""):
 # wrapper for scaffolding
 
 def scaffold(contigs, paired_reads):
-    if scaffolding_method == "superscaffolder":
-        # superscaf takes one library at a time
-        for i, paired_read in enumerate(paired_reads):
-            input_file = prefix + ".scaffolds%d.fa" % i if i > 0 else contigs
-            output_file = prefix + ".scaffolds%d.fa" % (i+1)
-            superscaffolder(input_file,paired_read,output_file)
-    elif scaffolding_method == "sspace":
+    if scaffolding_method == "sspace":
         sspace(contigs,paired_reads)
     elif scaffolding_method == "besst":
         # besst needs pre-mapping one library at a time
@@ -403,59 +392,60 @@ def get_read_length(list_reads):
 # ------------------------------
 # main pipeline
 
-create_list_reads()
+if contigs is None: # need to create contigs, or are they given?
+    create_list_reads()
 
-if use_bloocoo_preprocessing == True:
+    if use_bloocoo_preprocessing == True:
 
-    # call bloocoo
-    list_reads_corrected = bloocoo(output_file_prefix=prefix)
+        # call bloocoo
+        list_reads_corrected = bloocoo(output_file_prefix=prefix)
 
-    # now list_reads contains only the bloocoo output filename(s)
-    shutil.copyfile(list_reads,list_reads+".orig")
-    shutil.copyfile(list_reads_corrected,list_reads)
-    #os.rename(list_reads_corrected,list_reads)
+        # now list_reads contains only the bloocoo output filename(s)
+        shutil.copyfile(list_reads,list_reads+".orig")
+        shutil.copyfile(list_reads_corrected,list_reads)
+        #os.rename(list_reads_corrected,list_reads)
 
 
-if len(list_k_values) == 0:
-    max_k = get_read_length(paired_reads + unpaired_reads) #TODO: modify bloocoo so that it gives a read length histogram, rather than using this hacky procedure
-    if max_k <= 21:
-        sys.exit("Reads are shorter than 21 base pairs? (%d bp at 90 percentile of read lengths over the first 1000 reads of each input file).\nNotify a developer if this estimation was wrong, or if your reads are really that short, please set the list of kmer lengths manually using the --kmer-sizes parameter" % max_k)
-    # two implicit assumptions: do not make more than 20 rounds, and start at k=21 
-    for i in xrange(20): 
-        k = 21 + i*step
-        if k <= max_k and k <= 256: #max supported in minia binary is 256
-            list_k_values += [k]
+    if len(list_k_values) == 0:
+        max_k = get_read_length(paired_reads + unpaired_reads) #TODO: modify bloocoo so that it gives a read length histogram, rather than using this hacky procedure
+        if max_k <= 21:
+            sys.exit("Reads are shorter than 21 base pairs? (%d bp at 90 percentile of read lengths over the first 1000 reads of each input file).\nNotify a developer if this estimation was wrong, or if your reads are really that short, please set the list of kmer lengths manually using the --kmer-sizes parameter" % max_k)
+        # two implicit assumptions: do not make more than 20 rounds, and start at k=21 
+        for i in xrange(20): 
+            k = 21 + i*step
+            if k <= max_k and k <= 256: #max supported in minia binary is 256
+                list_k_values += [k]
 
-if len(list_min_abundances) == 0:
-    list_min_abundances = [2]*len(list_k_values)
+    if len(list_min_abundances) == 0:
+        list_min_abundances = [2]*len(list_k_values)
 
-cutoffs = sorted(zip(list_k_values, list_min_abundances))
+    cutoffs = sorted(zip(list_k_values, list_min_abundances))
 
-if k_restart == -1:
-    print "Multi-k values and cutoffs: ",cutoffs
-else:
-    print "*** restart mode"
-    cutoffs_keys = sorted([x for x in dict(cutoffs).keys()])
-    last_k_value_before_restart = cutoffs_keys[cutoffs_keys.index(k_restart)-1]
-    print "*** pipeline restart mode: k_restart=%d (last_k_value_before_restart=%d) *** " % (k_restart, last_k_value_before_restart)
-    cutoffs = sorted([(key,dict(cutoffs)[key]) for key in cutoffs_keys if key >= k_restart])
-    print "Restarting GATB-pipeline with cutoffs ", cutoffs
-    print "This assumes that an assembly with k =", last_k_value_before_restart, "exists."
+    if k_restart == -1:
+        print "Multi-k values and cutoffs: ",cutoffs
+    else:
+        print "*** restart mode"
+        cutoffs_keys = sorted([x for x in dict(cutoffs).keys()])
+        last_k_value_before_restart = cutoffs_keys[cutoffs_keys.index(k_restart)-1]
+        print "*** pipeline restart mode: k_restart=%d (last_k_value_before_restart=%d) *** " % (k_restart, last_k_value_before_restart)
+        cutoffs = sorted([(key,dict(cutoffs)[key]) for key in cutoffs_keys if key >= k_restart])
+        print "Restarting GATB-pipeline with cutoffs ", cutoffs
+        print "This assumes that an assembly with k =", last_k_value_before_restart, "exists."
 
-last_k_value = 0
-previous_contigs = None if k_restart == -1 else  prefix+"_k%d.contigs.fa"%last_k_value_before_restart
-for k in sorted(dict(cutoffs).keys()):
-    if k < last_k_value + step and not metagenomics:
-        continue
-    min_abundance = dict(cutoffs)[k]
-    print "Multi-k GATB-Pipeline, Minia assembling at k=%d min_abundance=%d" % (k, min_abundance)
-    extra_reads = [previous_contigs]*(min_abundance+1) if previous_contigs is not None else []
-    create_list_reads(extra_reads, append=True)
-    multi_k_prefix = prefix + "_k%d" % k
-    previous_contigs = minia(k, min_abundance, prefix=multi_k_prefix)
-    last_k_value = k
-k = last_k_value # hint for besst
-print "Finished Multi-k GATB-Pipeline at k=%d" % last_k_value
+    last_k_value = 0
+    previous_contigs = None if k_restart == -1 else  prefix+"_k%d.contigs.fa"%last_k_value_before_restart
+    for k in sorted(dict(cutoffs).keys()):
+        if k < last_k_value + step and not metagenomics:
+            continue
+        min_abundance = dict(cutoffs)[k]
+        print "Multi-k GATB-Pipeline, Minia assembling at k=%d min_abundance=%d" % (k, min_abundance)
+        extra_reads = [previous_contigs]*(min_abundance+1) if previous_contigs is not None else []
+        create_list_reads(extra_reads, append=True)
+        multi_k_prefix = prefix + "_k%d" % k
+        previous_contigs = minia(k, min_abundance, prefix=multi_k_prefix)
+        last_k_value = k
+    k = last_k_value # hint for besst
+    print "Finished Multi-k GATB-Pipeline at k=%d" % last_k_value
 
 # scaffolding all libraries
 if len(paired_reads) > 0:
