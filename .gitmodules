@@ -1,3 +1,3 @@
 [submodule "BESST"]
 	path = BESST
-	url = https://github.com/ksahlin/BESST
+	url = https://github.com/ksahlin/BESST.git
