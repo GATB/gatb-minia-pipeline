@@ -302,7 +302,7 @@ def run_besst_mapping(i, contigs, library):
 
     output_bam = prefix + '.lib_%d' % i
     os.environ["TEMP"] = os.getcwd() # besst uses tempfile which uses $TEMP to store mapping data
-    execute('BESST/scripts/reads_to_ctg_map.py', ["--threads", nb_cpus] + paired_reads + [contigs, output_bam], interpreter="python")
+    execute('BESST/scripts/reads_to_ctg_map.py', ["--tmp_path", os.path.dirname(os.path.realpath(output_bam)) + os.sep + "BESST_tmp"] + ["--threads", nb_cpus] + paired_reads + [contigs, output_bam], interpreter="python")
     return output_bam + ".bam"
 
 # besst needs python >= 2.7, see if we have it installed on the system somewhere
