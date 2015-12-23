@@ -36,7 +36,12 @@ Type `make test` to launch a small test.
 FAQ
 ---
 
-Can't install scipy? get activestate python: http://www.activestate.com/activepython/downloads and type 'pypm install scipy'
+Can't install scipy? (because e.g. cannot sudo) 
+a solution is either to contact your system administrator, 
+or install a python distribution that doesn't require root (it's not that hard):
+- conda: http://conda.pydata.org/miniconda.html then type 'conda install scipy'
+or
+- activestate python: http://www.activestate.com/activepython/downloads then type 'pypm install scipy'
 
 Support
 -------
