@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import sys, os, shutil
-from subprocess import call, Popen, PIPE, check_output
+from subprocess import call, Popen, PIPE, STDOUT, check_output
 import glob
 sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0) #unbuffered print, solves badly ordered stdout on clusters
 import multiprocessing
@@ -119,6 +119,23 @@ except:
 
 DIR = os.path.dirname(os.path.realpath(__file__))
 
+class Logger(object):
+    def __init__(self):
+        global prefix
+        with open(prefix + ".log","w") as logfile:
+            from time import gmtime, strftime
+            logfile.write("(%s) GATB-pipeline starting\n" %strftime("%Y-%m-%d %H:%M:%S", gmtime()))
+    def __call__(self, message):
+        global prefix
+        logfile= open(prefix + ".log", "a")
+        sys.stderr.flush()
+        sys.stdout.write(message+"\n")
+        sys.stdout.flush()
+        logfile.write(message+"\n")  
+        logfile.flush()  
+        logfile.close()
+log = Logger()
+
 def execute(program, cmdline=[], interpreter=None, stdout=None, memused=False):
     ret = 0
     try:
@@ -131,13 +148,25 @@ def execute(program, cmdline=[], interpreter=None, stdout=None, memused=False):
             cmd += [ "%s/%s" % (DIR, program) ] 
         cmd += map(str, cmdline)
         program_string = ((interpreter + " ") if interpreter is not None else "") + (program if program is not None else "")
-        print >>sys.stderr, "Execution of '%s'. Command line: \n     %s" % (program_string, ' '.join(cmd))
-        ret = call(cmd, stdout=stdout)
+        log("Execution of '%s'. Command line: \n     %s" % (program_string, ' '.join(cmd)))
+        stderr = None
+        log_output = stdout is None # log to file
+        log_output = False # disabled logging of execute() programs, because it causes stdout/stderr to be slightly not in order (try it, you will see)
+        if log_output:
+            stdout=PIPE
+            #stderr=STDOUT  # i changed my mind, let's not capture stderr, minia outputs annoying progress bars
+        p = Popen(cmd, stdout=stdout, stderr=stderr, bufsize=0) #unbuffered
+        if log_output:
+            global prefix
+            tee = Popen(['tee', '--append', prefix + ".log"], stdin=p.stdout)
+            p.stdout.close()
+            tee.communicate()
+        ret = p.wait()
     except OSError as e:
-        print >>sys.stderr, "Exception:",e
+        log.write("Exception:" + str(e) )
         ret = 1
     if ret:
-        print >>sys.stderr, "Execution of '%s' failed. Command line: \n     %s" % (program_string, ' '.join(cmd))
+        log("Execution of '%s' failed. Command line: \n     %s" % (program_string, ' '.join(cmd)))
         exit(1)
 
 list_reads = prefix + ".list_reads"
@@ -189,7 +218,7 @@ def bloocoo(output_file_prefix, threshold=2, kmer_size=31):
     corrected_fasta = output_file_prefix + keyword + ".fa"
     params = ['-file', list_reads, '-out', corrected_fasta, '-abundance-min', threshold, 
               '-kmer-size', kmer_size, '-nb-cores', nb_cores , '-slow', '-high-precision']
-    print "Running bloocoo on ", nb_cores, "cores"
+    log("Running bloocoo on %d cores" % nb_cores)
     # call bloocoo
     execute('bloocoo/Bloocoo', params)
 
@@ -199,7 +228,7 @@ def bloocoo(output_file_prefix, threshold=2, kmer_size=31):
     #          according to the number of lines of the list_reads file
     with open(list_reads) as f:
         nInputBanks = sum(1 for _ in f) # nb of lines in list_reads
-    print "nInputBanks=", nInputBanks
+    log("nInputBanks=%d"% nInputBanks)
 
     if nInputBanks == 1:    # one input bank
         # return a text file with the name of the bloocoo corrected data file(s)
@@ -213,7 +242,7 @@ def bloocoo(output_file_prefix, threshold=2, kmer_size=31):
                 f.write(bloocoo_output[ii] + "\n")
         return list_reads_with_bloocoo_corrections
     else:
-        print("Error: nInputBanks=", nInputBanks)
+        log("Error: nInputBanks=%d " %  nInputBanks)
         raise Exception("Displaying help") 
 
 #-------------------------------
@@ -230,7 +259,7 @@ def get_paired_end_parameters(contigs, library, is_mate_pairs = False):
         if line.startswith('Orientation'):
             l = line.split()
             orientation, mean, stdev = l[1], int(l[3]), int(l[5])
-    print "GATB-Pipeline estimated insert size of library", paired_reads, ":", mean, stdev, orientation
+    log("GATB-Pipeline estimated insert size of library " + str(paired_reads) + " : %f %f %s " %(mean, stdev, orientation ))
     return orientation, mean, stdev
     
 def possibly_gunzip(filename, lib_index, paired_index=None):
@@ -241,7 +270,7 @@ def possibly_gunzip(filename, lib_index, paired_index=None):
         if paired_index:
             output += "_%d" % paired_index
         output += "." + ext
-        print "Gunzipping", filename, "to", output
+        log("Gunzipping " + str(filename) +  " to " + str(output))
         outfile = open(output, 'wb')
         execute(None, ['-c', filename], interpreter='gunzip', stdout=outfile)
         outfile.close
@@ -257,7 +286,7 @@ def sspace(contigs, paired_reads, output_filename=""):
             # sspace needs de-interleaved input
             if ' ' not in library:
                 library = possibly_gunzip(library, i)
-                print "Splitting interleaved file:", library
+                log("Splitting interleaved file: " +str(library))
                 ext = library.split(".")[-1]
                 p1, p2 = [prefix + ".lib%d_%d." % (i,j) + ext for j in [1,2] ]
                 #de-interleave reads using SGA's script (was too lazy to write my own)
@@ -280,7 +309,7 @@ def sspace(contigs, paired_reads, output_filename=""):
     # run sspace
     cmd = ['-l', lib_file, '-s', contigs, '-b', prefix + '.sspace']
     execute('sspace/SSPACE_Basic_v2.0.pl', cmd, interpreter="perl", memused=True)
-    print "SSPACE is done! the maximal memory used above was for SSPACE only"
+    log("SSPACE is done! the maximal memory used above was for SSPACE only")
 
     # clean up intermediate sspace files
     
@@ -292,7 +321,7 @@ def run_besst_mapping(i, contigs, library):
     # besst needs de-interleaved input, for the mapping phase (else it thinks they're single end)
     if ' ' not in library:
         library = possibly_gunzip(library, i) # until sga-deinterleave supports gzipped input, no other choice but to gunzip
-        print "Splitting interleaved file:", library
+        log("Splitting interleaved file: " + str(library))
         ext = library.split(".")[-1]
         p1, p2 = [prefix + ".lib%d_%d." % (i,j) + ext for j in [1,2] ]
         #de-interleave reads using SGA's script (was too lazy to write my own)
@@ -314,7 +343,7 @@ def check_for_python_27():
             ret = 1
         if ret == 0:
             if i > 0:
-                print "found Python 2.7 via command:", python27
+                log("found Python 2.7 via command: " + str(python27))
             return python27
     exit("BESST needs Python >= 2.7, make sure it is aliased to either the 'python' or the 'python2.7' command on your shell")
 
@@ -334,7 +363,7 @@ def besst(contigs, bam_files, orientations, output_filename=""):
     if os.path.exists(final_assembly):
         os.remove(final_assembly)
     os.symlink(last_pass, final_assembly)
-    print "BESST is done! the maximal memory used above was for BESST only"
+    log( "BESST is done! the maximal memory used above was for BESST only")
     
 
 # ------------------------------
@@ -386,7 +415,7 @@ def get_read_length(list_reads):
         return sorted(data)[int(math.ceil((size * percentile) / 100)) - 1]
 
     estimated_max_read_length = percentile(read_lengths,90)
-    print "Setting maximum kmer length to:", estimated_max_read_length, "bp" # based on the 90 percentile of 1000 first reads lengths of each input file
+    log("Setting maximum kmer length to: " + str(estimated_max_read_length) + " bp") # based on the 90 percentile of 1000 first reads lengths of each input file
     return estimated_max_read_length
 
 # ------------------------------
@@ -422,15 +451,15 @@ if contigs is None: # need to create contigs, or are they given?
     cutoffs = sorted(zip(list_k_values, list_min_abundances))
 
     if k_restart == -1:
-        print "Multi-k values and cutoffs: ",cutoffs
+        log("Multi-k values and cutoffs: " + str(cutoffs))
     else:
-        print "*** restart mode"
+        log("*** restart mode")
         cutoffs_keys = sorted([x for x in dict(cutoffs).keys()])
         last_k_value_before_restart = cutoffs_keys[cutoffs_keys.index(k_restart)-1]
-        print "*** pipeline restart mode: k_restart=%d (last_k_value_before_restart=%d) *** " % (k_restart, last_k_value_before_restart)
+        log("*** pipeline restart mode: k_restart=%d (last_k_value_before_restart=%d) *** " % (k_restart, last_k_value_before_restart))
         cutoffs = sorted([(key,dict(cutoffs)[key]) for key in cutoffs_keys if key >= k_restart])
-        print "Restarting GATB-pipeline with cutoffs ", cutoffs
-        print "This assumes that an assembly with k =", last_k_value_before_restart, "exists."
+        log("Restarting GATB-pipeline with cutoffs " + str(cutoffs))
+        log("This assumes that an assembly with k =" + str(last_k_value_before_restart) + " exists.")
 
     last_k_value = 0
     previous_contigs = None if k_restart == -1 else  prefix+"_k%d.contigs.fa"%last_k_value_before_restart
@@ -438,14 +467,14 @@ if contigs is None: # need to create contigs, or are they given?
         if k < last_k_value + step and not metagenomics:
             continue
         min_abundance = dict(cutoffs)[k]
-        print "Multi-k GATB-Pipeline, Minia assembling at k=%d min_abundance=%d" % (k, min_abundance)
+        log("Multi-k GATB-Pipeline, Minia assembling at k=%d min_abundance=%d" % (k, min_abundance))
         extra_reads = [previous_contigs]*(min_abundance+1) if previous_contigs is not None else []
         create_list_reads(extra_reads, append=True)
         multi_k_prefix = prefix + "_k%d" % k
         previous_contigs = minia(k, min_abundance, prefix=multi_k_prefix)
         last_k_value = k
     k = last_k_value # hint for besst
-    print "Finished Multi-k GATB-Pipeline at k=%d" % last_k_value
+    log("Finished Multi-k GATB-Pipeline at k=%d" % last_k_value)
 
 # scaffolding all libraries
 if len(paired_reads) > 0:
@@ -455,4 +484,4 @@ else:
         os.remove(final_assembly)
     os.symlink(contigs, final_assembly)
  
-print "pipeline finished!! assembly is in: %s" % final_assembly
+log("pipeline finished!! assembly is in: %s" % final_assembly)
