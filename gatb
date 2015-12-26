@@ -25,6 +25,7 @@ Reads (mandatory, specify at least one of these parameters):
     --mp-12  <filename>             same input as paired reads (--12) but for mate pairs
     --mp-1   <filename>             same input as paired reads (-1 -2) but for mate pairs
     --mp-2   <filename>              
+
 Advanced parameters (optional):
 
     -o <string>                     prefix of the output files (default: assembly)
@@ -34,6 +35,9 @@ Advanced parameters (optional):
     --abundance-mins <t1>,<t2>,..   list of low abundance thresholds (default: 2,2,2,..)
     --restart-from <k>              k value where to restart the multi-k process (useful for interrupted jobs)
     --max-memory <int>              go faster by using more memory (in MB) (default: as much as Minia needs)
+
+Note: Scaffolding skips the mapping step if [prefix].lib_?.bam.done already exists
+
 """ % (sys.argv[0])
 
 paired_reads = []
@@ -331,7 +335,12 @@ def run_besst_mapping(i, contigs, library):
 
     output_bam = prefix + '.lib_%d' % i
     os.environ["TEMP"] = os.getcwd() # besst uses tempfile which uses $TEMP to store mapping data
-    execute('BESST/scripts/reads_to_ctg_map.py', ["--tmp_path", os.path.dirname(os.path.realpath(output_bam)) + os.sep + "BESST_tmp"] + ["--threads", nb_cpus] + paired_reads + [contigs, output_bam], interpreter="python")
+    done_file = output_bam + ".bam.done"
+    if not os.path.exists(done_file):
+        execute('BESST/scripts/reads_to_ctg_map.py', ["--tmp_path", os.path.dirname(os.path.realpath(output_bam)) + os.sep + "BESST_tmp"] + ["--threads", nb_cpus] + paired_reads + [contigs, output_bam], interpreter="python")
+        open(done_file, 'a').close()
+    else:
+        log("Reusing existing BAM file for library " + str(library))
     return output_bam + ".bam"
 
 # besst needs python >= 2.7, see if we have it installed on the system somewhere

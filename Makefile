@@ -5,4 +5,4 @@ all:
 .FORCE:
 
 test: all .FORCE 
-	cd test ; ../gatb --12 small_test_reads.fa.gz
+	cd test ; rm -Rf assembly* ; ../gatb --12 small_test_reads.fa.gz
