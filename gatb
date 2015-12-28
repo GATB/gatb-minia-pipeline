@@ -108,6 +108,7 @@ try:
             skip = 0
         elif arg == "--no-error-correction":
             use_bloocoo_preprocessing = False
+            skip = 0
         elif arg in ["-h", "-help", "--help"]:
             raise Exception("Displaying help") 
         else:
