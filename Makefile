@@ -1,6 +1,6 @@
 all:
-	#make -C superscaffolder # using a better scaffolder now
-	#make -C minia # will be dynamically compiled
+	@#make -C superscaffolder # using a better scaffolder now
+	@#make -C minia # will be dynamically compiled
 	@echo "Checking Python"
 	@python -c "import scipy; print 'scipy OK'"
 	@python -c "import numpy; print 'numpy OK'"
