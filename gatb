@@ -135,7 +135,8 @@ class Logger(object):
         global prefix
         with open(prefix + ".log","w") as logfile:
             from time import gmtime, strftime
-            logfile.write("(%s) GATB-pipeline starting\n" %strftime("%Y-%m-%d %H:%M:%S", gmtime()))
+            self("(%s) GATB-pipeline starting" %strftime("%Y-%m-%d %H:%M:%S", gmtime()))
+            self("Command line: %s \n\n" % ' '.join(sys.argv))
     def __call__(self, message):
         global prefix
         logfile= open(prefix + ".log", "a")
@@ -436,8 +437,6 @@ def get_read_length(list_reads):
 
 # ------------------------------
 # main pipeline
-
-log("GATB-pipeline starting")
 
 if contigs is None: # need to create contigs, or are they given?
     create_list_reads()

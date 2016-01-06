@@ -32,6 +32,7 @@ mkdir -p $soft-$version/test/
 cp -R test/small_test_reads.fa.gz $soft-$version/test/
 cp -R BESST $soft-$version/
 cp -R tools $soft-$version/
+cp -R bloocoo $soft-$version/
 
 tar -chzf $soft-$version.tar.gz $soft-$version/
 rm -Rf $soft-$version/
