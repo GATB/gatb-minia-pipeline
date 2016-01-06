@@ -130,15 +130,16 @@ except:
 
 DIR = os.path.dirname(os.path.realpath(__file__))
 
+from time import gmtime, strftime
 class Logger(object):
     def __init__(self):
         global prefix
         with open(prefix + ".log","w") as logfile:
-            from time import gmtime, strftime
-            self("(%s) GATB-pipeline starting" %strftime("%Y-%m-%d %H:%M:%S", gmtime()))
+            self("GATB-pipeline starting")
             self("Command line: %s \n\n" % ' '.join(sys.argv))
     def __call__(self, message):
         global prefix
+        message = ("(%s) "  % strftime("%Y-%m-%d %H:%M:%S", gmtime()))+ message
         logfile= open(prefix + ".log", "a")
         sys.stderr.flush()
         sys.stdout.write(message+"\n")
@@ -240,7 +241,8 @@ def bloocoo(output_file_prefix, threshold=2, kmer_size=31):
     #          according to the number of lines of the list_reads file
     with open(list_reads) as f:
         nInputBanks = sum(1 for _ in f) # nb of lines in list_reads
-    log("nInputBanks=%d"% nInputBanks)
+
+    log("Bloocoo done (%d input file)\n\n" % nInputBanks)
 
     if nInputBanks == 1:    # one input bank
         # return a text file with the name of the bloocoo corrected data file(s)
@@ -468,7 +470,7 @@ if contigs is None: # need to create contigs, or are they given?
     cutoffs = sorted(zip(list_k_values, list_min_abundances))
 
     if k_restart == -1:
-        log("Multi-k values and cutoffs: " + str(cutoffs))
+        log("Multi-k values and cutoffs: " + str(cutoffs) + "\n\n")
     else:
         log("*** restart mode")
         cutoffs_keys = sorted([x for x in dict(cutoffs).keys()])
@@ -484,14 +486,15 @@ if contigs is None: # need to create contigs, or are they given?
         if k < last_k_value + step and not metagenomics:
             continue
         min_abundance = dict(cutoffs)[k]
-        log("Multi-k GATB-Pipeline, Minia assembling at k=%d min_abundance=%d" % (k, min_abundance))
+        log("Minia assembling at k=%d min_abundance=%d" % (k, min_abundance))
         extra_reads = [previous_contigs]*(min_abundance+1) if previous_contigs is not None else []
         create_list_reads(extra_reads, append=True)
         multi_k_prefix = prefix + "_k%d" % k
         previous_contigs = minia(k, min_abundance, prefix=multi_k_prefix)
         last_k_value = k
+        log("Finished Minia k=%d\n\n" % last_k_value)
     k = last_k_value # hint for besst
-    log("Finished Multi-k GATB-Pipeline at k=%d" % last_k_value)
+    log("Finished Multi-k GATB-Pipeline at k=%d\n\n" % last_k_value)
 
 # scaffolding all libraries
 if len(paired_reads) > 0:
