@@ -33,10 +33,10 @@ Advanced parameters (optional):
     --step <step>                   step size to control increments of k values (default: 20)
     --kmer-sizes <k1>,<k2>,..       comma-separated list of k-mer sizes (default: 21,21+step,21+2*step,..)
     --abundance-mins <t1>,<t2>,..   list of low abundance thresholds (default: 2,2,2,..)
-    --restart-from <k>              k value where to restart the multi-k process (useful for interrupted jobs)
     --max-memory <int>              go faster by using more memory (in MB) (default: as much as Minia needs)
+    --restart-from <k>              k value where to restart the multi-k process (useful for interrupted jobs)
+    --continue-scaffolding          continue an interrupted scaffolding (already mapped libraries are not remapped)
 
-Note: Scaffolding skips the mapping step if [prefix].lib_?.bam.done already exists
 
 """ % (sys.argv[0])
 
@@ -59,6 +59,8 @@ scaffolding_method="besst"
 multi_k_mode = True
 metagenomics = True
 use_bloocoo_preprocessing = True
+
+continue_scaffolding = False
 
 try:
     skip = 1 # this was formerly to handle paired-end case (-p XX XX) but it's not needed anymore now
@@ -109,6 +111,10 @@ try:
         elif arg == "--no-error-correction":
             use_bloocoo_preprocessing = False
             skip = 0
+        elif arg == "--continue-scaffolding":
+            continue_scaffolding = True
+            skip = 0
+
         elif arg in ["-h", "-help", "--help"]:
             raise Exception("Displaying help") 
         else:
@@ -337,11 +343,11 @@ def run_besst_mapping(i, contigs, library):
     output_bam = prefix + '.lib_%d' % i
     os.environ["TEMP"] = os.getcwd() # besst uses tempfile which uses $TEMP to store mapping data
     done_file = output_bam + ".bam.done"
-    if not os.path.exists(done_file):
+    if os.path.exists(done_file) and continue_scaffolding:
+        log("Reusing existing BAM file for library " + str(library))
+    else:
         execute('BESST/scripts/reads_to_ctg_map.py', ["--tmp_path", os.path.dirname(os.path.realpath(output_bam)) + os.sep + "BESST_tmp"] + ["--threads", nb_cpus] + paired_reads + [contigs, output_bam], interpreter="python")
         open(done_file, 'a').close()
-    else:
-        log("Reusing existing BAM file for library " + str(library))
     return output_bam + ".bam"
 
 # besst needs python >= 2.7, see if we have it installed on the system somewhere
@@ -430,6 +436,8 @@ def get_read_length(list_reads):
 
 # ------------------------------
 # main pipeline
+
+log("GATB-pipeline starting")
 
 if contigs is None: # need to create contigs, or are they given?
     create_list_reads()

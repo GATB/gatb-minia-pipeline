@@ -26,7 +26,8 @@ cp -R minia $soft-$version/
 #mv $soft-$version/minia*/ $soft-$version/minia
 
 # package the rest
-cp gatb README CHANGELOG Makefile $soft-$version/
+cp gatb README.md CHANGELOG Makefile $soft-$version/
+mv $soft-$version/README.md $soft-$version/README
 mkdir -p $soft-$version/test/
 cp -R test/small_test_reads.fa.gz $soft-$version/test/
 cp -R BESST $soft-$version/
