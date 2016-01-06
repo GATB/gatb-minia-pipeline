@@ -174,7 +174,7 @@ def execute(program, cmdline=[], interpreter=None, stdout=None, memused=False):
             tee.communicate()
         ret = p.wait()
     except OSError as e:
-        log.write("Exception:" + str(e) )
+        log("Exception:" + str(e) )
         ret = 1
     if ret:
         log("Execution of '%s' failed. Command line: \n     %s" % (program_string, ' '.join(cmd)))
