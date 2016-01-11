@@ -11,6 +11,8 @@ It is based on:
 Usage
 -----
 
+*Before anything, run `make test` to see if your installation works.*
+
 Command line arguments are similar to SPAdes.
 
 Paired reads assembly:
@@ -26,7 +28,7 @@ Unpaired reads:
     ./gatb -s single_reads.fastq
 
 More input options are available. Type `./gatb` for extended usage.
-Type `make test` to launch a small test.
+
 
 
 Prerequisites
@@ -37,10 +39,11 @@ Prerequisites
 - bwa (for BESST)
 
 - Python >= 2.7 with the following modules (for BESST):
-        * mathstats
-        * scipy
-        * networkx
-        * pysam
+
+    * mathstats
+    * scipy
+    * networkx
+    * pysam
 
   To install all of them at once, run:
 
