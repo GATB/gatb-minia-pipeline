@@ -35,7 +35,8 @@ Advanced parameters (optional):
     --abundance-mins <t1>,<t2>,..   list of low abundance thresholds (default: 2,2,2,..)
     --max-memory <int>              go faster by using more memory (in MB) (default: as much as Minia needs)
     --restart-from <k>              k value where to restart the multi-k process (useful for interrupted jobs)
-    --continue-scaffolding          continue an interrupted scaffolding (already mapped libraries are not remapped)
+    --continue-scaffolding          continue an interrupted scaffolding (already mapped libraries are not remapped; 
+                                                                         should be used along with -c <assembly_kXXX.fa>)
 
 
 """ % (sys.argv[0])
