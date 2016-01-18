@@ -1,8 +1,9 @@
 GATB-Pipeline
 -------------
 
-GATB-Pipeline is a de novo assembly pipeline for llumina data.
-It is based on:
+GATB-Pipeline is a de novo assembly pipeline for llumina data. 
+It can assemble genomes and metagenomes.
+The pipeline consists of:
 - Bloocoo (error correction)
 - Minia (contigs assembly)
 - BESST (scaffolding)
