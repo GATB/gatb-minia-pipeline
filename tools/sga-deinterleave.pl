@@ -67,7 +67,7 @@ close(IN);
 sub isFirstRead
 {
     my ($header) = @_;
-    return 1 if($header =~ /[^\w]A([^\w]|$)|[^\w]1([^\w]|$)/);
-    return 0 if($header =~ /[^\w]B([^\w]|$)|[^\w]2([^\w]|$)/);
+    return 1 if($header =~ /[^\w]A([^\w]|$)|[^\w:]1([^\w]|$)/);
+    return 0 if($header =~ /[^\w]B([^\w]|$)|[^\w:]2([^\w]|$)/);
     die("Cannot parse record $header");
 }
