@@ -186,14 +186,10 @@ def execute(program, cmdline=[], interpreter=None, stdout=None, memused=False):
 list_reads = prefix + ".list_reads"
 final_assembly = prefix + ".fasta"
 
-def create_list_reads(extra_reads = [], append = False):
-    # create of flat text file with all reads
-    if append == True:
-        local_list = extra_reads
-        open_mode = "a"
-    else:
-        local_list = paired_reads + unpaired_reads + extra_reads
-        open_mode = "w"
+def create_list_reads(extra_reads = []):
+    # create of flat text file with all reads (and possibly previous assembly if multi-k)
+    local_list = paired_reads + unpaired_reads + extra_reads
+    open_mode = "w"
 
     with open(list_reads, open_mode) as f:
         for read in local_list:
@@ -489,7 +485,7 @@ if contigs is None: # need to create contigs, or are they given?
         min_abundance = dict(cutoffs)[k]
         log("Minia assembling at k=%d min_abundance=%d" % (k, min_abundance))
         extra_reads = [previous_contigs]*(min_abundance+1) if previous_contigs is not None else []
-        create_list_reads(extra_reads, append=True)
+        create_list_reads(extra_reads)
         multi_k_prefix = prefix + "_k%d" % k
         previous_contigs = minia(k, min_abundance, prefix=multi_k_prefix)
         last_k_value = k
