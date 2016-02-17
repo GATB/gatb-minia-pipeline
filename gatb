@@ -50,7 +50,11 @@ list_min_abundances = []
 k_restart = -1
 step = 20
 max_memory = -1
-nb_cores = int(check_output(["nproc"]))  # for bloocoo
+try:
+	nb_cores = int(check_output(["nproc"]))  # for bloocoo
+except:
+	print "machine has no nproc, setting bloocoo threads to 1"
+	nb_cores = 1
 
 # it's a hardcoded switch; only switch to sspace if you have good reasons to dislike besst! because besst rocks.
 #scaffolding_method="sspace"
