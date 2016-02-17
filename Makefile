@@ -5,9 +5,10 @@ all:
 	@python -c "import scipy; print 'scipy OK'"
 	@python -c "import numpy; print 'numpy OK'"
 	@python -c "import mathstats; print 'mathstats OK'"
+	@python -c "import pysam; print 'pysam OK'"
 	@echo "There is nothing to make. All programs are provided as binaries."
 
 .FORCE:
 
 test: all .FORCE 
-	cd test ; rm -Rf assembly* ; ../gatb --12 small_test_reads.fa.gz
+	cd test ; rm -Rf assembly* ; ../gatb --12 small_test_reads.fa.gz #--no-error-correction
