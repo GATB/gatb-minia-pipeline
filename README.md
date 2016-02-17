@@ -55,21 +55,22 @@ FAQ
 ---
 
 Can't install scipy? (because e.g. cannot sudo) 
+
 A solution is to install a python distribution that doesn't require root (it's not that hard).
 
 Conda: 
 
-wget https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh
-sh Miniconda-latest-Linux-x86_64.sh
-. ~/.bashrc
-conda install scipy pysam networkx
-pip install mathstats
+    wget https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh
+    sh Miniconda-latest-Linux-x86_64.sh
+    . ~/.bashrc
+    conda install scipy pysam networkx
+    pip install mathstats
 
-sources:
-http://lh3.github.io/2015/12/07/bioconda-the-best-package-manager-so-far/
+Read more on conda : http://lh3.github.io/2015/12/07/bioconda-the-best-package-manager-so-far/
+
 http://conda.pydata.org/miniconda.html
 
-Alternative: activestate python (http://www.activestate.com/activepython/downloads then type 'pypm install scipy')
+Alternative: activestate python (http://www.activestate.com/activepython/downloads then type `pypm install scipy`)
 
 Support
 -------
