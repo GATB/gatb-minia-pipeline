@@ -12,7 +12,7 @@ The pipeline consists of:
 Usage
 -----
 
-*Before anything, run `make test` to see if your installation works.*
+*Before anything, run `git submodule update --init && make test` to see if your installation works.*
 
 Command line arguments are similar to SPAdes.
 
