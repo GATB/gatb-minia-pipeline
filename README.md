@@ -1,7 +1,7 @@
-GATB-Pipeline
+GATB-Minia-Pipeline
 -------------
 
-GATB-Pipeline is a de novo assembly pipeline for llumina data. 
+GATB-Minia-Pipeline is a de novo assembly pipeline for llumina data. 
 It can assemble genomes and metagenomes.
 The pipeline consists of:
 - Bloocoo (error correction)
@@ -15,7 +15,7 @@ Prerequisites
 
 - bwa (for BESST)
 
-- Python >= 2.7 with the following modules (for BESST). See next section on how to install them.
+- Python >= 2.7 with the following modules (for BESST). See next section for a quick way to install them.
 
     * mathstats
     * scipy
