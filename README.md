@@ -26,7 +26,7 @@ Prerequisites
 Installation
 ------------
 
-    pip install --user mathstats pysam networkx scipy pyfasta
+    pip install --user mathstats networkx scipy pyfasta pysam==0.8.3
 
     git clone --recursive https://github.com/GATB/gatb-minia-pipeline
 
