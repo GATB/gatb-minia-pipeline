@@ -8,11 +8,18 @@ The pipeline consists of:
 - Minia (contigs assembly)
 - BESST (scaffolding)
 
+Installation
+------------
+
+    git clone --recursive https://github.com/GATB/gatb-minia-pipeline
+
+    pip install --user mathstats pysam networkx scipy pyfasta
+
+    make test
+
 
 Usage
 -----
-
-*Before anything, run `make test` to see if your installation works.*
 
 Command line arguments are similar to SPAdes.
 
@@ -46,10 +53,6 @@ Prerequisites
     * scipy
     * networkx
     * pysam
-
-  To install all of them at once, run:
-
-        pip install --user mathstats pysam networkx scipy pyfasta
 
 
 FAQ
