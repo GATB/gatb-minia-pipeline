@@ -30,6 +30,7 @@ Unpaired reads:
 
 More input options are available. Type `./gatb` for extended usage.
 
+Since the pipeline is multi-k, it is unnecessary to specify a kmer size.
 
 
 Prerequisites
