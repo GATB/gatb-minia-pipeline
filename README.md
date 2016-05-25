@@ -8,15 +8,29 @@ The pipeline consists of:
 - Minia (contigs assembly)
 - BESST (scaffolding)
 
+Prerequisites
+-------------
+
+- Linux 64 bits (for Minia binary)
+
+- bwa (for BESST)
+
+- Python >= 2.7 with the following modules (for BESST). See next section on how to install them.
+
+    * mathstats
+    * scipy
+    * networkx
+    * pysam
+
+
 Installation
 ------------
 
-    git clone --recursive https://github.com/GATB/gatb-minia-pipeline
-
     pip install --user mathstats pysam networkx scipy pyfasta
 
-    make test
+    git clone --recursive https://github.com/GATB/gatb-minia-pipeline
 
+    make test
 
 Usage
 -----
@@ -38,21 +52,6 @@ Unpaired reads:
 More input options are available. Type `./gatb` for extended usage.
 
 Since the pipeline is multi-k, it is unnecessary to specify a kmer size.
-
-
-Prerequisites
--------------
-
-- Linux 64 bits (for Minia binary)
-
-- bwa (for BESST)
-
-- Python >= 2.7 with the following modules (for BESST):
-
-    * mathstats
-    * scipy
-    * networkx
-    * pysam
 
 
 FAQ
