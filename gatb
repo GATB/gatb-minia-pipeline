@@ -64,8 +64,6 @@ except:
 scaffolding_method="besst"
 
 # this used to be false, now it's default
-multi_k_mode = True
-metagenomics = True
 use_bloocoo_preprocessing = True
 
 continue_scaffolding = False
@@ -459,7 +457,7 @@ if contigs is None: # need to create contigs, or are they given?
 
 
     if len(list_k_values) == 0:
-        max_k = get_read_length(paired_reads + unpaired_reads) #TODO: modify bloocoo so that it gives a read length histogram, rather than using this hacky procedure
+        max_k = get_read_length(paired_reads + unpaired_reads) #TODO: modify bloocoo so that it gives a read length histogram, rather than using this hacky procedure to get max read length
         if max_k <= 21:
             sys.exit("Reads are shorter than 21 base pairs? (%d bp at 90 percentile of read lengths over the first 1000 reads of each input file).\nNotify a developer if this estimation was wrong, or if your reads are really that short, please set the list of kmer lengths manually using the --kmer-sizes parameter" % max_k)
         # two implicit assumptions: do not make more than 20 rounds, and start at k=21 
@@ -486,9 +484,10 @@ if contigs is None: # need to create contigs, or are they given?
 
     last_k_value = 0
     previous_contigs = None if k_restart == -1 else  prefix+"_k%d.contigs.fa"%last_k_value_before_restart
+    """
+    multi-k minia iteration happens here
+    """
     for k in sorted(dict(cutoffs).keys()):
-        if k < last_k_value + step and not metagenomics:
-            continue
         min_abundance = dict(cutoffs)[k]
         log("Minia assembling at k=%d min_abundance=%d" % (k, min_abundance))
         extra_reads = [previous_contigs]*(min_abundance+1) if previous_contigs is not None else []
