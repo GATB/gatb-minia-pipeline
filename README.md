@@ -39,7 +39,7 @@ Prerequisites
 
 - bwa (for BESST)
 
-- Python >= 2.7 with the following modules (for BESST):
+- Python >= 2.7 and < 3 with the following modules (for BESST):
 
     * mathstats
     * scipy

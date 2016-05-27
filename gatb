@@ -3,9 +3,12 @@
 import sys, os, shutil
 from subprocess import call, Popen, PIPE, STDOUT, check_output
 import glob
-sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0) #unbuffered print, solves badly ordered stdout on clusters
 import multiprocessing
 nb_cpus = multiprocessing.cpu_count()
+
+
+if 3 > sys.version[0]: # only works in python 2
+    sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0) #unbuffered print, solves badly ordered stdout on clusters
 
 prefix="assembly"
 
@@ -53,7 +56,7 @@ max_memory = -1
 try:
 	nb_cores = int(check_output(["nproc"]))  # for bloocoo
 except:
-	print "machine has no nproc, setting bloocoo threads to 1"
+	print("machine has no nproc, setting bloocoo threads to 1")
 	nb_cores = 1
 
 # it's a hardcoded switch; only switch to sspace if you have good reasons to dislike besst! because besst rocks.
@@ -130,7 +133,7 @@ try:
 except:
     import traceback
     traceback.print_exc()
-    print doc
+    print(doc)
     sys.exit(1)
 
 DIR = os.path.dirname(os.path.realpath(__file__))
@@ -415,7 +418,7 @@ def get_read_length(list_reads):
                 import gzip
                 fp = gzip.open(reads_file)
                 ln = fp.read(2) # read arbitrary bytes to check if gzipped 
-            except Exception,e:
+            except Exception as e:
                 fp.close()
                 fp = open(reads_file)  
             # read the 1000 first reads

@@ -7,6 +7,7 @@ def readfq(fp): # this is a generator function
     while True: # mimic closure; is it a bad idea?
         if not last: # the first record or a record following a fastq
             for l in fp: # search for the start of the next record
+                print(l)
                 if l[0] in '>@': # fasta/q header line
                     last = l[:-1] # save this line
                     break
@@ -40,4 +41,4 @@ if __name__ == "__main__":
         n += 1
         slen += len(seq)
         qlen += qual and len(qual) or 0
-    print n, '\t', slen, '\t', qlen
+    print(n, '\t', slen, '\t', qlen)
