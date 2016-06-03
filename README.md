@@ -30,7 +30,7 @@ Installation
 
     git clone --recursive https://github.com/GATB/gatb-minia-pipeline
 
-    make test
+    cd gatb-minia-pipeline ; make test
 
 Usage
 -----
