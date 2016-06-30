@@ -1,0 +1,136 @@
+<!doctype html>
+<html class="no-js" lang="">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>template_allgo</title>
+
+  <link rel="icon" type="image/ico" href="favicon.ico">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <!-- Place favicon.ico in the root directory -->
+
+  <!-- build:css styles/vendor.css -->
+  <!-- bower:css -->
+  <link rel="stylesheet" href="/bower_components/bootflat/css/bootflat.css">
+  <link rel="stylesheet" href="/bower_components/bootstrap-select/dist/css/bootstrap-select.css">
+  <!-- endbower -->
+  <!-- endbuild -->
+
+  <!-- build:css styles/main.css -->
+  <link rel="stylesheet" href="styles/main.css">
+  <!-- endbuild -->
+
+  <!-- build:js scripts/vendor/modernizr.js -->
+  <script src="/bower_components/modernizr/modernizr.js"></script>
+  <!-- endbuild -->
+</head>
+
+<body>
+  <!--[if lt IE 10]>
+      <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+    <![endif]-->
+
+  <div class="container">
+    <div class="header">
+      <ul class="nav nav-pills pull-right">
+        <li class="active"><a href="#">Home</a></li>
+        <li><a href="#">About</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+      <h3 class="text-muted">template_allgo</h3>
+    </div>
+
+    <div class="jumbotron">
+      <h1>'Allo, 'Allo!</h1>
+      <p class="lead">Always a pleasure scaffolding your apps.</p>
+      <p><a class="btn btn-lg btn-success" href="#">Splendid!</a></p>
+    </div>
+
+    <div class="panel panel-default">
+      <div class="panel-body">
+        <form action="" method="POST" enctype="multipart/form-data" accept-charset="utf-8" id="formUpload">
+          <!-- Hidden Job ID -->
+          <input name="job[webapp_id]" value=[id_of_A||go_app] type="hidden" /> <!-- Change id of A||go app -->
+          <h4>Upload a file</h4>
+          <p class="text-info">Input image file (2D, 2D+time or 3D, tiff format):</p>
+          <!-- Hidden Input file -->
+          <input id="inputfile" style="display: none;" name="files[0]" type="file" />
+          <div class="input-group">
+            <input id="subfile" type="text" class="form-control" placeholder="Input file...">
+            <span class="input-group-btn">
+          <button class="btn btn-info" type="button" onclick="$('#inputfile').click();">
+            <span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span> &nbsp;&nbsp;Browse
+            </button>
+            </span>
+          </div>
+          <!-- END Input file -->
+          <hr>
+          <!-- Submit -->
+          <button type="submit" class="btn btn-primary pull-right">Envoyer</button>
+        </form>
+      </div>
+      <!-- END panel-body -->
+    </div>
+    <!-- END panel-default -->
+
+    <div class="row marketing">
+      <div class="col-lg-6">
+        <h4>HTML5 Boilerplate</h4>
+        <p>HTML5 Boilerplate is a professional front-end template for building fast, robust, and adaptable web apps or sites.</p>
+
+        <h4>Sass</h4>
+        <p>Sass is the most mature, stable, and powerful professional grade CSS extension language in the world.</p>
+
+        <h4>Bootstrap</h4>
+        <p>Sleek, intuitive, and powerful mobile first front-end framework for faster and easier web development.</p>
+        <h4>Modernizr</h4>
+        <p>Modernizr is an open-source JavaScript library that helps you build the next generation of HTML5 and CSS3-powered websites.</p>
+
+      </div>
+    </div>
+
+
+
+    <div class="footer">
+      <p>♥ from SED team ~ INRIA Bretagne</p>
+    </div>
+  </div>
+
+  <!-- build:js scripts/vendor.js -->
+  <!-- bower:js -->
+  <script src="/bower_components/jquery/dist/jquery.js"></script>
+  <script src="/bower_components/bootstrap-select/dist/js/bootstrap-select.js"></script>
+  <!-- endbower -->
+  <!-- endbuild -->
+
+  <!-- build:js scripts/plugins.js -->
+  <script src="/bower_components/bootstrap-sass/assets/javascripts/bootstrap/affix.js"></script>
+  <script src="/bower_components/bootstrap-sass/assets/javascripts/bootstrap/alert.js"></script>
+  <script src="/bower_components/bootstrap-sass/assets/javascripts/bootstrap/dropdown.js"></script>
+  <script src="/bower_components/bootstrap-sass/assets/javascripts/bootstrap/tooltip.js"></script>
+  <script src="/bower_components/bootstrap-sass/assets/javascripts/bootstrap/modal.js"></script>
+  <script src="/bower_components/bootstrap-sass/assets/javascripts/bootstrap/transition.js"></script>
+  <script src="/bower_components/bootstrap-sass/assets/javascripts/bootstrap/button.js"></script>
+  <script src="/bower_components/bootstrap-sass/assets/javascripts/bootstrap/popover.js"></script>
+  <script src="/bower_components/bootstrap-sass/assets/javascripts/bootstrap/carousel.js"></script>
+  <script src="/bower_components/bootstrap-sass/assets/javascripts/bootstrap/scrollspy.js"></script>
+  <script src="/bower_components/bootstrap-sass/assets/javascripts/bootstrap/collapse.js"></script>
+  <script src="/bower_components/bootstrap-sass/assets/javascripts/bootstrap/tab.js"></script>
+  <!-- Bootstrap-select's JS files.-->
+  <script src="/bower_components/bootstrap-select/dist/js/bootstrap-select.min.js"></script>
+  <script src="/bower_components/bootstrap-select/dist/js/i18n/defaults-en_US.min.js"></script>
+  <!-- endbuild -->
+
+  <!-- build:js scripts/main.js -->
+  <script src="scripts/main.js"></script>
+  <script src="scripts/form.js"></script>
+  <!-- Bootflat's JS files.-->
+  <script src="https://bootflat.github.io/bootflat/js/icheck.min.js"></script>
+  <script src="https://bootflat.github.io/bootflat/js/jquery.fs.selecter.min.js"></script>
+  <script src="https://bootflat.github.io/bootflat/js/jquery.fs.stepper.min.js"></script>
+  <!-- endbuild -->
+</body>
+
+</html>
