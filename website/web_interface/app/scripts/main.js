@@ -6,6 +6,10 @@
  * Send data (pictures, files, params, etc.) to A||go
  * @param  {FormData} formData [Data who have some data to send and number of application]
  */
+
+
+
+
 function sendQuery(formData) {
   $.ajax({
     type: 'POST',
@@ -19,12 +23,12 @@ function sendQuery(formData) {
       'Accept': 'application/json',
     },
     success: function(d, s, ex) {
-      console.log("success");
+      console.log('success');
       console.log(d);
       getAllgoResponseLoop(d);
     },
     error: function(d, s, ex) {
-      console.log("error");
+      console.log('error');
       console.log(d);
     }
   });
@@ -42,8 +46,11 @@ function getAllgoResponseLoop(data) {
       getAllgoResponseLoop(data);
     } else {
       if (result[data.id] !== undefined) {
-        var fileUrl = result[data.id]["[name_of_output]"]; //You must change the name of output file
+        var fileUrl = result[data.id]['assembly.fasta']; //You must change the name of output file
+        var fileUrl2 = result[data.id]['stats.json'];
         console.log(fileUrl);
+        console.log(fileUrl2);
+        document.getElementById("result_assembly").innerHTML="Completed<br /><a href='"+fileUrl+"'>Download</a><br /><a href='"+fileUrl2+"'>Stats</a>";
         getOutputFile(fileUrl);
       }
     }
@@ -65,14 +72,14 @@ function getAllgoResponse(data) {
       'Accept': 'application/json',
     },
     success: function(d, s, ex) {
-      console.log("success");
+      console.log('success');
       console.log(d);
       console.log(s);
       console.log(ex);
       result = d;
     },
     error: function(d, s, ex) {
-      console.log("error");
+      console.log('error');
       console.log(d);
       console.log(s);
       console.log(ex);

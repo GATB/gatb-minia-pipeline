@@ -6,7 +6,12 @@
  * Send upload file to A||go
  * @param  {id} '#formUpload' [ID of form for upload]
  * @return {boolean}               [false]
+
  */
+
+
+
+
 $('#formUpload').on('submit', function(event) {
   event.preventDefault();
   console.log('Envoi');
