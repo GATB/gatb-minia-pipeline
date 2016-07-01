@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # Module 1
 #GATB
 # This module will compute the GC% , Number of contigs , size of each contig
