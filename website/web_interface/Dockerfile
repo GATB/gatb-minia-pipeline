@@ -10,6 +10,11 @@
 FROM node:6
 MAINTAINER allgo@inria.fr
 
+ENV PACKAGES vim
+
+RUN apt-get update -y && \
+    apt-get install -y --no-install-recommends ${PACKAGES}
+
 RUN npm install gulp -g
 RUN npm install bower -g
 
