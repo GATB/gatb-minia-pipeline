@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta name="description" content="">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>template_allgo</title>
+  <title>GATB-Web</title>
 
   <link rel="icon" type="image/ico" href="favicon.ico">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -25,6 +25,8 @@
   <!-- build:js scripts/vendor/modernizr.js -->
   <script src="/bower_components/modernizr/modernizr.js"></script>
   <!-- endbuild -->
+
+  <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
 </head>
 
 <body>
@@ -39,22 +41,22 @@
         <li><a href="#">About</a></li>
         <li><a href="#">Contact</a></li>
       </ul>
-      <h3 class="text-muted">GATB</h3>
+      <h3 class="text-muted">Genome Assembly Tool Box</h3>
     </div>
 
-    <div class="jumbotron">
-      <h1>GATB-Web</h1>
-      <p class="lead">Get your Genome Assembly done.</p>
-      <p><a class="btn btn-lg btn-success" href="#">Splendid!</a></p>
+    <div class="jumbotron" id="jumbo">
+      <h1 class="g-web">GATB-Web</h1>
+      <p class="lead">Get your Genome Assembly Done.Online.</p>
+      <p><a class="btn btn-lg btn-success" href="#">For Bacterial Genomes.</a></p>
     </div>
 
-    <div class="panel panel-default">
+    <div class="panel panel-default" id="form-data">
       <div class="panel-body">
         <form action="" method="POST" enctype="multipart/form-data" accept-charset="utf-8" id="formUpload">
           <!-- Hidden Job ID -->
           <input name="job[webapp_id]" value=122 type="hidden" /> <!-- Change id of A||go app -->
           <h4>Upload a file</h4>
-          <p class="text-info">Input image file (2D, 2D+time or 3D, tiff format):</p>
+          <p class="text-info">Input Genomic file (fasta,.tar.gz format):</p>
           <!-- Hidden Input file -->
           <input id="inputfile" style="display: none;" name="files[0]" type="file" />
           <div class="input-group">
@@ -68,19 +70,30 @@
           <!-- END Input file -->
           <hr>
           <!-- Submit -->
-          <button type="submit" class="btn btn-primary pull-right">Envoyer</button>
+          <button type="submit" class="btn btn-primary pull-right">Get Result</button>
         </form>
       </div>
       <!-- END panel-body -->
     </div>
     <!-- END panel-default -->
- <div id="result_assembly">
-   
+ <div id="result_assembly" style="font-family:Roboto;font-size:30px;">
 
  </div>
+ <div id="assembly"></div>
+ <div id="stats" style="width:200px;">
+ 
+ </div>
+ <div id="basic_table">
+
+ </div>
+ <div id="result_table">
+
+
+ </div>
+  <!--
     <div class="row marketing">
       <div class="col-lg-6">
-        <h4>HTML5 Boilerplate</h4>
+        <h4>What is GATB?</h4>
         <p>HTML5 Boilerplate is a professional front-end template for building fast, robust, and adaptable web apps or sites.</p>
 
         <h4>Sass</h4>
@@ -93,11 +106,11 @@
 
       </div>
     </div>
-
+  -->
 
 
     <div class="footer">
-      <p>♥ from Genscale team ~ INRIA Bretagne</p>
+      <p>♥ from Genscale team ~ INRIA/IRISA Rennes</p>
     </div>
   </div>
 

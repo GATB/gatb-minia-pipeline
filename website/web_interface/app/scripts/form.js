@@ -14,8 +14,19 @@
 
 $('#formUpload').on('submit', function(event) {
   event.preventDefault();
-  console.log('Envoi');
+  //document.getElementById("jumbo").style="visibility:hidden";
+   //$("div").removeClass("jumbotron");
+   //$("h1").removeClass("g-web");
+   $("div").removeClass("jumbotron");
+   $("#jumbo").empty();
+   $("div").removeClass("panel panel-default");
+   $("#form-data").empty();
+   
+
+
+  console.log('Send');
   var formData = new FormData($(this)[0]);
+
   console.log(formData);
   sendQuery(formData);
   return false;
