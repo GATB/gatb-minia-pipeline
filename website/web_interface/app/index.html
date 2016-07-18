@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>GATB-Web</title>
 
-  <link rel="icon" type="image/ico" href="favicon.ico">
+  <link rel="icon" type="image/ico" href="https://upload.wikimedia.org/wikipedia/en/f/f3/INRIA_logo.png">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <!-- Place favicon.ico in the root directory -->
 
@@ -27,6 +27,29 @@
   <!-- endbuild -->
 
   <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
+
+  <style type="text/css">
+    .intro {
+  border: 16px solid #f3f3f3;
+  border-radius: 50%;
+  border-top: 16px solid #3498db;
+  width: 120px;
+  height: 120px;
+  -webkit-animation: spin 2s linear infinite;
+  animation: spin 2s linear infinite;
+ 
+}
+
+@-webkit-keyframes spin {
+  0% { -webkit-transform: rotate(0deg); }
+  100% { -webkit-transform: rotate(360deg); }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+  </style>
 </head>
 
 <body>
@@ -37,18 +60,22 @@
   <div class="container">
     <div class="header">
       <ul class="nav nav-pills pull-right">
-        <li class="active"><a href="#">Home</a></li>
+        <li class="active"><a href="index.html">Home</a></li>
         <li><a href="#">About</a></li>
         <li><a href="#">Contact</a></li>
       </ul>
-      <h3 class="text-muted">Genome Assembly Tool Box</h3>
+      <h3 class="text-muted">Online Bacterial Genome Assembler</h3>
+    </div>
+   
+    <div class="jumbotron" id="jumbo" style="font-family:Roboto">
+      
+      <p class="lead" style="font-weight:200;">Get your Bacterial Genome Assembly Done.Online.</p>
+      <!--
+      <p><a class="btn btn-lg btn-success" href="#">For Bacterial Genomes.</a></p>
+    -->
     </div>
 
-    <div class="jumbotron" id="jumbo">
-      <h1 class="g-web">GATB-Web</h1>
-      <p class="lead">Get your Genome Assembly Done.Online.</p>
-      <p><a class="btn btn-lg btn-success" href="#">For Bacterial Genomes.</a></p>
-    </div>
+ 
 
     <div class="panel panel-default" id="form-data">
       <div class="panel-body">
@@ -56,21 +83,53 @@
           <!-- Hidden Job ID -->
           <input name="job[webapp_id]" value=122 type="hidden" /> <!-- Change id of A||go app -->
           <h4>Upload a file</h4>
-          <p class="text-info">Input Genomic file (fasta,.tar.gz format):</p>
+          <br />
+          <select id="file_type" onchange="filetype();">
+            <option>Select type of File</option>
+            <option>Interleaved Paired Reads(1 File)</option>
+            <option>Non-Interleaved Paired Reads (2 File)</option>
+          </select>
+          <br /><br />
+          <p class="text-info">Input Read File(fasta,.tar.gz format):</p>
           <!-- Hidden Input file -->
           <input id="inputfile" style="display: none;" name="files[0]" type="file" />
-          <div class="input-group">
+          <div class="input-group" id="file-1">
             <input id="subfile" type="text" class="form-control" placeholder="Input file...">
             <span class="input-group-btn">
           <button class="btn btn-info" type="button" onclick="$('#inputfile').click();">
             <span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span> &nbsp;&nbsp;Browse
+
             </button>
             </span>
+
+           
+           
           </div>
+          <br />
+
+          <input id="inputfile2" style="display:none;" name="files[1]" type="file" />
+          <div class="input-group" id="file-2">
+            <input id="subfile2" type="text" class="form-control" placeholder= "Input file..." >
+            <span class="input-group-btn">
+          <button class="btn btn-info" type="button" onclick="$('#inputfile2').click();">
+            <span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span> &nbsp;&nbsp;Browse
+          </button>
+        </span>
+
+
+
+          </div>
+
+
+
+
           <!-- END Input file -->
           <hr>
           <!-- Submit -->
-          <button type="submit" class="btn btn-primary pull-right">Get Result</button>
+          <div style="font-size:14px;">File size limit : 2GB </div>
+          <br />
+          <button type="submit" class="btn btn-primary pull-right" style="position:relative;left:-78%;">Compute Assembly</button>
+          <br /><br />
         </form>
       </div>
       <!-- END panel-body -->
@@ -80,16 +139,25 @@
 
  </div>
  <div id="assembly"></div>
- <div id="stats" style="width:200px;">
- 
- </div>
+
  <div id="basic_table">
 
+ </div>
+  <div id="stat" style="">
+ 
  </div>
  <div id="result_table">
 
 
  </div>
+
+ <div id="chartContainer" style="">
+   
+ </div>
+
+ <div id="stats" style="width:200px">
+
+ </div><br /><br />
   <!--
     <div class="row marketing">
       <div class="col-lg-6">
@@ -107,10 +175,10 @@
       </div>
     </div>
   -->
-
+  
 
     <div class="footer">
-      <p>♥ from Genscale team ~ INRIA/IRISA Rennes</p>
+      <p>Made with ♥ from Genscale team ~ INRIA/IRISA Rennes  <br /> For more information visit  <a href="https://gatb.inria.fr">GATB</a></p>
     </div>
   </div>
 
@@ -142,6 +210,7 @@
   <!-- build:js scripts/main.js -->
   <script src="scripts/main.js"></script>
   <script src="scripts/form.js"></script>
+
   <!-- Bootflat's JS files.-->
   <script src="https://bootflat.github.io/bootflat/js/icheck.min.js"></script>
   <script src="https://bootflat.github.io/bootflat/js/jquery.fs.selecter.min.js"></script>
@@ -150,3 +219,24 @@
 </body>
 
 </html>
+
+
+<script type="text/javascript">
+ function filetype()
+ {
+
+   var s = document.getElementById("file_type").value;
+   console.log(s);
+
+   if(s=="Interleaved Paired Reads(1 File)")
+   {
+     document.getElementById("file-2").style="display:none";
+
+     console.log("into interleaved");
+   }
+   else if(s=="Non-Interleaved Paired Reads (2 File)")
+   {
+     document.getElementById("file-2").style="display:";
+   }
+ }
+</script>
