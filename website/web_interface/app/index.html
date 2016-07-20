@@ -15,6 +15,8 @@
   <!-- bower:css -->
   <link rel="stylesheet" href="/bower_components/bootflat/css/bootflat.css">
   <link rel="stylesheet" href="/bower_components/bootstrap-select/dist/css/bootstrap-select.css">
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.10.12/css/dataTables.bootstrap.min.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" >
   <!-- endbower -->
   <!-- endbuild -->
 
@@ -48,6 +50,11 @@
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+#getcontig
+{
+  width:200px;
 }
   </style>
 </head>
@@ -87,7 +94,14 @@
           <select id="file_type" onchange="filetype();">
             <option>Select type of File</option>
             <option>Interleaved Paired Reads(1 File)</option>
-            <option>Non-Interleaved Paired Reads (2 File)</option>
+            <option>Non-Interleaved Paired Reads (2 Files)</option>
+          </select>
+
+          <br /><br />
+          <select id="mode" onchange="filetype(); ">
+            <option>Select your mode</option>
+            <option>File</option>
+            <option>Url</option>
           </select>
           <br /><br />
           <p class="text-info">Input Read File(fasta,.tar.gz format):</p>
@@ -119,6 +133,8 @@
 
 
           </div>
+          <br />
+          <input id="inputfile3" name="file_url" type="text" placeholder="Url of the file.." />
 
 
 
@@ -154,10 +170,14 @@
  <div id="chartContainer" style="">
    
  </div>
+<div id="getcontigs" style="width:200px;">
 
+ </div>
  <div id="stats" style="width:200px">
 
  </div><br /><br />
+
+ 
   <!--
     <div class="row marketing">
       <div class="col-lg-6">
@@ -207,9 +227,16 @@
   <script src="/bower_components/bootstrap-select/dist/js/i18n/defaults-en_US.min.js"></script>
   <!-- endbuild -->
 
+
+  <script src="//code.jquery.com/jquery-1.12.3.js"></script>
+  <script src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/1.10.12/js/dataTables.bootstrap.min.js"></script>
+
   <!-- build:js scripts/main.js -->
   <script src="scripts/main.js"></script>
   <script src="scripts/form.js"></script>
+  <script src="scripts/download.js"></script>
+  <script src="scripts/checker.js"></script>
 
   <!-- Bootflat's JS files.-->
   <script src="https://bootflat.github.io/bootflat/js/icheck.min.js"></script>
@@ -221,22 +248,3 @@
 </html>
 
 
-<script type="text/javascript">
- function filetype()
- {
-
-   var s = document.getElementById("file_type").value;
-   console.log(s);
-
-   if(s=="Interleaved Paired Reads(1 File)")
-   {
-     document.getElementById("file-2").style="display:none";
-
-     console.log("into interleaved");
-   }
-   else if(s=="Non-Interleaved Paired Reads (2 File)")
-   {
-     document.getElementById("file-2").style="display:";
-   }
- }
-</script>
