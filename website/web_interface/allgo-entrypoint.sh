@@ -85,7 +85,7 @@ run_module_download() {
   echo "Running run_module_download ..."
 
   [ -z "$file_url" ] && usage
-  [ -z "$contigs_list" ] && { echo "No contigs_list specified, all contigs will be downloaded ..."; }
+  [ -z "$contigs_list" ] && { echo "No contigs_list specified, NO contigs will be downloaded ..."; }
 
   wget $file_url
    
