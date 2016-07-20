@@ -2,9 +2,13 @@
 # Dockerfile:
 #   to start a template web interface using an App deployed in the A||go compute engine
 #--------------------------------------------------------------------------------------
-# Usage:
-#   build with : docker build -t template_allgo .
-#   run   with : docker run -d -p 26000:3000 --name template_allgo template_allgo
+# Example usage:
+#   (!) with git clone https
+#   git clone https://cdeltel@scm.gforge.inria.fr/authscm/cdeltel/git/gatb-pipeline/gatb-pipeline.git git-https-gatb-pipeline
+#   git checkout website
+#   cd git-https-gatb-pipeline
+#   docker build -f website/web_interface/Dockerfile -t template_allgo .
+#   docker run -d -p 26000:3000 --name template_allgo template_allgo
 #######################################################################################
 
 FROM node:6
@@ -19,9 +23,10 @@ RUN npm install gulp -g
 RUN npm install bower -g
 
 #RUN git clone http://gitlab.irisa.fr/mileem/template_allgo.git
-ADD . /code
+ADD . /git-gatb-pipeline
 
-RUN cd /code
+RUN ln -s /git-gatb-pipeline/website/web_interface /code
+RUN cd /code 
 RUN cd /code && npm install gulp --save-dev
 RUN echo '{ "allow_root": true }' > /root/.bowerrc
 RUN cd /code && npm install bower --save-dev
