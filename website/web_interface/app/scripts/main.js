@@ -62,7 +62,9 @@ function getAllgoResponseLoop(data,token) {
     } else {
       if (result[data.id] !== undefined) {
         var fileUrl = result[data.id]['assembly_NOT_YET_sorted_by_size.fasta']; //You must change the name of output file
-        console.log("File Url - assembly ");
+
+        //changer(fileUrl);
+        console.log('File Url - assembly ');
         console.log(fileUrl);
         var fileUrl2 = result[data.id]['stats.json'];
         console.log(fileUrl);
@@ -73,8 +75,8 @@ function getAllgoResponseLoop(data,token) {
 
         document.getElementById('result_assembly').style='font-size:30px;font-weight:100;';
         document.getElementById('result_assembly').innerHTML='Summary';
-        document.getElementById('stat').style="font-size:30px;font-weight:100;";
-        document.getElementById('stat').innerHTML = "<br />List of Contigs";       
+        document.getElementById('stat').style='font-size:30px;font-weight:100;';
+        document.getElementById('stat').innerHTML = '<br />List of Contigs';       
         //Function for parsing through the JSON file 
 
         // Formation of the table
@@ -82,19 +84,19 @@ function getAllgoResponseLoop(data,token) {
         console.log( 'JSON Data: ' + json.sizes[0] );
 
 
-        var download = '<a href=\''+fileUrl +'\' class=\'btn btn-primary btn-block\'>Download All Contigs</a>';
-        console.log("File url");
+        var download = '<a href=\''+fileUrl +'\' class=\'btn btn-primary btn-block\' id="all" >Download All Contigs</a>';
+        console.log('File url');
         console.log(fileUrl);
         document.getElementById('stats').innerHTML = '<br /><br />'+download;
         //Formation of the mains table
 
-        var basic_header = '<table class=\'table\'><tr><th>Features</th><th></th></tr><tr><td>No.of Contigs</td><td>'+json.contig_number+'</td></tr><tr><td>N50</td><td>'+json.N50+'</td></tr><tr><td>Total Size</td><td>'+json.total_size+'</td></tr><tr><td>GC%</td><td>'+ json.GC+ '</td></tr><tr><td>L50</td><td>'+ json.L50+'</td></tr></table>';
+        var basic_header = '<table class=\'table\'><tr><th>Features</th><th></th></tr><tr><td>No.of Contigs</td><td>'+json.contig_number+'</td></tr><tr><td>N50</td><td>'+json.N50+'</td></tr><tr><td>Total Size</td><td>'+json.total_size+'</td></tr><tr><td>GC%</td><td>'+ (json.GC).toFixed(2)+ '</td></tr><tr><td>L50</td><td>'+ json.L50+'</td></tr></table>';
 
         document.getElementById('basic_table').innerHTML = '<br /><br />' + basic_header;
 
         //Formation of the results table 
 
-        var string_header='<table class=\'table\'><tr><th>Contig No.</th><th>Contig-Size</th><th>Download</th></tr>';
+        var string_header='<table id="example" class=\'table table-striped table-bordered\'><thead><tr><th>Contig No.</th><th>Contig-Size</th><th>Download</th></tr></thead><tfoot><tr><th>Contig No.</th><th>Contig-Size</th><th>Download</th></tr></tfoot><tbody>';
         var no_of_contigs = json.sizes.length;
         var i;
 
@@ -103,15 +105,18 @@ function getAllgoResponseLoop(data,token) {
         for(i=0;i<no_of_contigs;i++)
         {
            var num = i+1;
-           string_header = string_header + '<tr><td>'+ num + '</td><td>'+ json.sizes[i]+'</td><td><input type=\'checkbox\' name=\'Download\'></td></tr>';
+           string_header = string_header + '<tr><td class="numbers">'+ num + '</td><td>'+ json.sizes[i]+'</td><td><input type=\'checkbox\' class=\'down\' name=\'Download\'></td></tr>';
 
         }
 
-        string_header = string_header +'</table>';
+        string_header = string_header +'</tbody></table>';
 
-        document.getElementById('result_table').innerHTML = '<br /><br />'+ string_header;
+        document.getElementById('result_table').innerHTML = '<br /><br />'+ string_header + '<br /><button class="btn btn-primary btn-block" id="getcontig" onclick=\'get_download();\' >Get Contigs</button>';
         
-       
+        $(document).ready(function() {
+           console.log('into example');
+           $('#example').DataTable();
+        });
 
 
 
