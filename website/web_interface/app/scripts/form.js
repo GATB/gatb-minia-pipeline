@@ -21,13 +21,13 @@ $('#formUpload').on('submit', function(event) {
    //$("div").removeClass("jumbotron");
    //$("h1").removeClass("g-web");
 
-   var value = $('#subfile').val();
-   if(value=='')
-   {
-    alert('Please upload a File!');
-   }
-   else {
+   var value1 = $('#subfile').val();
+   
+   var value2 = $('#subfile2').val();
 
+   var value3 = $('#inputfile3').val();
+
+  
    $('div').removeClass('jumbotron');
    $('#jumbo').empty();
    $('div').removeClass('panel panel-default');
@@ -35,16 +35,25 @@ $('#formUpload').on('submit', function(event) {
 
    var d =document.getElementById('result_assembly');
     d.className = 'intro';
+
    
+
 
 
   console.log('Send');
   var formData = new FormData($(this)[0]);
-  console.log("The formdata is");
+  //formData.append('job[file_url]', 'http://gatb-pipeline.gforge.inria.fr/test/SRR959239_1_small_100Klines.fastq.gz');
+   if(value1=='' && value2=='' && value3!='')
+   {
+    console.log('No Files are uploaded, but url is given');
+    
+    console.log(value3);
+    formData.append('job[file_url]', value3);
+   }
+  console.log('The formdata is');
   console.log(formData);
   sendQuery(formData);
   return false;
-}
 
 });
 
@@ -56,6 +65,8 @@ $('#formUpload').on('submit', function(event) {
 $(document).ready(function() {
   $('#inputfile').change(function() {
     $('#subfile').val($(this).val()); // Duplicate value to subfile
+    
+
   });
 });
 
