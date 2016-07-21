@@ -9,8 +9,9 @@
 #   without developer access:
 #      git clone https://github.com/GATB/gatb-minia-pipeline.git
 #   with developer access
+#      bash
 #      export INRIA_FORGE_LOGIN=xxxx  
-#      git clone https://${INRIA_FORGE_LOGIN}@scm.gforge.inria.fr/authscm/${NRIA_FORGE_LOGIN}/git/gatb-pipeline/gatb-pipeline.git git-https-gatb-pipeline
+#      git clone https://${INRIA_FORGE_LOGIN}@scm.gforge.inria.fr/authscm/${INRIA_FORGE_LOGIN}/git/gatb-pipeline/gatb-pipeline.git git-https-gatb-pipeline
 #
 #   Then:
 #      cd git-https-gatb-pipeline
