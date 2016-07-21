@@ -2,3 +2,7 @@ CHANGELOG
 kmergenie
 archive
 token.json
+.tmp/
+bower_components/
+dist/
+node_modules/
