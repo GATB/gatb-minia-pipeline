@@ -2,13 +2,21 @@
 # Dockerfile:
 #   to start a template web interface using an App deployed in the A||go compute engine
 #--------------------------------------------------------------------------------------
+#
 # Example usage:
+#
 #   (!) with git clone https
-#   git clone https://cdeltel@scm.gforge.inria.fr/authscm/cdeltel/git/gatb-pipeline/gatb-pipeline.git git-https-gatb-pipeline
-#   git checkout website
-#   cd git-https-gatb-pipeline
-#   docker build -f website/web_interface/Dockerfile -t template_allgo .
-#   docker run -d -p 26000:3000 --name template_allgo template_allgo
+#   without developer access:
+#      git clone https://github.com/GATB/gatb-minia-pipeline.git
+#   with developer access
+#      export INRIA_FORGE_LOGIN=xxxx  
+#      git clone https://${INRIA_FORGE_LOGIN}@scm.gforge.inria.fr/authscm/${NRIA_FORGE_LOGIN}/git/gatb-pipeline/gatb-pipeline.git git-https-gatb-pipeline
+#
+#   Then:
+#      cd git-https-gatb-pipeline
+#      git checkout website
+#      docker build -f website/web_interface/Dockerfile -t template_allgo .
+#      docker run -d -p 26000:3000 --name template_allgo template_allgo
 #######################################################################################
 
 FROM node:6
