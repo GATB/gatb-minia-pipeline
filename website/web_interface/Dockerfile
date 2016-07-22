@@ -16,6 +16,7 @@
 #   Then:
 #      cd git-https-gatb-pipeline
 #      git checkout website
+#      put token file at right location
 #      docker build -f website/web_interface/Dockerfile -t template_allgo .
 #      docker run -d -p 26000:3000 --name template_allgo template_allgo
 #######################################################################################
@@ -41,6 +42,11 @@ RUN echo '{ "allow_root": true }' > /root/.bowerrc
 RUN cd /code && npm install bower --save-dev
 RUN cd /code && npm install
 RUN cd /code && bower --allow-root --config.interactive=false install
+
+# Developer mode
 CMD cd /code && gulp serve
+
+# Once the dev is OK, manually launch "gulp" from the /code directory, this generates the 
+# dist/ folder, which is ready for production.
 
 EXPOSE 3000
