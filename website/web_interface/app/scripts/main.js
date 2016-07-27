@@ -58,9 +58,11 @@ function getAllgoResponseLoop(data,token) {
       getAllgoResponseLoop(data,token);
     var d =document.getElementById('result_assembly');
     d.className = 'intro';
+    document.getElementById("assembly_test").innerHTML = "Please wait, job is running<br /> Running time maybe a few minutes depending on File size";
     
     } else {
       if (result[data.id] !== undefined) {
+        document.getElementById("assembly_test").innerHTML = "";
         var fileUrl = result[data.id]['assembly_NOT_YET_sorted_by_size.fasta']; //You must change the name of output file
 
         //changer(fileUrl);
