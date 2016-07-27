@@ -32,7 +32,7 @@ function filetype()
    {
      document.getElementById('file-2').style='display:none';
      document.getElementById('inputfile3').style='display:none;'
-     document.getElementById('file-1').style="";
+     document.getElementById('file-1').style="display:block";
 
      $('#inputfile').bind('change', function() {
 
@@ -59,8 +59,8 @@ function filetype()
    //When both files are getting uploaded
    else if(s=='Non-Interleaved Paired Reads (2 Files)' && mode=='File')
    {
-     document.getElementById('file-1').style="";
-     document.getElementById('file-2').style='';
+     document.getElementById('file-1').style="display:block";
+     document.getElementById('file-2').style='display:block';
 
      document.getElementById('inputfile3').style='display:none';
       
