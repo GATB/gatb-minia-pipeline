@@ -147,6 +147,8 @@ count_last = 0
 
 for i in range(pos_last,length):
 	count_last = count_last + 1
+	if file_read[i]=='>':
+		break
 
 
 if count_contig<10:
