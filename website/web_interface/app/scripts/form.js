@@ -9,13 +9,6 @@
 
  */
 
-/**
- * This scripts handles the formData submitted through the form
- * Checks the uploaded file and validates if it is correct
- * Sends File to A||GO, wait for computation and returns the output once job is finished
-
-*/
-
 
 
 
@@ -23,24 +16,30 @@ $('#formUpload').on('submit', function(event) {
 
   
  
-   event.preventDefault();    
-   
-   // Obtaining the values of the three fields of file upload
+  event.preventDefault();
+  //document.getElementById("jumbo").style="visibility:hidden";
+   //$("div").removeClass("jumbotron");
+   //$("h1").removeClass("g-web");
+
+  
+
    var value1 = $('#subfile').val();
-   var value2 = $('#subfile2').val();
-   var value3 = $('#inputfile3').val();
+  var value2 = $('#subfile2').val();
+  var value3 = $('#inputfile3').val();
+
+
 
    //Creating conditions for Checking empty File
+
    var type = document.getElementById("file_type").value;
    var mode = document.getElementById("mode").value;
 
-   // If Non-Interleaved condition, it checks if both files have been uploaded
    if(type == 'Non-Interleaved Paired Reads (2 Files)'){
 
      var value1 = $('#subfile').val();
    
      var value2 = $('#subfile2').val();
- 
+
      if(value1=="" || value2==""){
       alert("Please upload a File!");
       return;
@@ -48,8 +47,6 @@ $('#formUpload').on('submit', function(event) {
 
    }
 
-   //If Interleaved Paired reads condition and mode is File - checks if file field is not empty
-   //If empty, the procedure stops and user is prompted to upload a file
    else if(type == 'Interleaved Paired Reads (1 File)'){
     if(mode=="File"){
      var value1 = $("#subfile").val();
@@ -68,29 +65,51 @@ $('#formUpload').on('submit', function(event) {
 
 
    }
-   
-   // This condition checks when the user hasn't selected anything from dropdown
-   // In that case, the user is prompted to enter valid files
-   if(value1=="" && value2=="" && value3==""){
+
+   if(value1=="" && value2=="" && value3=="")
+   {
     alert("Please select correct options and upload Files");
     return;
    }
 
 
-   //Cleaning up the form, for the results to be displayed
+
+
+
+
+
+
+
+
+   console.log($('#file_type').val());
+   console.log($('#mode').val());
+  
+   //
+   
+
+  
    $('div').removeClass('jumbotron');
    $('#jumbo').empty();
    $('div').removeClass('panel panel-default');
    $('#form-data').empty();
 
    var d =document.getElementById('result_assembly');
-   d.className = 'intro';
-   
-   // Basic FormData from the form
-   var formData = new FormData($(this)[0]);
+    d.className = 'intro';
 
-  // Appending of parameters to the formData according to the entry point script
-  // In case of two files - Non Interleaved Case
+   
+
+
+
+  console.log('Send');
+  var formData = new FormData($(this)[0]);
+
+  /**
+   *   Construction of parameters for Multiple Files
+   *   Appending of parameters to formData --- formData.append()
+   *   Parameters depend on name of the File
+
+
+  */
   if(type == 'Non-Interleaved Paired Reads (2 Files)'){
 
      console.log("Noninterleaved Case");
@@ -100,9 +119,6 @@ $('#formUpload').on('submit', function(event) {
      formData.append('job[param]',parameter);
 
   }
-
-  //Appending of parameters to the formData according to the entry point script
-  // In case of one file - Interleaved Paired Reads Case
   else if(type == 'Interleaved Paired Reads (1 File)' && mode=="File"){
     console.log("Interleaved Case");
     //Parameter or one file
@@ -110,22 +126,42 @@ $('#formUpload').on('submit', function(event) {
       formData.append('job[param]',parameter);
 
   }
+
+
   
-  // Appending the URL in case of One File Case and upload via file_url
-  if(value3!=''){
+
+
+
+
+
+  
+   if(value3!='')
+   {
     console.log('No Files are uploaded, but url is given');
     
     console.log(value3);
-    formData.append('job[file_url]', value3);
-  }
 
+    var temp_path = value3.split('/');
+    var temp_path_length = temp_path.length;
+    var path = temp_path[temp_path_length - 1];
+    console.log(path);
+
+    var parameter = "-t pipeline --12 /tmp/"+path;
+    formData.append('job[param]',parameter);
+    formData.append('job[file_url]', value3);
+   }
+  console.log('The formdata is');
+  console.log(formData);
   sendQuery(formData);
   return false;
 
 });
 
 
-
+/**
+ * CUSTOM TEMPLATE
+ * All function about form custom
+ */
 $(document).ready(function() {
   $('#inputfile').change(function() {
     $('#subfile').val($(this).val()); // Duplicate value to subfile
@@ -141,4 +177,3 @@ $(document).ready(function() {
 });
 
 
-//END OF script which handles the form
