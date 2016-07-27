@@ -56,6 +56,15 @@
 {
   width:200px;
 }
+
+#inputfile3{
+ width:100%;
+}
+
+.tool_info{
+  height:20px;
+  width:20px;
+}
   </style>
 </head>
 
@@ -68,19 +77,23 @@
     <div class="header">
       <ul class="nav nav-pills pull-right">
         <li class="active"><a href="index.html">Home</a></li>
-        <li><a href="#">About</a></li>
-        <li><a href="#">Contact</a></li>
+        <li><a href="info.html">Help</a></li>
+        <li><a href="https://github.com/GATB/gatb-minia-pipeline/issues">Contact</a></li>
       </ul>
       <h3 class="text-muted">Online Bacterial Genome Assembler</h3>
+      
+      
     </div>
    
+
+<!--
     <div class="jumbotron" id="jumbo" style="font-family:Roboto">
       
       <p class="lead" style="font-weight:200;">Get your Bacterial Genome Assembly Done.Online.</p>
-      <!--
-      <p><a class="btn btn-lg btn-success" href="#">For Bacterial Genomes.</a></p>
-    -->
-    </div>
+  
+    </div> 
+
+-->
 
  
 
@@ -89,26 +102,30 @@
         <form action="" method="POST" enctype="multipart/form-data" accept-charset="utf-8" id="formUpload">
           <!-- Hidden Job ID -->
           <input name="job[webapp_id]" value=122 type="hidden" /> <!-- Change id of A||go app -->
-          <h4>Upload a file</h4>
+          <h4>Upload Data</h4>
           <br />
           <select id="file_type" onchange="filetype();">
-            <option>Select type of File</option>
-            <option>Interleaved Paired Reads(1 File)</option>
+            <option>Select Read Type</option>
+            <option>Interleaved Paired Reads (1 File)</option>
             <option>Non-Interleaved Paired Reads (2 Files)</option>
           </select>
+          <a href="#"><img class="tool_info" data-toggle="tooltip" title="Type of Read File can be Interleaved Paired Reads - 1 File. It can be Non- Interleaved Paired Reads - 2 File" src="help.png" /></a>
 
           <br /><br />
           <select id="mode" onchange="filetype(); ">
-            <option>Select your mode</option>
-            <option>File</option>
-            <option>Url</option>
+            <option value="Select">Select Data Access</option>
+            <option value="File">File</option>
+            <option value="URL">URL</option>
           </select>
+
+          <a href="#"><img class="tool_info" data-toggle="tooltip" title="Mode of File can be URL in case of only one File upload" src="help.png" /></a>
+
           <br /><br />
-          <p class="text-info">Input Read File(fasta,.tar.gz format):</p>
+          <p class="text-info">Input Read File (fasta,.tar.gz format):</p>
           <!-- Hidden Input file -->
           <input id="inputfile" style="display: none;" name="files[0]" type="file" />
-          <div class="input-group" id="file-1">
-            <input id="subfile" type="text" class="form-control" placeholder="Input file...">
+          <div class="input-group" id="file-1" style="display:none;">
+            <input id="subfile" type="text" class="form-control" placeholder="Input file..." readonly="readonly">
             <span class="input-group-btn">
           <button class="btn btn-info" type="button" onclick="$('#inputfile').click();">
             <span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span> &nbsp;&nbsp;Browse
@@ -122,8 +139,8 @@
           <br />
 
           <input id="inputfile2" style="display:none;" name="files[1]" type="file" />
-          <div class="input-group" id="file-2">
-            <input id="subfile2" type="text" class="form-control" placeholder= "Input file..." >
+          <div class="input-group" id="file-2" style="display:none;">
+            <input id="subfile2" type="text" class="form-control" placeholder= "Input file..." readonly="readonly">
             <span class="input-group-btn">
           <button class="btn btn-info" type="button" onclick="$('#inputfile2').click();">
             <span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span> &nbsp;&nbsp;Browse
@@ -134,7 +151,7 @@
 
           </div>
           <br />
-          <input id="inputfile3" name="file_url" type="text" placeholder="Url of the file.." />
+          <input id="inputfile3" name="file_url" type="text" placeholder="Url of the file.." style="display:none" />
 
 
 
@@ -153,7 +170,8 @@
     <!-- END panel-default -->
  <div id="result_assembly" style="font-family:Roboto;font-size:30px;">
 
- </div>
+ </div><br />
+ <div id="assembly_test"></div>
  <div id="assembly"></div>
 
  <div id="basic_table">
@@ -253,3 +271,9 @@ window.onbeforeunload = function() {
     return "Leaving this page will reset the wizard";
 };
 </script>
+
+
+<!--
+ Use of unicode values for heart.
+
+  -->
