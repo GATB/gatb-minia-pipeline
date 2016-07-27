@@ -21,11 +21,71 @@ $('#formUpload').on('submit', function(event) {
    //$("div").removeClass("jumbotron");
    //$("h1").removeClass("g-web");
 
-   var value1 = $('#subfile').val();
-   
-   var value2 = $('#subfile2').val();
+  
 
-   var value3 = $('#inputfile3').val();
+   var value1 = $('#subfile').val();
+  var value2 = $('#subfile2').val();
+  var value3 = $('#inputfile3').val();
+
+
+
+   //Creating conditions for Checking empty File
+
+   var type = document.getElementById("file_type").value;
+   var mode = document.getElementById("mode").value;
+
+   if(type == 'Non-Interleaved Paired Reads (2 Files)'){
+
+     var value1 = $('#subfile').val();
+   
+     var value2 = $('#subfile2').val();
+
+     if(value1=="" || value2==""){
+      alert("Please upload a File!");
+      return;
+     }
+
+   }
+
+   else if(type == 'Interleaved Paired Reads (1 File)'){
+    if(mode=="File"){
+     var value1 = $("#subfile").val();
+     if(value1==""){
+      alert("Please upload a File!");
+      return;
+     }
+    }
+    else if(mode=="URL"){
+      var value3 = $('#inputfile3').val();
+      if(value3==""){
+        alert("Please upload a File!");
+        return;
+      }
+    }
+
+
+   }
+
+   if(value1=="" && value2=="" && value3=="")
+   {
+    alert("Please select correct options and upload Files");
+    return;
+   }
+
+
+
+
+
+
+
+
+
+
+   console.log($('#file_type').val());
+   console.log($('#mode').val());
+  
+   //
+   
 
   
    $('div').removeClass('jumbotron');
@@ -42,8 +102,40 @@ $('#formUpload').on('submit', function(event) {
 
   console.log('Send');
   var formData = new FormData($(this)[0]);
-  //formData.append('job[file_url]', 'http://gatb-pipeline.gforge.inria.fr/test/SRR959239_1_small_100Klines.fastq.gz');
-   if(value1=='' && value2=='' && value3!='')
+
+  /**
+   *   Construction of parameters for Multiple Files
+   *   Appending of parameters to formData --- formData.append()
+   *   Parameters depend on name of the File
+
+
+  */
+  if(type == 'Non-Interleaved Paired Reads (2 Files)'){
+
+     console.log("Noninterleaved Case");
+     //Parameter for two files
+     var parameter =  "-t pipeline -1 /tmp/"+value1+" -2 /tmp/"+value2;
+     console.log(parameter);
+     formData.append('job[param]',parameter);
+
+  }
+  else if(type == 'Interleaved Paired Reads (1 File)' && mode=="File"){
+    console.log("Interleaved Case");
+    //Parameter or one file
+      var parameter = "-t pipeline --12 /tmp/"+value1;
+      formData.append('job[param]',parameter);
+
+  }
+
+
+  
+
+
+
+
+
+  
+   if(value3!='')
    {
     console.log('No Files are uploaded, but url is given');
     
