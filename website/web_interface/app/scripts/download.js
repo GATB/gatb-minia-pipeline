@@ -28,7 +28,7 @@ function get_download()
     console.log(file_url);
 	var radios = document.getElementsByName('Download');
   var nums = document.getElementsByClassName('numbers');
-  console.log(nums[1].textContent);
+  //console.log(nums[1].textContent);
 	for(i=0;i<radios.length;i++)
 	{
 		if(radios[i].checked)
@@ -47,7 +47,10 @@ function get_download()
 	var formData = new FormData();
 	formData.append('job[webapp_id]',122);
 	//console.log(file_url);
-	formData.append('job[param]','-t download -c '+temp+' -u '+file_url);
+  temp = "[" + temp + "]";
+
+  console.log(temp);
+	formData.append('job[param]','-t download ' + file_url + ' ' + temp);
 	console.log(formData);
 
 	sendQuery2(formData);
