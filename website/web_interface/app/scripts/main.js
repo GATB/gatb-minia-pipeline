@@ -1,15 +1,17 @@
 /**
- * Connect template to A||go plateform via A||go API
+ * Connect template to A||go platform via A||go API
+ * This script does the following pperations
+ * Sends data to A||GO via sendQuery
+ * Wait for A||GO to run the job and checks via getAllgoResponseLoop
+ * Once job finished, getAllgoResponse gets the output file, which is then provided to the user
  */
+
+
 
 /**
  * Send data (pictures, files, params, etc.) to A||go
  * @param  {FormData} formData [Data who have some data to send and number of application]
- */
-
-
-
- 
+ */ 
 function sendQuery(formData) {
 
   var tok;
@@ -40,7 +42,7 @@ function sendQuery(formData) {
     }
   });
 
-});
+ });
 
 
   
@@ -54,27 +56,28 @@ function getAllgoResponseLoop(data,token) {
   var result;
   setTimeout(function() {
     result = getAllgoResponse(data,token);
+
+    // LOOPING when the job is not finished
+    // This process continuously checks if Allgo has completed it's job
     if (result.status !== undefined) {
       getAllgoResponseLoop(data,token);
     var d =document.getElementById('result_assembly');
     d.className = 'intro';
     document.getElementById("assembly_test").innerHTML = "Please wait, job is running<br /> Running time maybe a few minutes depending on File size";
     
-    } else {
+    } 
+
+    // If result is computed then getAllgoResponse is called which gives the result
+    // This result is displayed, in the format as depicted in the script
+    else {
       if (result[data.id] !== undefined) {
+
+        //Setting of HTML when output is available
         document.getElementById("assembly_test").innerHTML = "";
         var fileUrl = result[data.id]['assembly_NOT_YET_sorted_by_size.fasta']; //You must change the name of output file
-
-        //changer(fileUrl);
-        console.log('File Url - assembly ');
-        console.log(fileUrl);
         var fileUrl2 = result[data.id]['stats.json'];
-        console.log(fileUrl);
-        console.log(fileUrl2);
-        //Giving user an option
         var e = document.getElementById('result_assembly');
         e.className = '';
-
         document.getElementById('result_assembly').style='font-size:30px;font-weight:100;';
         document.getElementById('result_assembly').innerHTML='Summary';
         document.getElementById('stat').style='font-size:30px;font-weight:100;';
@@ -104,8 +107,7 @@ function getAllgoResponseLoop(data,token) {
 
         console.log(no_of_contigs);
 
-        for(i=0;i<no_of_contigs;i++)
-        {
+        for(i=0;i<no_of_contigs;i++){
            var num = i+1;
            string_header = string_header + '<tr><td class="numbers">'+ num + '</td><td>'+ json.sizes[i]+'</td><td><input type=\'checkbox\' class=\'down\' name=\'Download\'></td></tr>';
 
@@ -127,7 +129,7 @@ function getAllgoResponseLoop(data,token) {
 
      
 
-
+        //Obtaining the output file
         getOutputFile(fileUrl);
       }
     }
