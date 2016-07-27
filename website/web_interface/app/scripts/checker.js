@@ -130,7 +130,7 @@ function filetype()
    {
      document.getElementById('file-1').style='display:none;';
      document.getElementById('file-2').style='display:none;';
-     document.getElementById('inputfile3').style='';
+     document.getElementById('inputfile3').style='display:block';
 
 
      var xhr = $.ajax({
