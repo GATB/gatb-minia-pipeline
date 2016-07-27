@@ -26,10 +26,6 @@ url = sys.argv[1]
 #Reading the file from the url
 txt = urllib2.urlopen(url).read()
 
-#Finding the job id
-job_id = url.split("/")[6]
-
-
 #Naming the file uniquely
 file_name = "temp" + str(job_id) + ".fasta"
 
