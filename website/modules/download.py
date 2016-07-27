@@ -27,7 +27,7 @@ url = sys.argv[1]
 txt = urllib2.urlopen(url).read()
 
 #Naming the file uniquely
-file_name = "temp" + str(job_id) + ".fasta"
+file_name = "temp" + ".fasta"
 
 #print file_name
 
