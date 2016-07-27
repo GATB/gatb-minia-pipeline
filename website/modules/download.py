@@ -44,7 +44,7 @@ f.write(txt)
 for seq_record in SeqIO.parse(file_name, "fasta"):
 	if seq_record.id in download:
 		
-		print seq_record.id
+		print ">"+seq_record.id
 		print seq_record.seq
 		
 
