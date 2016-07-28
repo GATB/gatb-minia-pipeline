@@ -190,3 +190,14 @@ function getOutputFile(url) {
     }
   });
 }
+
+
+function open1(){
+  var win = window.open("info.html", '_blank');
+  win.focus();
+}
+
+function open2(){
+  var win = window.open("https://github.com/GATB/gatb-minia-pipeline/issues","blank");
+  win.focus();
+}
