@@ -118,7 +118,9 @@ function getAllgoResponseLoop(data,token) {
         
         $(document).ready(function() {
            console.log('into example');
-           $('#example').DataTable();
+           $('#example').DataTable({
+            "order": [[ 1, "desc" ]]
+           });
         });
 
 
