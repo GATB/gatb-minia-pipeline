@@ -114,7 +114,7 @@ function getAllgoResponseLoop(data,token) {
 
         string_header = string_header +'</tbody></table>';
 
-        document.getElementById('result_table').innerHTML = '<br /><br />'+ string_header + '<br /><button class="btn btn-primary btn-block" id="getcontig" onclick=\'get_download();\' >Get Contigs</button>';
+        document.getElementById('result_table').innerHTML = '<br /><br />'+ string_header + '<br /><button class="btn btn-primary btn-block" id="getcontig" onclick=\'get_download();\' >Get Selected Contigs</button>';
         
         $(document).ready(function() {
            console.log('into example');
