@@ -69,6 +69,17 @@ function getAllgoResponseLoop(data,token) {
 
         // Check over here if fileURL is not empty 
         // IF fileURL is undefined stop the script -- return -- display an error message
+
+         if(fileUrl == null){
+          //alert("Please provide valid file");
+          console.log("Provide valid file");
+          var s_temp = document.getElementById('result_assembly');
+          s_temp.className="";
+          s_temp.innerHTML = "Error!Please provide valid file";
+          return;
+
+ 
+        }
         
         
 
