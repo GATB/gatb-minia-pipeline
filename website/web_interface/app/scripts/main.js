@@ -63,7 +63,13 @@ function getAllgoResponseLoop(data,token) {
     } else {
       if (result[data.id] !== undefined) {
         document.getElementById("assembly_test").innerHTML = "";
+
+        // File name returned by A||GO
         var fileUrl = result[data.id]['assembly.fasta']; //You must change the name of output file
+
+        // Check over here if fileURL is not empty 
+        // IF fileURL is undefined stop the script -- return -- display an error message
+        
         
 
         //changer(fileUrl);
