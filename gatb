@@ -40,6 +40,7 @@ Advanced parameters (optional):
     --restart-from <k>              k value where to restart the multi-k process (useful for interrupted jobs)
     --continue-scaffolding          continue an interrupted scaffolding (already mapped libraries are not remapped; 
                                                                          should be used along with -c <assembly_kXXX.fa>)
+    --no-error-correction           skips error correction
 
 
 """ % (sys.argv[0])
