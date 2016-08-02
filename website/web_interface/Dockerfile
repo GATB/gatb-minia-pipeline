@@ -19,6 +19,9 @@
 #      put token file at right location
 #      docker build -f website/web_interface/Dockerfile -t template_allgo .
 #      docker run -d -p 26000:3000 --name template_allgo template_allgo
+#   NB: 
+#      root access inside the container :
+#      docker exec -it template_allgo bash
 #######################################################################################
 
 FROM node:6
