@@ -435,6 +435,10 @@ def get_read_length(list_reads):
         size = len(data)
         return sorted(data)[int(math.ceil((size * percentile) / 100)) - 1]
 
+    if len(read_lengths) == 0:
+        print "WARNING: couldn't detect max read length. Are you sure the input is correct?"
+        exit(1)
+
     estimated_max_read_length = percentile(read_lengths,90)
     log("Setting maximum kmer length to: " + str(estimated_max_read_length) + " bp") # based on the 90 percentile of 1000 first reads lengths of each input file
     return estimated_max_read_length
