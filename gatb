@@ -40,7 +40,7 @@ Advanced parameters (optional):
     --restart-from <k>              k value where to restart the multi-k process (useful for interrupted jobs)
     --continue-scaffolding          continue an interrupted scaffolding (already mapped libraries are not remapped; 
                                                                          should be used along with -c <assembly_kXXX.fa>)
-	--besst_iter <int>              number of iteration during Besst scaffolding (default:10000)
+    --besst_iter <int>              number of iteration during Besst scaffolding (default:10000)
 
 
 """ % (sys.argv[0])
@@ -68,6 +68,7 @@ scaffolding_method="besst"
 use_bloocoo_preprocessing = True
 
 continue_scaffolding = False
+besst_iter = 10000
 
 try:
     skip = 1 # this was formerly to handle paired-end case (-p XX XX) but it's not needed anymore now
@@ -378,9 +379,7 @@ def besst(contigs, bam_files, orientations, output_filename="" ):
     #filter_contigs = (200 if len(mate_pairs) == 0 else 1000) #hacky
     #cmd = ['-c', contigs, '-f'] + bam_files + ['--orientation'] + orientations + ['-filter_contigs', filter_contigs, '-o', prefix + '_besst', '-K', k]
     # let's try with as few parameters as possible
-    cmd = ['-c', contigs, '-f'] + bam_files + ['-o', prefix + '_besst'] + ['--orientation'] + orientations
-    if( None != besst_iter ):
-    	cmd += ['--iter 3000']
+    cmd = ['-c', contigs, '-f'] + bam_files + ['-o', prefix + '_besst'] + ['--orientation'] + orientations + ['--iter', besst_iter]
     execute('BESST/runBESST', cmd, interpreter=interpreter, memused=True)
     besst_scaffolds = sorted(glob.glob(prefix + "_besst/BESST_output/pass*/*.fa"))
     if len(besst_scaffolds) == 0:
