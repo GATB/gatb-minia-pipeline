@@ -255,16 +255,14 @@ def bloocoo(output_file_prefix, threshold=2, kmer_size=31):
     log("Bloocoo done (%d input file)\n\n" % nInputBanks)
 
     if nInputBanks == 1:    # one input bank
-        # return a text file with the name of the bloocoo corrected data file(s)
-        with open(list_reads_with_bloocoo_corrections,"w") as f:
-            f.write(corrected_fasta + "\n")
-        return list_reads_with_bloocoo_corrections
+    	return [ corrected_fasta ]
     elif nInputBanks > 1:   # several input banks
+    	l_corrected = []
         bloocoo_output = sorted(glob.glob(prefix+'*'+keyword+'*_*_*'))
         with open(list_reads_with_bloocoo_corrections,"w") as f:
             for ii in range(nInputBanks):
-                f.write(bloocoo_output[ii] + "\n")
-        return list_reads_with_bloocoo_corrections
+                l_corrected.append( bloocoo_output[ii] )
+        return l_corrected
     else:
         log("Error: nInputBanks=%d " %  nInputBanks)
         raise Exception("Displaying help") 
@@ -460,12 +458,13 @@ if contigs is None: # need to create contigs, or are they given?
     if use_bloocoo_preprocessing == True:
 
         # call bloocoo
-        list_reads_corrected = bloocoo(output_file_prefix=prefix)
+        l_reads_corrected = bloocoo(output_file_prefix=prefix)
 
         # now list_reads contains only the bloocoo output filename(s)
         sav_list_reads( "orig" )
-        shutil.copyfile(list_reads_corrected,list_reads)
-        #os.rename(list_reads_corrected,list_reads)
+
+        # I copy into unpaired_reads because paired_reads are used in scaffolding, not unpaired.
+        unpaired_reads += l_reads_corrected
 
 
     if len(list_k_values) == 0:
