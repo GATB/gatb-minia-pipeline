@@ -504,7 +504,7 @@ if contigs is None: # need to create contigs, or are they given?
         log("Minia assembling at k=%d min_abundance=%d" % (k, min_abundance))
         if previous_contigs is not None:
             extra_reads = [previous_contigs]*(min_abundance+1)
-        else:
+        elif( True == use_bloocoo_preprocessing ) :
             with open( list_reads, 'r' ) as f:
                 extra_reads = f.readlines()
         create_list_reads(extra_reads)
