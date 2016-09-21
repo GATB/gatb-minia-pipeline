@@ -502,7 +502,11 @@ if contigs is None: # need to create contigs, or are they given?
     for k in sorted(dict(cutoffs).keys()):
         min_abundance = dict(cutoffs)[k]
         log("Minia assembling at k=%d min_abundance=%d" % (k, min_abundance))
-        extra_reads = [previous_contigs]*(min_abundance+1) if previous_contigs is not None else []
+        if previous_contigs is not None:
+            extra_reads = [previous_contigs]*(min_abundance+1)
+        else:
+            with open( list_reads, 'r' ) as f:
+                extra_reads = f.readlines()
         create_list_reads(extra_reads)
         sav_list_reads( str(k) )	# create a copy for dbg purpose
         multi_k_prefix = prefix + "_k%d" % k
