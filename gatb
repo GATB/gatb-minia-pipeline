@@ -208,6 +208,10 @@ def create_list_reads(extra_reads = []):
                     exit("Read file %s does not exist" % filename)
                 f.write(filename + "\n")
 
+def sav_list_reads( suffix ):
+    if( os.path.exists( list_reads ) ):
+        shutil.copyfile( list_reads, ".".join( [list_reads, suffix] ) )
+            
 # ------------------------------
 # minia
 
@@ -460,7 +464,7 @@ if contigs is None: # need to create contigs, or are they given?
         list_reads_corrected = bloocoo(output_file_prefix=prefix)
 
         # now list_reads contains only the bloocoo output filename(s)
-        shutil.copyfile(list_reads,list_reads+".orig")
+        sav_list_reads( "orig" )
         shutil.copyfile(list_reads_corrected,list_reads)
         #os.rename(list_reads_corrected,list_reads)
 
@@ -501,6 +505,7 @@ if contigs is None: # need to create contigs, or are they given?
         log("Minia assembling at k=%d min_abundance=%d" % (k, min_abundance))
         extra_reads = [previous_contigs]*(min_abundance+1) if previous_contigs is not None else []
         create_list_reads(extra_reads)
+        sav_list_reads( str(k) )	# create a copy for dbg purpose
         multi_k_prefix = prefix + "_k%d" % k
         previous_contigs = minia(k, min_abundance, prefix=multi_k_prefix)
         last_k_value = k
