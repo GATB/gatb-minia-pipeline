@@ -41,7 +41,7 @@ Advanced parameters (optional):
     --continue-scaffolding          continue an interrupted scaffolding (already mapped libraries are not remapped; 
                                                                          should be used along with -c <assembly_kXXX.fa>)
     --no-error-correction           skips error correction
-
+    --besst_iter <int>              number of iteration during Besst scaffolding (default:10000)
 
 """ % (sys.argv[0])
 
@@ -68,6 +68,7 @@ scaffolding_method="besst"
 use_bloocoo_preprocessing = True
 
 continue_scaffolding = False
+besst_iter = 10000
 
 try:
     skip = 1 # this was formerly to handle paired-end case (-p XX XX) but it's not needed anymore now
@@ -110,6 +111,8 @@ try:
             step = int(sys.argv[i+1])
         elif arg == "--max-memory":
             max_memory = int(sys.argv[i+1])
+        elif arg == "--besst_iter":
+        	besst_iter = int( sys.argv[i+1] )
 
         # special cases: 0-parameters arguments, need for "skip=0", well one day i'll use getopt
         elif arg == "--sspace":  #hidden parameter, for now
@@ -370,13 +373,13 @@ def check_for_python_27():
     exit("BESST needs Python >= 2.7, make sure it is aliased to either the 'python' or the 'python2.7' command on your shell")
 
 
-def besst(contigs, bam_files, orientations, output_filename=""):
-    global k, final_assembly
+def besst(contigs, bam_files, orientations, output_filename="" ):
+    global k, final_assembly,  besst_iter
     interpreter = check_for_python_27()
     #filter_contigs = (200 if len(mate_pairs) == 0 else 1000) #hacky
     #cmd = ['-c', contigs, '-f'] + bam_files + ['--orientation'] + orientations + ['-filter_contigs', filter_contigs, '-o', prefix + '_besst', '-K', k]
     # let's try with as few parameters as possible
-    cmd = ['-c', contigs, '-f'] + bam_files + ['-o', prefix + '_besst'] + ['--orientation'] + orientations
+    cmd = ['-c', contigs, '-f'] + bam_files + ['-o', prefix + '_besst'] + ['--orientation'] + orientations + ['--iter', besst_iter]
     execute('BESST/runBESST', cmd, interpreter=interpreter, memused=True)
     besst_scaffolds = sorted(glob.glob(prefix + "_besst/BESST_output/pass*/*.fa"))
     if len(besst_scaffolds) == 0:
@@ -400,7 +403,7 @@ def scaffold(contigs, paired_reads):
         for i, paired_read in enumerate(paired_reads):
             bam_files += [run_besst_mapping(i,contigs,paired_read)]
             orientations += [ 'rf' if paired_read in mate_pairs else 'fr' ]
-        besst(contigs,bam_files, orientations)
+        besst(contigs,bam_files, orientations )
 
 # ------------------------------
 # auxiliary function
@@ -435,6 +438,10 @@ def get_read_length(list_reads):
     def percentile(data, percentile):
         size = len(data)
         return sorted(data)[int(math.ceil((size * percentile) / 100)) - 1]
+
+    if len(read_lengths) == 0:
+        print "WARNING: couldn't detect max read length. Are you sure the input is correct?"
+        exit(1)
 
     estimated_max_read_length = percentile(read_lengths,90)
     log("Setting maximum kmer length to: " + str(estimated_max_read_length) + " bp") # based on the 90 percentile of 1000 first reads lengths of each input file
