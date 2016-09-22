@@ -69,6 +69,7 @@ use_bloocoo_preprocessing = True
 
 continue_scaffolding = False
 besst_iter = 10000
+l_minia_reads = [] # list of filenames used by minia
 
 try:
     skip = 1 # this was formerly to handle paired-end case (-p XX XX) but it's not needed anymore now
@@ -196,17 +197,14 @@ def execute(program, cmdline=[], interpreter=None, stdout=None, memused=False):
 list_reads = prefix + ".list_reads"
 final_assembly = prefix + ".fasta"
 
-def create_list_reads(extra_reads = []):
-    # create of flat text file with all reads (and possibly previous assembly if multi-k)
-    local_list = paired_reads + unpaired_reads + extra_reads
-    open_mode = "w"
-
-    with open(list_reads, open_mode) as f:
-        for read in local_list:
+def create_list_reads( l_reads ):
+    '''create of flat text file with l_reads'''
+    with open( list_reads, 'w' ) as f:
+        for read in l_reads:
             for filename in read.strip().split():
                 if not os.path.exists(filename):
                     exit("Read file %s does not exist" % filename)
-                f.write(filename + "\n")
+                f.write( filename + "\n" )
 
 def sav_list_reads( suffix ):
     if( os.path.exists( list_reads ) ):
@@ -454,7 +452,7 @@ def get_read_length(list_reads):
 # main pipeline
 
 if contigs is None: # need to create contigs, or are they given?
-    create_list_reads()
+    create_list_reads( paired_reads + unpaired_reads )
 
     if use_bloocoo_preprocessing == True:
 
@@ -465,11 +463,14 @@ if contigs is None: # need to create contigs, or are they given?
         sav_list_reads( "orig" )
 
         # I copy into unpaired_reads because paired_reads are used in scaffolding, not unpaired.
-        unpaired_reads += l_reads_corrected
+        l_minia_reads = l_reads_corrected
+    else:
+    	l_minia_reads = paired_reads + unpaired_reads
 
 
+	# minia preparation
     if len(list_k_values) == 0:
-        max_k = get_read_length(paired_reads + unpaired_reads) #TODO: modify bloocoo so that it gives a read length histogram, rather than using this hacky procedure to get max read length
+        max_k = get_read_length( l_minia_reads ) #TODO: modify bloocoo so that it gives a read length histogram, rather than using this hacky procedure to get max read length
         if max_k <= 21:
             sys.exit("Reads are shorter than 21 base pairs? (%d bp at 90 percentile of read lengths over the first 1000 reads of each input file).\nNotify a developer if this estimation was wrong, or if your reads are really that short, please set the list of kmer lengths manually using the --kmer-sizes parameter" % max_k)
         # two implicit assumptions: do not make more than 20 rounds, and start at k=21 
@@ -503,7 +504,7 @@ if contigs is None: # need to create contigs, or are they given?
         min_abundance = dict(cutoffs)[k]
         log("Minia assembling at k=%d min_abundance=%d" % (k, min_abundance))
         extra_reads = [previous_contigs]*(min_abundance+1) if previous_contigs is not None else []
-        create_list_reads(extra_reads)
+        create_list_reads( l_minia_reads + extra_reads )
         sav_list_reads( str(k) )	# create a copy for dbg purpose
         multi_k_prefix = prefix + "_k%d" % k
         previous_contigs = minia(k, min_abundance, prefix=multi_k_prefix)
