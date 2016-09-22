@@ -105,6 +105,7 @@ try:
             prefix = sys.argv[i+1]
         elif arg == "--restart-from":
             k_restart = int(sys.argv[i+1])
+            use_bloocoo_preprocessing = False #no ec when continuing, of course
         elif arg == "--step":
             step = int(sys.argv[i+1])
         elif arg == "--max-memory":
