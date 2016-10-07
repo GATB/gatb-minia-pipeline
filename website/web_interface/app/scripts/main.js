@@ -9,9 +9,10 @@
 
 
 
- 
+
 function sendQuery(formData) {
 
+document.getElementById("assembly_test").innerHTML = "Uploading data to server...<br /> May take a few minutes depending on file size.";
   var tok;
   $.getJSON('token.json', function( json ) {
    //console.log(json.token);
@@ -35,6 +36,7 @@ function sendQuery(formData) {
       getAllgoResponseLoop(d,tok);
     },
     error: function(d, s, ex) {
+      document.getElementById("assembly_test").innerHTML = "<span style='color:red;font-weight: bold;'>Error:</span> "+d.status+": "+d.statusText+". Job aborted.";
       console.log('error');
       console.log(d);
     }
@@ -43,7 +45,7 @@ function sendQuery(formData) {
 });
 
 
-  
+
 }
 
 /**
@@ -58,8 +60,8 @@ function getAllgoResponseLoop(data,token) {
       getAllgoResponseLoop(data,token);
     var d =document.getElementById('result_assembly');
     d.className = 'intro';
-    document.getElementById("assembly_test").innerHTML = "Please wait, job is running<br /> Running time maybe a few minutes depending on File size";
-    
+    document.getElementById("assembly_test").innerHTML = "<span style='font-weight: bold;'>Job is now running...</span><br /> Running time maybe a few minutes depending on File size";
+
     } else {
       if (result[data.id] !== undefined) {
         document.getElementById("assembly_test").innerHTML = "";
@@ -67,7 +69,7 @@ function getAllgoResponseLoop(data,token) {
         // File name returned by A||GO
         var fileUrl = result[data.id]['assembly.fasta']; //You must change the name of output file
 
-        // Check over here if fileURL is not empty 
+        // Check over here if fileURL is not empty
         // IF fileURL is undefined stop the script -- return -- display an error message
 
          if(fileUrl == null){
@@ -78,10 +80,10 @@ function getAllgoResponseLoop(data,token) {
           s_temp.innerHTML = "Error!Please provide valid file";
           return;
 
- 
+
         }
-        
-        
+
+
 
         //changer(fileUrl);
         console.log('File Url - assembly ');
@@ -96,8 +98,8 @@ function getAllgoResponseLoop(data,token) {
         document.getElementById('result_assembly').style='font-size:30px;font-weight:100;';
         document.getElementById('result_assembly').innerHTML='Summary';
         document.getElementById('stat').style='font-size:30px;font-weight:100;';
-        document.getElementById('stat').innerHTML = '<br />List of Contigs';       
-        //Function for parsing through the JSON file 
+        document.getElementById('stat').innerHTML = '<br />List of Contigs';
+        //Function for parsing through the JSON file
 
         // Formation of the table
         $.getJSON( fileUrl2, function( json ) {
@@ -114,7 +116,7 @@ function getAllgoResponseLoop(data,token) {
 
         document.getElementById('basic_table').innerHTML = '<br /><br />' + basic_header;
 
-        //Formation of the results table 
+        //Formation of the results table
 
         var string_header='<table id="example" class=\'table table-striped table-bordered\'><thead><tr><th>Contig No.</th><th>Contig-Size</th><th>Download</th></tr></thead><tfoot><tr><th>Contig No.</th><th>Contig-Size</th><th>Download</th></tr></tfoot><tbody>';
         var no_of_contigs = json.sizes.length;
@@ -132,7 +134,7 @@ function getAllgoResponseLoop(data,token) {
         string_header = string_header +'</tbody></table>';
 
         document.getElementById('result_table').innerHTML = '<br /><br />'+ string_header + '<br /><button class="btn btn-primary btn-block" id="getcontig" onclick=\'get_download();\' >Get Selected Contigs</button>';
-        
+
         $(document).ready(function() {
            console.log('into example');
            $('#example').DataTable({
@@ -145,7 +147,7 @@ function getAllgoResponseLoop(data,token) {
 
  });
 
-     
+
 
 
         getOutputFile(fileUrl);
@@ -168,7 +170,7 @@ function getAllgoResponse(data,token) {
 
   });
  console.log(token);
- 
+
 
   var result;
   $.get({
