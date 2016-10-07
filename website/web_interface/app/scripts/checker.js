@@ -1,12 +1,20 @@
+const FILE_SIZE_LIMIT = 500;//Unit is Mb
+
+function getFileSizeLimit(){
+  return FILE_SIZE_LIMIT*1024*1024;//unit is bytes
+}
+function getFileSizeLimitStr(){
+  return FILE_SIZE_LIMIT+" Mb";
+}
 function filetype()
  {
 
    var s = document.getElementById('file_type').value;
-   var mode = document.getElementById('mode').value;
-   console.log(mode);
+   //var mode = document.getElementById('mode').value;
+   //console.log(mode);
    console.log(s);
 
-   if(s=='Non-Interleaved Paired Reads (2 Files)')
+   /*if(s=='Non-Interleaved Paired Reads (2 Files)')
    {
       var selectobject=document.getElementById("mode")
       for (var i=0; i<selectobject.length; i++){
@@ -24,14 +32,14 @@ function filetype()
         option.text = "URL";
         selectobject.add(option);
       }
-   }
- 
+   }*/
+
 
   //Only when one file is getting uploaded
-   if(s=='Interleaved Paired Reads (1 File)' && mode=='File') 
+   if(s=='Interleaved Paired Reads (1 File)' /*&& mode=='File'*/)
    {
      document.getElementById('file-2').style='display:none';
-     document.getElementById('inputfile3').style='display:none;'
+     //document.getElementById('inputfile3').style='display:none;'
      document.getElementById('file-1').style="display:block";
 
      $('#inputfile').bind('change', function() {
@@ -57,13 +65,13 @@ function filetype()
    }
 
    //When both files are getting uploaded
-   else if(s=='Non-Interleaved Paired Reads (2 Files)' && mode=='File')
+   else if(s=='Non-Interleaved Paired Reads (2 Files)' /*&& mode=='File'*/)
    {
      document.getElementById('file-1').style="display:block";
      document.getElementById('file-2').style='display:block';
 
-     document.getElementById('inputfile3').style='display:none';
-      
+     //document.getElementById('inputfile3').style='display:none';
+
      var s1, s2;
 
      var name1="" , name2="";
@@ -126,7 +134,7 @@ function filetype()
 
 
    }
-   else if(mode=='URL')
+   /*else if(mode=='URL')
    {
      document.getElementById('file-1').style='display:none;';
      document.getElementById('file-2').style='display:none;';
@@ -141,8 +149,8 @@ function filetype()
      }
     });
 
-     
-   }
+
+  }*/
  }
 
 /**

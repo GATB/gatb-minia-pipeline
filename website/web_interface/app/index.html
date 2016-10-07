@@ -28,6 +28,8 @@
   <script src="/bower_components/modernizr/modernizr.js"></script>
   <!-- endbuild -->
 
+<script src="scripts/checker.js"></script>
+
   <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
 
   <style type="text/css">
@@ -39,7 +41,7 @@
   height: 120px;
   -webkit-animation: spin 2s linear infinite;
   animation: spin 2s linear infinite;
- 
+
 }
 
 @-webkit-keyframes spin {
@@ -55,10 +57,6 @@
 #getcontig
 {
   width:200px;
-}
-
-#inputfile3{
- width:100%;
 }
 
 .tool_info{
@@ -81,21 +79,21 @@
         <li><a href="#" onclick="open2();">Contact</a></li>
       </ul>
       <h3 class="text-muted">Online Bacterial Genome Assembler</h3>
-      
-      
+
+
     </div>
-   
+
 
 <!--
     <div class="jumbotron" id="jumbo" style="font-family:Roboto">
-      
+
       <p class="lead" style="font-weight:200;">Get your Bacterial Genome Assembly Done.Online.</p>
-  
-    </div> 
+
+    </div>
 
 -->
 
- 
+
 
     <div class="panel panel-default" id="form-data">
       <div class="panel-body">
@@ -111,14 +109,14 @@
           </select>
           <a href="#"><img class="tool_info" data-toggle="tooltip" title="Type of Read File can be Interleaved Paired Reads - 1 File. It can be Non- Interleaved Paired Reads - 2 File" src="help.png" /></a>
 
-          <br /><br />
-          <select id="mode" onchange="filetype(); ">
+
+          <!-- <select id="mode" onchange="filetype(); ">
             <option value="Select">Select Data Access</option>
             <option value="File">File</option>
             <option value="URL">URL</option>
           </select>
-
           <a href="#"><img class="tool_info" data-toggle="tooltip" title="Mode of File can be URL in case of only one File upload" src="help.png" /></a>
+        -->
 
           <br /><br />
           <p class="text-info">Input Read File (fasta,.tar.gz format):</p>
@@ -133,8 +131,8 @@
             </button>
             </span>
 
-           
-           
+
+
           </div>
           <br />
 
@@ -150,8 +148,8 @@
 
 
           </div>
-          <br />
-          <input id="inputfile3" name="file_url" type="text" placeholder="Url of the file.." style="display:none" />
+          <!-- <br />
+          <input id="inputfile3" name="file_url" type="text" placeholder="Url of the file.." style="display:none" />  -->
 
 
 
@@ -159,7 +157,11 @@
           <!-- END Input file -->
           <hr>
           <!-- Submit -->
-          <div style="font-size:14px;">File size limit : 2GB </div>
+          <div style="font-size:14px;">File size limit:
+            <script type="text/javascript">
+                        document.write(getFileSizeLimitStr());
+                    </script>
+           </div>
           <br />
           <button type="submit" class="btn btn-primary pull-right" style="position:relative;left:-78%;">Compute Assembly</button>
           <br /><br />
@@ -178,7 +180,7 @@
 
  </div>
   <div id="stat" style="">
- 
+
  </div>
  <div id="result_table">
 
@@ -186,7 +188,7 @@
  </div>
 
  <div id="chartContainer" style="">
-   
+
  </div>
 <div id="getcontigs" style="width:200px;">
 
@@ -195,7 +197,7 @@
 
  </div><br /><br />
 
- 
+
   <!--
     <div class="row marketing">
       <div class="col-lg-6">
@@ -213,10 +215,10 @@
       </div>
     </div>
   -->
-  
+
 
     <div class="footer">
-      <p>Made with ♥ from Genscale team ~ INRIA/IRISA Rennes  <br /> For more information visit  <a href="https://gatb.inria.fr">GATB</a></p>
+      <p>Made with &#x2764; from Genscale team &#x223c; INRIA/IRISA Rennes  <br /> For more information visit  <a href="https://gatb.inria.fr">GATB</a></p>
     </div>
   </div>
 
@@ -254,7 +256,6 @@
   <script src="scripts/main.js"></script>
   <script src="scripts/form.js"></script>
   <script src="scripts/download.js"></script>
-  <script src="scripts/checker.js"></script>
 
   <!-- Bootflat's JS files.-->
   <script src="https://bootflat.github.io/bootflat/js/icheck.min.js"></script>

@@ -14,30 +14,30 @@
 
 $('#formUpload').on('submit', function(event) {
 
-  
- 
+
+
   event.preventDefault();
   //document.getElementById("jumbo").style="visibility:hidden";
    //$("div").removeClass("jumbotron");
    //$("h1").removeClass("g-web");
 
-  
+
 
    var value1 = $('#subfile').val();
   var value2 = $('#subfile2').val();
-  var value3 = $('#inputfile3').val();
+  //var value3 = $('#inputfile3').val();
 
 
 
    //Creating conditions for Checking empty File
 
    var type = document.getElementById("file_type").value;
-   var mode = document.getElementById("mode").value;
+   //var mode = document.getElementById("mode").value;
 
    if(type == 'Non-Interleaved Paired Reads (2 Files)'){
 
      var value1 = $('#subfile').val();
-   
+
      var value2 = $('#subfile2').val();
 
      if(value1=="" || value2==""){
@@ -48,27 +48,16 @@ $('#formUpload').on('submit', function(event) {
    }
 
    else if(type == 'Interleaved Paired Reads (1 File)'){
-    if(mode=="File"){
      var value1 = $("#subfile").val();
      if(value1==""){
       alert("Please upload a File!");
       return;
      }
-    }
-    else if(mode=="URL"){
-      var value3 = $('#inputfile3').val();
-      if(value3==""){
-        alert("Please upload a File!");
-        return;
-      }
-    }
-
-
    }
 
-   if(value1=="" && value2=="" && value3=="")
+   if(value1=="" && value2=="")
    {
-    alert("Please select correct options and upload Files");
+    alert("Please select correct options");
     return;
    }
 
@@ -82,12 +71,12 @@ $('#formUpload').on('submit', function(event) {
 
 
    console.log($('#file_type').val());
-   console.log($('#mode').val());
-  
-   //
-   
+   //console.log($('#mode').val());
 
-  
+   //
+
+
+
    $('div').removeClass('jumbotron');
    $('#jumbo').empty();
    $('div').removeClass('panel panel-default');
@@ -96,7 +85,7 @@ $('#formUpload').on('submit', function(event) {
    var d =document.getElementById('result_assembly');
     d.className = 'intro';
 
-   
+
 
 
 
@@ -119,7 +108,7 @@ $('#formUpload').on('submit', function(event) {
      formData.append('job[param]',parameter);
 
   }
-  else if(type == 'Interleaved Paired Reads (1 File)' && mode=="File"){
+  else if(type == 'Interleaved Paired Reads (1 File)'){
     console.log("Interleaved Case");
     //Parameter or one file
       var parameter = "-t pipeline --12 /tmp/"+value1;
@@ -128,17 +117,17 @@ $('#formUpload').on('submit', function(event) {
   }
 
 
-  
 
 
 
 
 
-  
-   if(value3!='')
+
+
+   /*if(value3!='')
    {
     console.log('No Files are uploaded, but url is given');
-    
+
     console.log(value3);
 
     var temp_path = value3.split('/');
@@ -149,7 +138,7 @@ $('#formUpload').on('submit', function(event) {
     var parameter = "-t pipeline --12 /tmp/"+path;
     formData.append('job[param]',parameter);
     formData.append('job[file_url]', value3);
-   }
+  }*/
   console.log('The formdata is');
   console.log(formData);
   sendQuery(formData);
@@ -165,7 +154,7 @@ $('#formUpload').on('submit', function(event) {
 $(document).ready(function() {
   $('#inputfile').change(function() {
     $('#subfile').val($(this).val()); // Duplicate value to subfile
-    
+
 
   });
 });
@@ -175,5 +164,3 @@ $(document).ready(function() {
     $('#subfile2').val($(this).val()); // Duplicate value to subfile
   });
 });
-
-
