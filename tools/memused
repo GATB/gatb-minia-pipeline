@@ -1,23 +1,24 @@
 #!/bin/bash
-# Author: Rayan Chikhi
+# Author: Marc Garcia-Garcera
 #  usage: memused [program arg1 arg2 ...]
 
 "$@" &
 pid=$!
-cd /proc/$pid
-
+status=$(ps -o rss -o vsz -o pid | grep $pid)
 max=0
-while [ -f status ]
+while [ "${#status}" -gt "0" ];
 do
     sleep 0.1
-    mem=`if [ -f status ]; then cat status | grep VmHWM | tr -s [:blank:] | cut -d ' ' -f 2; fi`
+    mem=$(ps -o rss -o vsz -o pid | grep $pid | awk '{print $1}')
+    mem=$((mem/1024))
     if [ "0$mem" -gt "0$max" ] 2>/dev/null; then
         max=$mem
     fi
+status=$(ps -o rss -o vsz -o pid | grep $pid)
 done
 wait $pid
 ret=$?
 
-echo "maximal memory used: $max KB"
+echo "maximal memory used: $max MB"
 
 exit $ret
