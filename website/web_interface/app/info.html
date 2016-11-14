@@ -1,23 +1,147 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html class="no-js" lang="">
 
 <head>
-<title>Information</title>
-	<style type="text/css">
-	  #info
-	  {
-	  	font-size:30px;
-	  }
+  <meta charset="utf-8">
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GATB-Web</title>
 
-	</style>
+  <link rel="icon" type="image/ico" href="https://upload.wikimedia.org/wikipedia/en/f/f3/INRIA_logo.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <!-- Place favicon.ico in the root directory -->
+
+  <!-- build:css styles/vendor.css -->
+  <!-- bower:css -->
+  <link rel="stylesheet" href="/bower_components/bootflat/css/bootflat.css">
+  <link rel="stylesheet" href="/bower_components/bootstrap-select/dist/css/bootstrap-select.css">
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.10.12/css/dataTables.bootstrap.min.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" >
+  <!-- endbower -->
+  <!-- endbuild -->
+
+  <!-- build:css styles/main.css -->
+  <link rel="stylesheet" href="styles/main.css">
+  <!-- endbuild -->
+
+  <!-- build:js scripts/vendor/modernizr.js -->
+  <script src="/bower_components/modernizr/modernizr.js"></script>
+  <!-- endbuild -->
+  <script src="scripts/checker.js"></script>
+
+  <style type="text/css">
+    .intro {
+      border: 16px solid #f3f3f3;
+      border-radius: 50%;
+      border-top: 16px solid #3498db;
+      width: 120px;
+      height: 120px;
+      -webkit-animation: spin 2s linear infinite;
+      animation: spin 2s linear infinite;
+    }
+
+    @-webkit-keyframes spin {
+      0% { -webkit-transform: rotate(0deg); }
+      100% { -webkit-transform: rotate(360deg); }
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    #getcontig
+    {
+      width:200px;
+    }
+
+    .tool_info{
+      height:20px;
+      width:20px;
+    }
+  </style>
 </head>
 
 <body>
-  <div id="info">	
-   Work in progress..
+
+  <div class="container">
+    <div class="header">
+      <ul class="nav nav-pills pull-right">
+        <li><a href="index.html">Home</a></li>
+        <li class="active"><a href="#">Help</a></li>
+        <li><a href="#" onclick="open2();">Contact</a></li>
+      </ul>
+      <h3 class="text-muted">Online Bacterial Genome Assembler</h3>
+    </div>
+
+    <div class="panel panel-default">
+      <div class="panel-body">
+          <h4>About</h4>
+          <p>This tool enables the assembly of reads data using an online version of <a href="https://github.com/GATB/gatb-minia-pipeline">GATB-Minia-Pipeline</a>.</p>
+          <p>GATB-Minia-Pipeline is a <i>de novo</i> assembly pipeline for Illumina data. 
+          <p>The pipeline consists of the automated execution of the following tools:
+            <ul>
+            <li><a href="https://github.com/GATB/bloocoo">Bloocoo</a>: error correction</li>
+            <li><a href="https://github.com/GATB/minia">Minia</a>: contigs assembly</li>
+            <li><a href="https://github.com/ksahlin/BESST">BESST</a>: scaffolding</li>
+            </ul>
+          </p>
+          <p>
+            It can be used to assemble genomes and metagenomes. However, for this online version we limit its use to bacterial genomics, due to restriction on the amount of reads data you can transfer to our server. If you want to assemble larger genomes, please install and use the pipeline on your own computers. It is available from Github, <a href="https://github.com/GATB/gatb-minia-pipeline">here</a>.
+          </p>
+          <h4>Use</h4>
+            <p>You can use the tools with two kind of files:
+            <ul>
+            <li>a single file containing all reads</li>
+            <li>two files containing paired-ended reads</li>
+            </ul>
+            </p>
+            <p>
+            In all cases, read files can be provided as FastA or FastQ; plain text or gzipped compressed files are accepted and we recommend you use gzipped files to reduce the amount of data to transfer from your computer to the remote server.
+            </p>
+      </div>
+      <!-- END panel-body -->
+    </div>
+    <!-- END panel-default -->
+    <div class="footer">
+      <p>Made with &#x2764; from Genscale team &#x223c; INRIA/IRISA Rennes  <br /> For more information visit  <a href="https://gatb.inria.fr">GATB</a></p>
+    </div>
   </div>
+
+  <!-- build:js scripts/vendor.js -->
+  <!-- bower:js -->
+  <script src="/bower_components/jquery/dist/jquery.js"></script>
+  <script src="/bower_components/bootstrap-select/dist/js/bootstrap-select.js"></script>
+  <!-- endbower -->
+  <!-- endbuild -->
+
+  <!-- build:js scripts/plugins.js -->
+  <script src="/bower_components/bootstrap-sass/assets/javascripts/bootstrap/affix.js"></script>
+  <script src="/bower_components/bootstrap-sass/assets/javascripts/bootstrap/alert.js"></script>
+  <script src="/bower_components/bootstrap-sass/assets/javascripts/bootstrap/dropdown.js"></script>
+  <script src="/bower_components/bootstrap-sass/assets/javascripts/bootstrap/tooltip.js"></script>
+  <script src="/bower_components/bootstrap-sass/assets/javascripts/bootstrap/modal.js"></script>
+  <script src="/bower_components/bootstrap-sass/assets/javascripts/bootstrap/transition.js"></script>
+  <script src="/bower_components/bootstrap-sass/assets/javascripts/bootstrap/button.js"></script>
+  <script src="/bower_components/bootstrap-sass/assets/javascripts/bootstrap/popover.js"></script>
+  <script src="/bower_components/bootstrap-sass/assets/javascripts/bootstrap/carousel.js"></script>
+  <script src="/bower_components/bootstrap-sass/assets/javascripts/bootstrap/scrollspy.js"></script>
+  <script src="/bower_components/bootstrap-sass/assets/javascripts/bootstrap/collapse.js"></script>
+  <script src="/bower_components/bootstrap-sass/assets/javascripts/bootstrap/tab.js"></script>
+  <!-- Bootstrap-select's JS files.-->
+  <script src="/bower_components/bootstrap-select/dist/js/bootstrap-select.min.js"></script>
+  <script src="/bower_components/bootstrap-select/dist/js/i18n/defaults-en_US.min.js"></script>
+  <!-- endbuild -->
+
+
+  <script src="//code.jquery.com/jquery-1.12.3.js"></script>
+
+  <!-- Bootflat's JS files.-->
+  <script src="https://bootflat.github.io/bootflat/js/icheck.min.js"></script>
+  <script src="https://bootflat.github.io/bootflat/js/jquery.fs.selecter.min.js"></script>
+  <script src="https://bootflat.github.io/bootflat/js/jquery.fs.stepper.min.js"></script>
+  <!-- endbuild -->
 </body>
 
-
-
 </html>
+
