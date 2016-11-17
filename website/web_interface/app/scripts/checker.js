@@ -9,13 +9,16 @@ function getFileSizeLimitStr(){
 function filetype()
 {
   var s = document.getElementById('file_type').value;
-  console.log(s);
+  //console.log(s);
 
   //Only when one file is getting uploaded
   if(s=='Interleaved Paired Reads (1 File)')
   {
-    document.getElementById('file-2').style='display:none';
-    document.getElementById('file-1').style="display:block";
+    //document.getElementById('file-2').style='display:none';
+    //document.getElementById('file-1').style="display:block";
+    $("#file-2").hide();
+    $("#file-1").show();
+    $("#file-size-info").show();
     $('#inputfile').bind('change', function() {
       console.log(this.files[0].size);
       if(this.files[0].size > getFileSizeLimit())
@@ -25,13 +28,15 @@ function filetype()
         file_1.value=file_1.defaultValue;
       }
     });
-    console.log('into interleaved');
   }
   //When both files are getting uploaded
   else if(s=='Non-Interleaved Paired Reads (2 Files)' /*&& mode=='File'*/)
   {
-    document.getElementById('file-1').style="display:block";
-    document.getElementById('file-2').style='display:block';
+    //document.getElementById('file-1').style="display:block";
+    //document.getElementById('file-2').style='display:block';
+    $("#file-2").show();
+    $("#file-1").show();
+    $("#file-size-info").show();
     var s1, s2;
     var name1="" , name2="";
     $('#inputfile').bind('change', function() {
@@ -69,5 +74,10 @@ function filetype()
         file_3.value = file_3.defaultValue;
       }
     });
+  }
+  else{
+    $("#file-2").hide();
+    $("#file-1").hide();
+    $("#file-size-info").hide();
   }
 }

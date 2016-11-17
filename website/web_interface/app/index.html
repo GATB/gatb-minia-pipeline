@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta name="description" content="">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>GATB-Web</title>
+  <title>GATB Assembly Pipeline</title>
 
   <link rel="icon" type="image/ico" href="https://upload.wikimedia.org/wikipedia/en/f/f3/INRIA_logo.png">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -34,44 +34,45 @@
 
   <style type="text/css">
     .intro {
-  border: 16px solid #f3f3f3;
-  border-radius: 50%;
-  border-top: 16px solid #3498db;
-  width: 120px;
-  height: 120px;
-  -webkit-animation: spin 2s linear infinite;
-  animation: spin 2s linear infinite;
+      border: 16px solid #f3f3f3;
+      border-radius: 50%;
+      border-top: 16px solid #3498db;
+      width: 120px;
+      height: 120px;
+      -webkit-animation: spin 2s linear infinite;
+      animation: spin 2s linear infinite;
 
-}
+    }
 
-@-webkit-keyframes spin {
-  0% { -webkit-transform: rotate(0deg); }
-  100% { -webkit-transform: rotate(360deg); }
-}
+    @-webkit-keyframes spin {
+      0% { -webkit-transform: rotate(0deg); }
+      100% { -webkit-transform: rotate(360deg); }
+    }
 
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
 
-#getcontig
-{
-  width:200px;
-}
+    #getcontig
+    {
+      width:200px;
+    }
 
-.tool_info{
-  height:20px;
-  width:20px;
-}
+    .tool_info{
+      height:20px;
+      width:20px;
+    }
+    
+    .footer-bk-clr {
+      background-color: rgba(255, 255, 255, 1.0);
+    }
   </style>
 </head>
 
 <body>
-  <!--[if lt IE 10]>
-      <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
-    <![endif]-->
-
   <div class="container">
+
     <div class="header">
       <ul class="nav nav-pills pull-right">
         <li class="active"><a href="index.html">Home</a></li>
@@ -79,27 +80,13 @@
         <li><a href="#" onclick="open2();">Contact</a></li>
       </ul>
       <h3 class="text-muted">Online Bacterial Genome Assembler</h3>
-
-
     </div>
-
-
-<!--
-    <div class="jumbotron" id="jumbo" style="font-family:Roboto">
-
-      <p class="lead" style="font-weight:200;">Get your Bacterial Genome Assembly Done.Online.</p>
-
-    </div>
-
--->
-
-
 
     <div class="panel panel-default" id="form-data">
       <div class="panel-body">
         <form action="" method="POST" enctype="multipart/form-data" accept-charset="utf-8" id="formUpload">
           <!-- Hidden Job ID -->
-          <input name="job[webapp_id]" value=122 type="hidden" /> <!-- Change id of A||go app -->
+          <input name="job[webapp_id]" value=122 type="hidden" />
           <h4>Upload Data</h4>
           <br />
           <select id="file_type" onchange="filetype();">
@@ -108,119 +95,78 @@
             <option>Non-Interleaved Paired Reads (2 Files)</option>
           </select>
           <a href="#"><img class="tool_info" data-toggle="tooltip" title="Type of Read File can be Interleaved Paired Reads - 1 File. It can be Non- Interleaved Paired Reads - 2 File" src="help.png" /></a>
-
-
-          <!-- <select id="mode" onchange="filetype(); ">
-            <option value="Select">Select Data Access</option>
-            <option value="File">File</option>
-            <option value="URL">URL</option>
-          </select>
-          <a href="#"><img class="tool_info" data-toggle="tooltip" title="Mode of File can be URL in case of only one File upload" src="help.png" /></a>
-        -->
-
           <br /><br />
-          <p class="text-info">Input Read File (fasta,.tar.gz format):</p>
           <!-- Hidden Input file -->
           <input id="inputfile" style="display: none;" name="files[0]" type="file" />
           <div class="input-group" id="file-1" style="display:none;">
-            <input id="subfile" type="text" class="form-control" placeholder="Input file..." readonly="readonly">
             <span class="input-group-btn">
-          <button class="btn btn-info" type="button" onclick="$('#inputfile').click();">
-            <span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span> &nbsp;&nbsp;Browse
-
-            </button>
+              <button class="btn btn-info" type="button" onclick="$('#inputfile').click();">
+                <span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span> &nbsp;&nbsp;Browse
+              </button>
             </span>
-
-
-
+            <input id="subfile" type="text" class="form-control" placeholder="Input file..." readonly="readonly">
           </div>
+
           <br />
 
           <input id="inputfile2" style="display:none;" name="files[1]" type="file" />
           <div class="input-group" id="file-2" style="display:none;">
-            <input id="subfile2" type="text" class="form-control" placeholder= "Input file..." readonly="readonly">
             <span class="input-group-btn">
-          <button class="btn btn-info" type="button" onclick="$('#inputfile2').click();">
-            <span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span> &nbsp;&nbsp;Browse
-          </button>
-        </span>
-
-
-
+              <button class="btn btn-info" type="button" onclick="$('#inputfile2').click();">
+                <span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span> &nbsp;&nbsp;Browse
+              </button>
+            </span>
+            <input id="subfile2" type="text" class="form-control" placeholder= "Input file..." readonly="readonly">
           </div>
-          <!-- <br />
-          <input id="inputfile3" name="file_url" type="text" placeholder="Url of the file.." style="display:none" />  -->
 
-
-
-
+          <br />
+          <div id="file-size-info"  style="display:none;">
+            <p class="text-info">Input Read File. Accepted formats: Fasta, FastQ (plain text or gzipped).</br>File size limit:
+            <script type="text/javascript">
+            document.write(getFileSizeLimitStr());
+            </script>
+            </p>
+          </div>
           <!-- END Input file -->
           <hr>
           <!-- Submit -->
-          <div style="font-size:14px;">File size limit:
-            <script type="text/javascript">
-                        document.write(getFileSizeLimitStr());
-                    </script>
-           </div>
-          <br />
           <button type="submit" class="btn btn-primary pull-right" style="position:relative;left:-78%;">Compute Assembly</button>
           <br /><br />
         </form>
-      </div>
-      <!-- END panel-body -->
+      </div><!-- END panel-body -->
+    </div><!-- END panel-default -->
+    
+    <div id="result_assembly" style="font-family:Roboto;font-size:30px;">
     </div>
-    <!-- END panel-default -->
- <div id="result_assembly" style="font-family:Roboto;font-size:30px;">
-
- </div><br />
- <div id="assembly_test"></div>
- <div id="assembly"></div>
-
- <div id="basic_table">
-
- </div>
-  <div id="stat" style="">
-
- </div>
- <div id="result_table">
-
-
- </div>
-
- <div id="chartContainer" style="">
-
- </div>
-<div id="getcontigs" style="width:200px;">
-
- </div>
- <div id="stats" style="width:200px">
-
- </div><br /><br />
-
-
-  <!--
-    <div class="row marketing">
-      <div class="col-lg-6">
-        <h4>What is GATB?</h4>
-        <p>HTML5 Boilerplate is a professional front-end template for building fast, robust, and adaptable web apps or sites.</p>
-
-        <h4>Sass</h4>
-        <p>Sass is the most mature, stable, and powerful professional grade CSS extension language in the world.</p>
-
-        <h4>Bootstrap</h4>
-        <p>Sleek, intuitive, and powerful mobile first front-end framework for faster and easier web development.</p>
-        <h4>Modernizr</h4>
-        <p>Modernizr is an open-source JavaScript library that helps you build the next generation of HTML5 and CSS3-powered websites.</p>
-
-      </div>
+  
+    <br />
+  
+    <div id="assembly_test">
     </div>
-  -->
-
-
-    <div class="footer">
-      <p>Made with &#x2764; from Genscale team &#x223c; INRIA/IRISA Rennes  <br /> For more information visit  <a href="https://gatb.inria.fr">GATB</a></p>
+    <div id="assembly">
     </div>
-  </div>
+    <div id="basic_table">
+    </div>
+    <div id="stat" style="">
+    </div>
+    <div id="result_table">
+    </div>
+    <div id="chartContainer" style="">
+    </div>
+    <div id="getcontigs" style="width:200px;">
+    </div>
+    <div id="stats" style="width:200px">
+    </div>
+
+    <div class="footer navbar-fixed-bottom footer-bk-clr">
+      <p align="center">
+      <a href="https://gatb.inria.fr/software/de-novo-genome-assembly/"  target="_blank">GATB Assembly Pipeline</a> <span id='tuto-release-tag'></span> &#x223c; 
+        Made with &#x2764; by <a href="https://team.inria.fr/genscale/" target="blank_">Genscale Team</a>, Inria &#x223c;  
+        Powered by <a href="https://allgo.inria.fr/" target="_blank">A||GO</a>
+        </p>
+    </div>
+
+  </div><!-- END container -->
 
   <!-- build:js scripts/vendor.js -->
   <!-- bower:js -->
@@ -273,8 +219,3 @@ window.onbeforeunload = function() {
 };
 </script>
 
-
-<!--
- Use of unicode values for heart.
-
-  -->

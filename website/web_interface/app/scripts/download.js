@@ -32,10 +32,14 @@ function get_download()
   formData.append('job[param]','-t download ' + file_url + ' ' + temp);
   console.log(formData);
 
-  sendQuery2(formData);
+  // see http://stackoverflow.com/a/39387533
+  // to undertand the following test
+  var windowReference = isSafari() ? window.open() : null;
+
+  sendQuery2(formData, windowReference);
 }
 
-function sendQuery2(formData)
+function sendQuery2(formData, windowReference)
 {
   var tok;
   $.getJSON('token.json', function( json ) {
@@ -56,7 +60,7 @@ function sendQuery2(formData)
       success: function(d, s, ex) {
         console.log('success');
         console.log(d);
-        getAllgoResponseLoop2(d,tok);
+        getAllgoResponseLoop2(d,tok,windowReference);
       },
       error: function(d, s, ex) {
         console.log('error');
@@ -66,7 +70,7 @@ function sendQuery2(formData)
   });
 }
 
-function getAllgoResponseLoop2(data,token) {
+function getAllgoResponseLoop2(data,token,windowReference) {
   var result;
   setTimeout(function() {
     result = getAllgoResponse2(data,token);
@@ -75,22 +79,30 @@ function getAllgoResponseLoop2(data,token) {
     } else {
       if (result[data.id] !== undefined) {
         var fileUrl = result[data.id]['extracted_contigs.fasta']; //You must change the name of output file
-        console.log('File Url - assembly ');
+        console.log('File Url - contigs ');
         console.log(fileUrl);
-        window.open(fileUrl);
-        getOutputFile2(fileUrl);
+        // see http://stackoverflow.com/a/39387533
+        // to undertand the following test
+        if(isSafari()){
+          windowReference.location=fileUrl
+        }
+        else{
+          window.open(fileUrl);
+        }
+        //only for devel: dump file content in console
+        //getOutputFile2(fileUrl);
       }
     }
   }, 1000 /*Time to wait, default 1 second */);
 }
 
 function getAllgoResponse2(data,token) {
-  var tok ;
+  /*var tok ;
   $.getJSON('token.json', function( json ) {
     tok = json.token;
     //console.log(tok);
   });
-  console.log(token);
+  console.log(token);*/
   var result;
   $.get({
     url: data.url,
@@ -127,4 +139,9 @@ function getOutputFile2(url) {
       console.log(d);
     }
   });
+}
+
+function isSafari(){
+  var safari = Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0 || (function (p) { return p.toString() === "[object SafariRemoteNotification]"; })(!window['safari'] || safari.pushNotification);
+  return safari;
 }

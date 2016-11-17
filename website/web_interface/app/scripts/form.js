@@ -70,12 +70,12 @@ $('#formUpload').on('submit', function(event) {
 */
 $(document).ready(function() {
   $('#inputfile').change(function() {
-    $('#subfile').val($(this).val()); // Duplicate value to subfile
+    $('#subfile').val($(this).val().split('\\').pop()); // Duplicate value to subfile
   });
 });
 
 $(document).ready(function() {
   $('#inputfile2').change(function() {
-    $('#subfile2').val($(this).val()); // Duplicate value to subfile
+    $('#subfile2').val($(this).val().split('\\').pop()); // Duplicate value to subfile
   });
 });
