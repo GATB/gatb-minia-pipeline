@@ -65,7 +65,15 @@ function getAllgoResponseLoop(data, token, start_time) {
   document.getElementById("assembly_test").innerHTML = "<span style='font-weight: bold;'>Job is now running...</span><br /> Running time maybe a few minutes depending on File size";
 
   var runnerTask = setInterval(function() {
-    var result = getAllgoResponse(data,token);
+    try {
+      var result = getAllgoResponse(data,token);
+    }
+    catch(err) {
+        console.log("Error: "+err.message);
+        clearInterval(runnerTask);
+        return;
+    }
+    
     if (result.status !== undefined) {
       counter++;
       if ((counter%30)==0){
@@ -88,7 +96,8 @@ function getAllgoResponseLoop(data, token, start_time) {
           //console.log("Provide valid file");
           var s_temp = document.getElementById('result_assembly');
           s_temp.className="";
-          s_temp.innerHTML = "Error!Please provide valid file";
+          s_temp.innerHTML = "Error! No result returned by the server.";
+          clearInterval(runnerTask);
           return;
         }
         //console.log('File Url - assembly ');
