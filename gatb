@@ -3,8 +3,8 @@
 import sys, os, shutil
 from subprocess import call, Popen, PIPE, STDOUT, check_output
 import glob
-import multiprocessing
-nb_cpus = multiprocessing.cpu_count()
+
+
 
 
 if 3 > sys.version[0]: # only works in python 2
@@ -54,18 +54,19 @@ list_min_abundances = []
 k_restart = -1
 step = 20
 max_memory = -1
-try:
-	nb_cores = int(check_output(["nproc"]))  # for bloocoo
-except:
-	print("machine has no nproc, setting bloocoo threads to 1")
-	nb_cores = 1
+debug_mode = 0  # 0: no debugging
+
+
+
+
 
 # it's a hardcoded switch; only switch to sspace if you have good reasons to dislike besst! because besst rocks.
 #scaffolding_method="sspace"
 scaffolding_method="besst"
 
 # this used to be false, now it's default
-use_bloocoo_preprocessing = True
+use_bloocoo_preprocessing = True    # used to launch bloocoo
+bloocoo_mode = True                 # used in restart mode (bloocoo _not_ launched)
 
 continue_scaffolding = False
 besst_iter = 10000
@@ -122,6 +123,7 @@ try:
             skip = 0
         elif arg == "--no-error-correction":
             use_bloocoo_preprocessing = False
+            bloocoo_mode = False
             skip = 0
         elif arg == "--continue-scaffolding":
             continue_scaffolding = True
@@ -129,6 +131,10 @@ try:
 
         elif arg in ["-h", "-help", "--help"]:
             raise Exception("Displaying help") 
+
+        # debug mode
+        elif arg == "--debug":
+            debug_mode = int(sys.argv[i+1])
         else:
             print("Unknown parameters", arg)
             raise Exception("Displaying help") 
@@ -139,6 +145,29 @@ except:
     traceback.print_exc()
     print(doc)
     sys.exit(1)
+
+#-- multi-threading parameters
+try:
+    nb_cores_system = int(check_output(["nproc"]))
+except ValueError:
+    print("machine has no nproc, setting threads to 1")
+    nb_cores_system = 1
+
+nb_cores_bloocoo = nb_cores_system  # for bloocoo
+nb_cores_besst = nb_cores_system    # for besst
+
+#-- debug mode
+if debug_mode == 0 :
+    print "No debugging option"
+elif debug_mode == 1 :
+    nb_cores_bloocoo = 1
+    print "debug_mode=%d : minia single-threaded, bloocoo [if used] single-threaded" % debug_mode
+elif debug_mode == 2 :
+    print "debug_mode=%d : minia single-threaded, bloocoo [if used] multi-threaded (with nb_cores_bloocoo=%d)" % (debug_mode, nb_cores_bloocoo)
+else :
+    print "Error in --debug option"
+    sys.exit(1)
+
 
 DIR = os.path.dirname(os.path.realpath(__file__))
 
@@ -226,6 +255,9 @@ def minia(k, min_abundance, prefix):
     if k >= 128:
         params += ['-debloom','original'] # fix for large k values
 
+    if ( 1 <= debug_mode <= 2) :
+        params += ['-nb-cores','1'] # issue54
+
     execute('minia/minia', params, memused=True)
     contigs = prefix + ".contigs.fa"
     return contigs
@@ -239,35 +271,44 @@ def bloocoo(output_file_prefix, threshold=2, kmer_size=31):
     keyword = ".corrected_with_bloocoo"
     corrected_fasta = output_file_prefix + keyword + ".fa"
     params = ['-file', list_reads, '-out', corrected_fasta, '-abundance-min', threshold, 
-              '-kmer-size', kmer_size, '-nb-cores', nb_cores , '-slow', '-high-precision']
-    log("Running bloocoo on %d cores" % nb_cores)
+              '-kmer-size', kmer_size, '-nb-cores', nb_cores_bloocoo , '-slow', '-high-precision']
+    log("Running bloocoo on %d cores" % nb_cores_bloocoo)
+
     # call bloocoo
     execute('bloocoo/Bloocoo', params)
+    log("Bloocoo done\n\n")
 
-    list_reads_with_bloocoo_corrections = output_file_prefix + "_corrected_with_bloocoo.list_reads"
+    return bloocoo_list_corrected(output_file_prefix, list_reads, corrected_fasta, keyword)
+
+#-------------------------------
+# bloocoo helper
+
+def bloocoo_list_corrected(c_output_file_prefix, c_list_reads, c_corrected_fasta, c_keyword):
+
+    log("Calling bloocoo_list_corrected...")
 
     # 2 cases: one or several input banks (cf. Bloocoo.cpp)
     #          according to the number of lines of the list_reads file
-    with open(list_reads) as f:
+    with open(c_list_reads) as f:
         nInputBanks = sum(1 for _ in f) # nb of lines in list_reads
 
-    log("Bloocoo done (%d input file)\n\n" % nInputBanks)
+    log("Bloocoo used %d input file(s)\n\n" % nInputBanks)
 
     if nInputBanks == 1:    # one input bank
-    	return [ corrected_fasta ]
+    	return [ c_corrected_fasta ]
     elif nInputBanks > 1:   # several input banks
-    	l_corrected = []
-        bloocoo_output = sorted(glob.glob(prefix+'*'+keyword+'*_*_*'))
-        with open(list_reads_with_bloocoo_corrections,"w") as f:
-            for ii in range(nInputBanks):
-                l_corrected.append( bloocoo_output[ii] )
-        return l_corrected
+        c_list_corrected = sorted(glob.glob(c_output_file_prefix+'*'+c_keyword+'*_*_*'))
+        return c_list_corrected
+
+
+
+
     else:
         log("Error: nInputBanks=%d " %  nInputBanks)
-        raise Exception("Displaying help") 
 
-#-------------------------------
-# sspace wrapper
+
+
+
 
 def get_paired_end_parameters(contigs, library, is_mate_pairs = False):
     paired_reads = library.split(' ')
@@ -356,7 +397,7 @@ def run_besst_mapping(i, contigs, library):
     if os.path.exists(done_file) and continue_scaffolding:
         log("Reusing existing BAM file for library " + str(library))
     else:
-        execute('BESST/scripts/reads_to_ctg_map.py', ["--tmp_path", os.path.dirname(os.path.realpath(output_bam)) + os.sep + "BESST_tmp"] + ["--threads", nb_cpus] + paired_reads + [contigs, output_bam], interpreter="python")
+        execute('BESST/scripts/reads_to_ctg_map.py', ["--tmp_path", os.path.dirname(os.path.realpath(output_bam)) + os.sep + "BESST_tmp"] + ["--threads", nb_cores_besst] + paired_reads + [contigs, output_bam], interpreter="python")
         open(done_file, 'a').close()
     return output_bam + ".bam"
 
@@ -465,7 +506,13 @@ if contigs is None: # need to create contigs, or are they given?
         # I copy into unpaired_reads because paired_reads are used in scaffolding, not unpaired.
         l_minia_reads = l_reads_corrected
     else:
-    	l_minia_reads = paired_reads + unpaired_reads
+        if ( k_restart != -1 and bloocoo_mode == True ):  # whenever we have both --restart-from and bloocoo
+            keyword = ".corrected_with_bloocoo"
+            corrected_fasta = prefix + keyword + ".fa"
+            l_minia_reads = bloocoo_list_corrected(prefix, list_reads, corrected_fasta, keyword)
+        else:
+            l_minia_reads = paired_reads + unpaired_reads
+
 
 
 	# minia preparation
