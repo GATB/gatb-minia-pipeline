@@ -258,6 +258,9 @@ def bloocoo(output_file_prefix, threshold=2, kmer_size=31):
     elif nInputBanks > 1:   # several input banks
     	l_corrected = []
         bloocoo_output = sorted(glob.glob(prefix+'*'+keyword+'*_*_*'))
+        if len(bloocoo_output) != nInputBanks:
+            print("Error: Bloocoo returned fewer error-corrected files (%d) than original input files (%d)" % (len(bloocoo_output), nInputBanks))
+            exit(1)
         with open(list_reads_with_bloocoo_corrections,"w") as f:
             for ii in range(nInputBanks):
                 l_corrected.append( bloocoo_output[ii] )
