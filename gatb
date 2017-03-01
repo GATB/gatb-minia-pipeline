@@ -4,7 +4,6 @@ import sys, os, shutil
 from subprocess import call, Popen, PIPE, STDOUT, check_output
 import glob
 
-
 if 3 > int(sys.version[0]): # only works in python 2
     sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0) #unbuffered print, solves badly ordered stdout on clusters
 
@@ -143,6 +142,11 @@ except:
     traceback.print_exc()
     print(doc)
     sys.exit(1)
+
+from sys import platform
+if platform == "darwin":
+    exit("gatb-pipeline requires a Linux 64 bits system")
+
 
 #-- multi-threading parameters
 try:
