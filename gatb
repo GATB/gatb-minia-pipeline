@@ -228,6 +228,30 @@ def execute(program, cmdline=[], interpreter=None, stdout=None, memused=False):
 list_reads = prefix + ".list_reads"
 final_assembly = prefix + ".fasta"
 
+
+# check that -s isnt mixed up with -l
+for ur in unpaired_reads:
+    try:
+        try: # some code duplication with below
+            import gzip
+            fp = gzip.open(ur)
+            fp.read(2) # read arbitrary bytes to check if gzipped 
+            fp.close() # close and reopen if successful
+            fp = gzip.open(ur)
+        except Exception as e:
+            fp.close()
+            fp = open(ur)  
+        from tools.readfq import readfq
+        for name, seq, qual in readfq(fp):
+            break
+        fp.close()
+    except:
+        import traceback
+        traceback.print_exc()
+ 
+        exit("are you sure you didn't confuse -s with -l?")
+ 
+
 def create_list_reads( l_reads ):
     '''create of flat text file with l_reads'''
     with open( list_reads, 'w' ) as f:
@@ -462,7 +486,9 @@ def get_read_length(list_reads):
             try:
                 import gzip
                 fp = gzip.open(reads_file)
-                ln = fp.read(2) # read arbitrary bytes to check if gzipped 
+                fp.read(2) # read arbitrary bytes to check if gzipped 
+                fp.close() # close and reopen if successful
+                fp = gzip.open(reads_file)
             except Exception as e:
                 fp.close()
                 fp = open(reads_file)  
