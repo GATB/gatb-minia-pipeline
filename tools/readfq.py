@@ -25,6 +25,7 @@ def readfq(fp): # this is a generator function
         else: # this is a fastq record
             seq, leng, seqs = ''.join(seqs), 0, []
             for l in fp: # read the quality
+                if type(l) is not str: l = l.decode('ascii') #python3 fix
                 seqs.append(l[:-1])
                 leng += len(l) - 1
                 if leng >= len(seq): # have read enough quality
