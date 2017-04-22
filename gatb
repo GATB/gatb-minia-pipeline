@@ -97,9 +97,9 @@ try:
         elif arg == "-c":
            contigs = sys.argv[i+1]
         elif arg == "--kmer-sizes":
-           list_k_values = map(int,sys.argv[i+1].split(','))
+           list_k_values = list(map(int,sys.argv[i+1].split(',')))
         elif arg == "--abundance-mins":
-           list_min_abundances = map(int,sys.argv[i+1].split(','))
+           list_min_abundances = list(map(int,sys.argv[i+1].split(',')))
         elif arg == "-l":
             unpaired_reads = open(sys.argv[i+1]).read().splitlines()
         elif arg == "-o":
@@ -404,7 +404,24 @@ def sspace(contigs, paired_reads, output_filename=""):
 # ------------------------------
 # besst wrapper
 
+# besst and its script needs python >= 2.7 < 3, see if we have it installed on the system somewhere
+def check_for_python_27():
+    for i, python27 in enumerate(['python', 'python2', 'python2.7', 'python-2.7']):
+        try:
+            ret = call([python27, "-c", "from collections import Counter"])#,stdout=PIPE,stderr=PIPE)
+            #also need to make sure it's not python3 (BESST doesn't support it)
+            ret = call([python27, "-c", "import sys; assert(int(sys.version[0]) == 2)"])#,stdout=PIPE,stderr=PIPE)
+        except:
+            ret = 1
+        if ret == 0:
+            if i > 0:
+                log("found Python 2.7 via command: " + str(python27))
+            return python27
+    exit("BESST needs Python >= 2.7, make sure it is aliased to either the 'python' or the 'python2.7' command on your shell")
+
+
 def run_besst_mapping(i, contigs, library):
+    interpreter = check_for_python_27()
     # besst needs de-interleaved input, for the mapping phase (else it thinks they're single end)
     if ' ' not in library:
         library = possibly_gunzip(library, i) # until sga-deinterleave supports gzipped input, no other choice but to gunzip
@@ -422,23 +439,9 @@ def run_besst_mapping(i, contigs, library):
     if os.path.exists(done_file) and continue_scaffolding:
         log("Reusing existing BAM file for library " + str(library))
     else:
-        execute('BESST/scripts/reads_to_ctg_map.py', ["--tmp_path", os.path.dirname(os.path.realpath(output_bam)) + os.sep + "BESST_tmp"] + ["--threads", nb_cores_besst] + paired_reads + [contigs, output_bam], interpreter="python")
+        execute('BESST/scripts/reads_to_ctg_map.py', ["--tmp_path", os.path.dirname(os.path.realpath(output_bam)) + os.sep + "BESST_tmp"] + ["--threads", nb_cores_besst] + paired_reads + [contigs, output_bam], interpreter=interpreter)
         open(done_file, 'a').close()
     return output_bam + ".bam"
-
-# besst needs python >= 2.7, see if we have it installed on the system somewhere
-def check_for_python_27():
-    for i, python27 in enumerate(['python', 'python2.7', 'python-2.7']):
-        try:
-            ret = call([python27, "-c", "from collections import Counter"])#,stdout=PIPE,stderr=PIPE)
-        except:
-            ret = 1
-        if ret == 0:
-            if i > 0:
-                log("found Python 2.7 via command: " + str(python27))
-            return python27
-    exit("BESST needs Python >= 2.7, make sure it is aliased to either the 'python' or the 'python2.7' command on your shell")
-
 
 def besst(contigs, bam_files, orientations, output_filename="" ):
     global k, final_assembly,  besst_iter
@@ -555,6 +558,9 @@ if contigs is None: # need to create contigs, or are they given?
 
     if len(list_min_abundances) == 0:
         list_min_abundances = [2]*len(list_k_values)
+    
+    if len(list_min_abundances) == 1 and len(list_k_values) > 1:
+        list_min_abundances = [list_min_abundances[0]]*len(list_k_values)
 
     cutoffs = sorted(zip(list_k_values, list_min_abundances))
 
