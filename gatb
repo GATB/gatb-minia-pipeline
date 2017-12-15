@@ -40,7 +40,7 @@ Advanced parameters (optional):
     --no-error-correction           skips error correction
     --besst_iter <int>              number of iteration during Besst scaffolding (default:10000)
 
-    -nb-cores <int>                number of core to use with Bloocoo and Besst (default: all)
+    --nb-cores <int>                number of core to use with Bloocoo and Besst (default: all)
 
 """ % (sys.argv[0])
 
@@ -114,7 +114,7 @@ try:
             step = int(sys.argv[i+1])
         elif arg == "--max-memory":
             max_memory = int(sys.argv[i+1])
-        elif arg == "-nb-cores":
+        elif arg == "--nb-cores":
 			nb_cores_bloocoo = int(sys.argv[i+1])
 			nb_cores_besst   = int(sys.argv[i+1])
         elif arg == "--besst_iter":
