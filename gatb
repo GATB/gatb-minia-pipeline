@@ -115,8 +115,8 @@ try:
         elif arg == "--max-memory":
             max_memory = int(sys.argv[i+1])
         elif arg == "--nb-cores":
-			nb_cores_bloocoo = int(sys.argv[i+1])
-			nb_cores_besst   = int(sys.argv[i+1])
+            nb_cores_bloocoo = int(sys.argv[i+1])
+            nb_cores_besst   = int(sys.argv[i+1])
         elif arg == "--besst_iter":
         	besst_iter = int( sys.argv[i+1] )
 
