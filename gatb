@@ -64,9 +64,9 @@ nb_cores_besst=None
 #scaffolding_method="sspace"
 scaffolding_method="besst"
 
-# this used to be false, now it's default
-use_bloocoo_preprocessing = True    # used to launch bloocoo
-bloocoo_mode = True                 # used in restart mode (bloocoo _not_ launched)
+# Set them to true to enable bloocoo
+use_bloocoo_preprocessing = False# used to launch bloocoo
+bloocoo_mode = False# used in restart mode (bloocoo _not_ launched)
 
 continue_scaffolding = False
 besst_iter = 10000
