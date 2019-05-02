@@ -49,11 +49,17 @@ Unpaired reads:
 
     ./gatb -s single_reads.fastq
 
+The final assembly is in:
+
+    assembly.fasta
+
+All other files are intermediary.
+
 More input options are available. Type `./gatb` for extended usage.
 
 Since the pipeline is multi-k, it is unnecessary to specify a kmer size.
 
-FAQ
+Install FAQ
 ---
 
 Don't copy the `./gatb` script to a bin folder it is meant to stay in that directory.
