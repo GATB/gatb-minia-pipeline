@@ -56,9 +56,13 @@ Since the pipeline is multi-k, it is unnecessary to specify a kmer size.
 FAQ
 ---
 
-Can't install scipy? (because e.g. cannot sudo) 
+Don't copy the `./gatb` script to a bin folder it is meant to stay in that directory.
 
-A solution is to install a python distribution that doesn't require root (it's not that hard).
+If you have trouble compiling, just give up and ignore the scaffolding (BESST) step. Did you consider that getting contigs instead of scaffolds may be good enough?
+
+If you want to persist compiling, read on.
+
+Can't install scipy? (because e.g. cannot sudo) A solution is to install a python distribution that doesn't require root (it's not that hard).
 
 Conda: 
 
