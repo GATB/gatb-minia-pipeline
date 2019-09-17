@@ -1,9 +1,9 @@
 GATB-Minia-Pipeline
 -------------
 
-GATB-Minia-Pipeline is a de novo multi-k assembly pipeline for Illumina data. 
+GATB-Minia-Pipeline is a de novo assembly pipeline for Illumina data. It can assemble genomes and metagenomes.
 
-It can assemble genomes and metagenomes.
+It is multi-k, to aim for high contiguity. Similar software: MEGAHIT, metaSPAdes.
 
 The pipeline consists of:
 - Bloocoo (error correction)

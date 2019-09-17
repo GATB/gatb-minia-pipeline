@@ -1,0 +1,230 @@
+Scripts we've used to perform hybrid assemblies for CAMI2.
+
+Input: a long_reads-only assembly and a short_reads-only assembly
+
+commands:
+
+minimap2 -x map-pb -m 25 -n 2 assembly_long_reads.fasta assembly_short_reads.fasta > mapping.paf
+python keep_included_sequences.py -p mapping.paf -f assembly_short_reads.fasta -v -o assembly_short_reads_less_80.fasta
+cat assembly_short_reads_less_80.fasta assembly_long_reads.fasta > reconciliation.fasta
+
+
+$ cat keep_included_sequences.py
+import sys
+import getopt
+
+class Unbuffered(object):
+   def __init__(self, stream):
+       self.stream = stream
+   def write(self, data):
+       self.stream.write(data)
+       self.stream.flush()
+   def writelines(self, datas):
+       self.stream.writelines(datas)
+       self.stream.flush()
+   def __getattr__(self, attr):
+       return getattr(self.stream, attr)
+
+"""
+PAF: a Pairwise mApping Format
+
+PAF is a text format describing the approximate mapping positions between two set of sequences. PAF is TAB-delimited with each line consisting of the following predefined fields:
+Col     Type    Description
+1   string  Query sequence name
+2   int     Query sequence length
+3   int     Query start (0-based)
+4   int     Query end (0-based)
+5   char    Relative strand: "+" or "-"
+6   string  Target sequence name
+7   int     Target sequence length
+8   int     Target start on original strand (0-based)
+9   int     Target end on original strand (0-based)
+10  int     Number of residue matches
+11  int     Alignment block length
+12  int     Mapping quality (0-255; 255 for missing)
+
+If PAF is generated from an alignment, column 10 equals the number of sequence matches, and column 11 equals the total number of sequence matches, mismatches, insertions and deletions in the alignment. If alignment is not available, column 10 and 11 are still required but may be highly inaccurate.
+"""
+
+
+"""
+Exemple
+k141_388924     314     103     244     +       ctg4    717558  379417  379558  98      141     60      tp:A:P  cm:i:7  s1:i:98 s2:i:44 dv:f:0.0342
+"""
+
+
+def usage():
+    '''Usage'''
+    print("-----------------------------------------------------------------------------")
+    print(sys.argv[0]," : from a .paf file and the corresponding query fasta file (one line per sequence) output only sequences that are aligned")
+    print("-----------------------------------------------------------------------------")
+    print("usage: ",sys.argv[0])
+    print(" -p paf file [mandatory]")
+    print(" -f fasta file file [mandatory]")
+    print(" -a minimal percentage of aligned part of the query (default 80)")
+    print(" -q max qual [0-255] to consider an alignment (default 255)")
+    print(" -v: reverse. Conserve only NON mapped sequences instead of mapped onces")
+    print("  -o: output fasta file path (default = stdout)")
+    print("  -h: help")
+    print("-----------------------------------------------------------------------------")
+    sys.exit(2)
+    
+
+
+def store_ids_of_sequences_to_keep_several_lines(in_paf_file, min_percentage, max_qual_value):
+    """ This function analyses contigs querys whose alignements are splitted among several lines. 
+    It takes as input a sorted paf, first sorted by query contigs ids (column 0) and then by target contig ids (column 5)
+    This sorted paf can be pobtained thanks to "sort  mapping.paf  --key=1,1 --key=6,6 | cut -f 1-6 | uniq  > sorted_mapping.paf"
+    Example: 
+    k141_101350     408     116     203     -       ctg186
+    k141_101350     408     116     203     +       ctg254
+    k141_101350     408     2       70      -       ctg254
+    k141_101350     408     214     406     -       ctg291
+    k141_101350     408     214     406     -       ctg392
+    k141_101350     408     116     203     +       ctg473
+    k141_101350     408     116     203     -       ctg488
+    k141_101350     408     214     378     +       ctg543
+    Here contig k141_101350 maps ctg254 from 2 to 70 and from 116 to 203. We cumulate those lenghts. Note that we do not care about strand. This should be an improvement
+    """
+    num_lines = sum(1 for line in open(in_paf_file))
+    file = open(in_paf_file)
+    ids_of_sequences_to_keep =set()
+    previous_contig_query=""
+    previous_contig_target=""
+    positive_mapped_positions=[]
+    positive_cumulated_mapped_positions=0
+    negative_mapped_positions=[]
+    negative_cumulated_mapped_positions=0
+    done=0
+    while True:
+        done+=1
+        if done%1000==0:
+            print("  ",str(round(100*done/num_lines, 2)),"%",end='\r')
+        line = file.readline()
+        if not line: break
+        line=line.rstrip().split()
+        if line[0]!=previous_contig_query or line[5]!=previous_contig_target: ### Reset the conters
+            previous_contig_query=line[0]
+            previous_contig_target=line[5]
+            
+            positive_mapped_positions=[0 for i in range(int(line[1]))]        ### fill with zeros
+            positive_cumulated_mapped_length=0
+            
+            negative_mapped_positions=[0 for i in range(int(line[1]))]        ### fill with zeros
+            negative_cumulated_mapped_length=0
+        
+        if line[4]=='+':                                                      ### Map positive mapped strand
+            for i in range(int(line[2]), int(line[3])): 
+                if  positive_mapped_positions[i]==0:
+                    positive_mapped_positions[i]==1
+                    positive_cumulated_mapped_length+=1
+            
+            if (positive_cumulated_mapped_length)/float(line[1])*100 >= min_percentage:# and int(line[11])<=max_qual_value:
+                ids_of_sequences_to_keep.add(line[0])
+        
+        if line[4]=='-':                                                      ### Map negative mapped strand
+            for i in range(int(line[2]), int(line[3])): 
+                if  negative_mapped_positions[i]==0:
+                    negative_mapped_positions[i]==1
+                    negative_cumulated_mapped_length+=1
+            
+            if (negative_cumulated_mapped_length)/float(line[1])*100 >= min_percentage:# and int(line[11])<=max_qual_value:
+                ids_of_sequences_to_keep.add(line[0])
+    file.close()
+    return ids_of_sequences_to_keep
+
+def store_ids_of_sequences_to_keep(in_paf_file, min_percentage, max_qual_value):
+    """ has been, does not consider the possible split mapping of a query on a target contig
+    use store_ids_of_sequences_to_keep_several_lines(in_paf_file, min_percentage, max_qual_value) instead
+    """
+    file = open(in_paf_file)
+    ids_of_sequences_to_keep =set()
+    for line in file: 
+        line=line.rstrip().split()
+        # print (line)
+        # print(int(line[3])-int(line[2]))
+        # print((int(line[3])-int(line[2]))/float(line[1])*100)
+        if (int(line[3])-int(line[2]))/float(line[1])*100 >= min_percentage:# and int(line[11])<=max_qual_value:
+            ids_of_sequences_to_keep.add(line[0])
+    file.close()
+    return ids_of_sequences_to_keep
+    
+def output_sequences_to_keep(in_fasta_file,ids_of_sequences_to_keep, out_file, reverse):
+    output=0
+    total=0
+    file = open(in_fasta_file)
+    if out_file:
+        filout=open(out_file,'w')
+    else:
+        filout = sys.stdout
+    while True:
+        line1=file.readline()
+        if not line1: break
+        line2=file.readline()
+        
+        total+=1
+        id_seq = line1.split()[0][1:]#>k141_666705 flag=1 multi=2.0000 len=309
+        if not reverse and id_seq in ids_of_sequences_to_keep: 
+            filout.write (line1+line2)
+            output+=1
+        if reverse and id_seq not in ids_of_sequences_to_keep: # if reverse, keep only sequences that are NOT similar enough. 
+            filout.write (line1+line2)
+            output+=1
+    print("Nb sequences:",total)
+    print("Nb output:",output)
+    filout.close()
+    file.close()
+    
+    
+    
+def main():
+    sys.stdout = Unbuffered(sys.stdout)
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "hvp:f:a:q:o:")
+    except getopt.GetoptError as err:
+        # print help information and exit:
+        usage()
+        sys.exit(2)
+    
+    # Default parameters
+    in_paf_file =       None
+    in_fasta_file = None
+    out_file =      None
+    reverse = False
+    min_percentage=80
+    max_qual_value=255
+    for opt, arg in opts:
+        if opt in ("-h", "--help"):
+            usage()
+            sys.exit()
+        elif opt in ("-f"):
+            in_fasta_file = arg
+        elif opt in ("-p"):
+            in_paf_file = arg
+        elif opt in ("-q"):
+            max_qual_value = int(arg)
+        elif opt in ("-v"):
+            reverse = True
+        elif opt in ("-a"):
+            min_percentage = int(arg)
+        elif opt in ("-o", "--out"):
+            out_file = arg
+        else:
+            assert False, "unhandled option"
+
+    if in_paf_file==None:
+        print ("-p missing")
+        usage()
+        sys.exit(2)
+
+    if in_fasta_file==None:
+        print ("-f missing")
+        usage()
+        sys.exit(2)
+    ids_of_sequences_to_keep=store_ids_of_sequences_to_keep_several_lines(in_paf_file, min_percentage, max_qual_value)
+    output_sequences_to_keep(in_fasta_file,ids_of_sequences_to_keep, out_file, reverse)
+
+if __name__ == "__main__":
+    main()
+    
+    
