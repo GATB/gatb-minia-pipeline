@@ -2,7 +2,9 @@ GATB-Minia-Pipeline
 -------------
 
 GATB-Minia-Pipeline is a de novo multi-k assembly pipeline for Illumina data. 
+
 It can assemble genomes and metagenomes.
+
 The pipeline consists of:
 - Bloocoo (error correction)
 - Minia 3 (contigs assembly) based on the BCALM2 (unitigs assembly) tool
@@ -64,13 +66,13 @@ Install FAQ
 
 Don't copy the `./gatb` script to a bin folder it is meant to stay in that directory.
 
-If you have trouble compiling, just give up and ignore the scaffolding (BESST) step. Did you consider that getting contigs instead of scaffolds may be good enough?
+If you have trouble compiling, just give up compilation and run `./gatb` nevertheless. You can just skip the scaffolding (BESST) step and the pipeline will still generate contigs.
 
 If you want to persist compiling, read on.
 
-Can't install scipy? (because e.g. cannot sudo) A solution is to install a python distribution that doesn't require root (it's not that hard).
+Can't install scipy? Potential solutions:
 
-Conda: 
+1) Conda: 
 
     wget https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh
     sh Miniconda-latest-Linux-x86_64.sh
@@ -79,13 +81,11 @@ Conda:
     pip install mathstats
 
 Read more on conda : http://lh3.github.io/2015/12/07/bioconda-the-best-package-manager-so-far/
-
 http://conda.pydata.org/miniconda.html
 
-Alternative: activestate python (http://www.activestate.com/activepython/downloads then type `pypm install scipy`)
+2) Alternative: activestate python (http://www.activestate.com/activepython/downloads then type `pypm install scipy`)
 
 Support
 -------
 
 To contact an author directly: rayan.chikhi@ens-cachan.org
-Community support: https://www.biostars.org/t/GATB/
