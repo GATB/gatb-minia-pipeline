@@ -598,6 +598,7 @@ if contigs is None: # need to create contigs, or are they given?
         last_k_value = k
         log("Finished Minia k=%d\n\n" % last_k_value)
     k = last_k_value # hint for besst
+    os.symlink(previous_contigs, prefix+"_final.contigs.fa")
     log("Finished Multi-k GATB-Pipeline at k=%d\n\n" % last_k_value)
 
 # scaffolding all libraries
