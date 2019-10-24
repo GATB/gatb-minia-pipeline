@@ -618,4 +618,4 @@ if (skip_scaffolding == 0):
 else:
     log("Skipped scaffolding.")
 
-log("Pipeline finished!)
+log("Pipeline finished!")
