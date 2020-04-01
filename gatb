@@ -24,7 +24,7 @@ Reads (mandatory, specify at least one of these parameters):
     -l   <file_of_filenames>        list of single reads, one file name per line
     --mp-12  <filename>             same input as paired reads (--12) but for mate pairs
     --mp-1   <filename>             same input as paired reads (-1 -2) but for mate pairs
-    --mp-2   <filename>              
+    --mp-2   <filename>
 
 Advanced parameters (optional):
 
@@ -35,8 +35,9 @@ Advanced parameters (optional):
     --abundance-mins <t1>,<t2>,..   list of low abundance thresholds (default: 2,2,2,..)
     --max-memory <int>              go faster by using more memory (in MB) (default: as much as Minia needs)
     --restart-from <k>              k value where to restart the multi-k process (useful for interrupted jobs)
-    --continue-scaffolding          continue an interrupted scaffolding (already mapped libraries are not remapped; 
+    --continue-scaffolding          continue an interrupted scaffolding (already mapped libraries are not remapped;
                                                                          should be used along with -c <assembly_kXXX.fa>)
+    --no-scaffolding                skips scaffolding
     --no-error-correction           skips error correction
     --besst_iter <int>              number of iteration during Besst scaffolding (default:10000)
 
@@ -54,6 +55,7 @@ k_restart = -1
 step = 20
 max_memory = -1
 debug_mode = 0  # 0: no debugging
+skip_scaffolding = 0    # 0: do scaffolding
 
 nb_cores_bloocoo=None
 nb_cores_besst=None
@@ -122,7 +124,7 @@ try:
 
         # special cases: 0-parameters arguments, need for "skip=0", well one day i'll use getopt
         elif arg == "--sspace":  #hidden parameter, for now
-            scaffolding_method = "sspace" 
+            scaffolding_method = "sspace"
             skip = 0
         elif arg == "--no-error-correction":
             use_bloocoo_preprocessing = False
@@ -131,18 +133,21 @@ try:
         elif arg == "--continue-scaffolding":
             continue_scaffolding = True
             skip = 0
+        elif arg == "--no-scaffolding":
+            skip_scaffolding = 1
+            skip = 0
 
         elif arg in ["-h", "-help", "--help"]:
-            raise Exception("Displaying help") 
+            raise Exception("Displaying help")
 
         # debug mode
         elif arg == "--debug":
             debug_mode = int(sys.argv[i+1])
         else:
             print("Unknown parameters", arg)
-            raise Exception("Displaying help") 
+            raise Exception("Displaying help")
     if len(paired_reads) + len(unpaired_reads) == 0:
-        raise Exception("Please input at least one read dataset") 
+        raise Exception("Please input at least one read dataset")
 except:
     import traceback
     traceback.print_exc()
@@ -194,8 +199,8 @@ class Logger(object):
         sys.stderr.flush()
         sys.stdout.write(message+"\n")
         sys.stdout.flush()
-        logfile.write(message+"\n")  
-        logfile.flush()  
+        logfile.write(message+"\n")
+        logfile.flush()
         logfile.close()
 log = Logger()
 
@@ -208,7 +213,7 @@ def execute(program, cmdline=[], interpreter=None, stdout=None, memused=False):
         if interpreter:
             cmd += [interpreter]
         if program is not None:
-            cmd += [ "%s/%s" % (DIR, program) ] 
+            cmd += [ "%s/%s" % (DIR, program) ]
         cmd += map(str, cmdline)
         program_string = ((interpreter + " ") if interpreter is not None else "") + (program if program is not None else "")
         log("Execution of '%s'. Command line: \n     %s" % (program_string, ' '.join(cmd)))
@@ -242,12 +247,12 @@ for ur in unpaired_reads:
         try: # some code duplication with below
             import gzip
             fp = gzip.open(ur)
-            fp.read(2) # read arbitrary bytes to check if gzipped 
+            fp.read(2) # read arbitrary bytes to check if gzipped
             fp.close() # close and reopen if successful
             fp = gzip.open(ur)
         except Exception as e:
             fp.close()
-            fp = open(ur)  
+            fp = open(ur)
         from tools.readfq import readfq
         for name, seq, qual in readfq(fp):
             break
@@ -255,9 +260,9 @@ for ur in unpaired_reads:
     except:
         import traceback
         traceback.print_exc()
- 
+
         exit("are you sure you didn't confuse -s with -l?")
- 
+
 
 def create_list_reads( l_reads ):
     '''create of flat text file with l_reads'''
@@ -271,7 +276,7 @@ def create_list_reads( l_reads ):
 def sav_list_reads( suffix ):
     if( os.path.exists( list_reads ) ):
         shutil.copyfile( list_reads, ".".join( [list_reads, suffix] ) )
-            
+
 # ------------------------------
 # minia
 
@@ -281,7 +286,7 @@ def minia(k, min_abundance, prefix):
         exit('cannot execute minia with k=0')
 
     params = ['-in', list_reads, '-kmer-size', k, '-abundance-min', min_abundance, '-out', prefix]
-    
+
     if max_memory != -1:
         params += ['-max-memory',max_memory]
 
@@ -303,7 +308,7 @@ def bloocoo(output_file_prefix, threshold=2, kmer_size=31):
     # bloocoo command line arguments
     keyword = ".corrected_with_bloocoo"
     corrected_fasta = output_file_prefix + keyword + ".fa"
-    params = ['-file', list_reads, '-out', corrected_fasta, '-abundance-min', threshold, 
+    params = ['-file', list_reads, '-out', corrected_fasta, '-abundance-min', threshold,
               '-kmer-size', kmer_size, '-nb-cores', nb_cores_bloocoo , '-slow', '-high-precision']
     log("Running bloocoo on %d cores" % nb_cores_bloocoo)
 
@@ -355,12 +360,12 @@ def get_paired_end_parameters(contigs, library, is_mate_pairs = False):
             orientation, mean, stdev = l[1], int(l[3]), int(l[5])
     log("GATB-Pipeline estimated insert size of library " + str(paired_reads) + " : %f %f %s " %(mean, stdev, orientation ))
     return orientation, mean, stdev
-    
+
 def possibly_gunzip(filename, lib_index, paired_index=None):
     if filename.endswith('.gz'):
         unzipped_filename = '.'.join(filename.split(".")[:-1])
         ext = unzipped_filename.split(".")[-1]
-        output = prefix + '.lib%d' % lib_index 
+        output = prefix + '.lib%d' % lib_index
         if paired_index:
             output += "_%d" % paired_index
         output += "." + ext
@@ -368,7 +373,7 @@ def possibly_gunzip(filename, lib_index, paired_index=None):
         outfile = open(output, 'wb')
         execute(None, ['-c', filename], interpreter='gunzip', stdout=outfile)
         outfile.close
-        return output 
+        return output
     return filename
 
 def sspace(contigs, paired_reads, output_filename=""):
@@ -406,7 +411,7 @@ def sspace(contigs, paired_reads, output_filename=""):
     log("SSPACE is done! the maximal memory used above was for SSPACE only")
 
     # clean up intermediate sspace files
-    
+
 
 # ------------------------------
 # besst wrapper
@@ -466,7 +471,7 @@ def besst(contigs, bam_files, orientations, output_filename="" ):
         os.remove(final_assembly)
     os.symlink(last_pass, final_assembly)
     log( "BESST is done! the maximal memory used above was for BESST only")
-    
+
 
 # ------------------------------
 # wrapper for scaffolding
@@ -496,12 +501,12 @@ def get_read_length(list_reads):
             try:
                 import gzip
                 fp = gzip.open(reads_file)
-                fp.read(2) # read arbitrary bytes to check if gzipped 
+                fp.read(2) # read arbitrary bytes to check if gzipped
                 fp.close() # close and reopen if successful
                 fp = gzip.open(reads_file)
             except Exception as e:
                 fp.close()
-                fp = open(reads_file)  
+                fp = open(reads_file)
             # read the 1000 first reads
             from tools.readfq import readfq
             read_count = 0
@@ -557,15 +562,15 @@ if contigs is None: # need to create contigs, or are they given?
         max_k = get_read_length( l_minia_reads ) #TODO: modify bloocoo so that it gives a read length histogram, rather than using this hacky procedure to get max read length
         if max_k <= 21:
             sys.exit("Reads are shorter than 21 base pairs? (%d bp at 90 percentile of read lengths over the first 1000 reads of each input file).\nNotify a developer if this estimation was wrong, or if your reads are really that short, please set the list of kmer lengths manually using the --kmer-sizes parameter" % max_k)
-        # two implicit assumptions: do not make more than 20 rounds, and start at k=21 
-        for i in range(20): 
+        # two implicit assumptions: do not make more than 20 rounds, and start at k=21
+        for i in range(20):
             k = 21 + i*step
             if k <= max_k and k <= 256: #max supported in minia binary is 256
                 list_k_values += [k]
 
     if len(list_min_abundances) == 0:
         list_min_abundances = [2]*len(list_k_values)
-    
+
     if len(list_min_abundances) == 1 and len(list_k_values) > 1:
         list_min_abundances = [list_min_abundances[0]]*len(list_k_values)
 
@@ -598,14 +603,19 @@ if contigs is None: # need to create contigs, or are they given?
         last_k_value = k
         log("Finished Minia k=%d\n\n" % last_k_value)
     k = last_k_value # hint for besst
+    os.symlink(previous_contigs.rsplit("/", 1)[-1], prefix+"_final.contigs.fa")     # create system link in same location as files
     log("Finished Multi-k GATB-Pipeline at k=%d\n\n" % last_k_value)
 
 # scaffolding all libraries
-if len(paired_reads) > 0:
-    scaffold(contigs, paired_reads)
+if (skip_scaffolding == 0):
+    if len(paired_reads) > 0:
+        scaffold(contigs, paired_reads)
+    else:
+        if os.path.exists(final_assembly):
+            os.remove(final_assembly)
+        os.symlink(contigs, final_assembly)
+    log("Finished scaffolding. Scaffolds are in: %s" % final_assembly)
 else:
-    if os.path.exists(final_assembly):
-        os.remove(final_assembly)
-    os.symlink(contigs, final_assembly)
- 
-log("pipeline finished!! assembly is in: %s" % final_assembly)
+    log("Skipped scaffolding.")
+
+log("Pipeline finished!")
