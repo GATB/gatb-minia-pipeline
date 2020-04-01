@@ -17,18 +17,20 @@ Prerequisites
 
 - bwa (for BESST)
 
-- Python >= 2.7 and < 3 with the following modules (for BESST). See next section for a quick way to install them.
+- Python >= 2.7 and < 3 for BESST:
 
-    * mathstats
-    * scipy
-    * networkx
-    * pysam
+    * BESST 
 
+BESST does not have a solid Python 3 support, hence only Pytohn 2 is supported.
 
+See next section for a quick way to install them.
+Note: these Python modules are only needed for BESST. 
+You can skip them if you do not plan on performing scaffolding.
+ 
 Installation
 ------------
 
-    pip install --user mathstats networkx scipy pyfasta pysam==0.8.3
+    python2 -m pip install --user BESST
 
     git clone --recursive https://github.com/GATB/gatb-minia-pipeline
 
@@ -66,24 +68,11 @@ Install FAQ
 
 Don't copy the `./gatb` script to a bin folder it is meant to stay in that directory.
 
-If you have trouble compiling, just give up compilation and run `./gatb` nevertheless. You can just skip the scaffolding (BESST) step and the pipeline will still generate contigs.
+If you have trouble installing BESST, just give up and run `./gatb` nevertheless. You can just skip the scaffolding step and the pipeline will still generate contigs.
 
 If you want to persist compiling, read on.
 
-Can't install scipy? Potential solutions:
-
-1) Conda: 
-
-    wget https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh
-    sh Miniconda-latest-Linux-x86_64.sh
-    . ~/.bashrc
-    conda install scipy pysam networkx
-    pip install mathstats
-
-Read more on conda : http://lh3.github.io/2015/12/07/bioconda-the-best-package-manager-so-far/
-http://conda.pydata.org/miniconda.html
-
-2) Alternative: activestate python (http://www.activestate.com/activepython/downloads then type `pypm install scipy`)
+Can't install BESST ? Try [Conda (with Python 2)](https://repo.anaconda.com/miniconda/Miniconda2-latest-Linux-x86_64.sh) or [Activestate](http://www.activestate.com/activepython/downloads)
 
 Support
 -------

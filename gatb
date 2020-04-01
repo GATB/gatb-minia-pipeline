@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 
 import sys, os, shutil
 from subprocess import call, Popen, PIPE, STDOUT, check_output
@@ -415,16 +415,16 @@ def sspace(contigs, paired_reads, output_filename=""):
 def check_for_python_27():
     for i, python27 in enumerate(['python', 'python2', 'python2.7', 'python-2.7']):
         try:
-            ret = call([python27, "-c", "from collections import Counter"])#,stdout=PIPE,stderr=PIPE)
+            ret = call([python27, "-c", "from collections import Counter"],stdout=PIPE,stderr=PIPE)
             #also need to make sure it's not python3 (BESST doesn't support it)
-            ret = call([python27, "-c", "import sys; assert(int(sys.version[0]) == 2)"])#,stdout=PIPE,stderr=PIPE)
+            ret = call([python27, "-c", "import sys; assert(int(sys.version[0]) == 2)"],stdout=PIPE,stderr=PIPE)
         except:
             ret = 1
         if ret == 0:
             if i > 0:
                 log("found Python 2.7 via command: " + str(python27))
             return python27
-    exit("BESST needs Python >= 2.7, make sure it is aliased to either the 'python' or the 'python2.7' command on your shell")
+    exit("BESST needs Python >= 2.7 and < 3, make sure it is aliased to either the 'python' or the 'python2.7' command on your shell")
 
 
 def run_besst_mapping(i, contigs, library):
