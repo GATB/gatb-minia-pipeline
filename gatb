@@ -59,6 +59,7 @@ skip_scaffolding = 0    # 0: do scaffolding
 
 nb_cores_bloocoo=None
 nb_cores_besst=None
+nb_cores_minia=None
 
 
 
@@ -117,6 +118,7 @@ try:
         elif arg == "--max-memory":
             max_memory = int(sys.argv[i+1])
         elif arg == "--nb-cores":
+            nb_cores_minia   = int(sys.argv[i+1])
             nb_cores_bloocoo = int(sys.argv[i+1])
             nb_cores_besst   = int(sys.argv[i+1])
         elif arg == "--besst_iter":
@@ -292,6 +294,9 @@ def minia(k, min_abundance, prefix):
 
     if k >= 128:
         params += ['-debloom','original'] # fix for large k values
+    
+    if nb_cores_minia is not None:
+        params += ['-nb-cores',nb_cores_minia]
 
     if ( 1 <= debug_mode <= 2) :
         params += ['-nb-cores','1'] # issue54
