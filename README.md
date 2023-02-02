@@ -1,7 +1,7 @@
 2023 update
 -----------
 
-You may still use GATB-minia-pipeline in 2023 to assemble short reads. When doing so, I recommend a few tweaks: skip installation of bwa/BESST, and use options `--no-scaffolding --no-error-correction`. You will still get a fine an efficient multi-k assembly, without paired-end information that doesn't being much in paired-end short reads anyway. -Rayan
+You may still use GATB-minia-pipeline in 2023 to assemble short reads. When doing so, I recommend a few tweaks: skip installation of bwa/BESST, and use options `--no-scaffolding --no-error-correction`. You will still get a fine an efficient multi-k assembly, without paired-end information that doesn't bring much contiguity gain in paired-end short reads anyway. -Rayan
 
 GATB-Minia-Pipeline
 -------------
